@@ -75,7 +75,7 @@
     .device-brand { display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 14px; font-weight: 850; letter-spacing: 5px; margin: 0 0 14px; text-shadow: 0 1px #e8eec4; color: #627c42; }
     .device-brand span { letter-spacing: 0; font-size: 12px; opacity: .55; }
     .bezel { padding: 10px; background: #7a8d59; border-radius: 24px; box-shadow: 0 2px 0 #e6ecc5, inset 0 3px 3px #52613977; border: 1px solid #728353; }
-    .screen { height: 287px; overflow: hidden; position: relative; background: var(--lcd); color: var(--pixel); border: 2px solid #526639; border-radius: 14px; padding: 13px 13px 0; box-shadow: inset 3px 4px 9px #53673539; font-family: 'Courier New', monospace; }
+    .screen { height: 365px; overflow: hidden; position: relative; background: var(--lcd); color: var(--pixel); border: 2px solid #526639; border-radius: 14px; padding: 13px 13px 0; box-shadow: inset 3px 4px 9px #53673539; font-family: 'Courier New', monospace; }
     .screen::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 3px, #30401d06 3px 4px); pointer-events: none; z-index: 5; }
     .screen-top { display: flex; align-items: center; justify-content: space-between; font-size: 9px; font-weight: 700; letter-spacing: .8px; height: 15px; }
     .life { display: flex; align-items: center; gap: 6px; }
@@ -91,7 +91,7 @@
     .meter-fill { background: var(--pixel); display: block; height: 100%; transition: width .3s; }
     .stat.low .stat-top::before { content: '!'; margin-right: 3px; }
     .stat.low .stat-top { text-decoration: underline; text-underline-offset: 2px; }
-    .room { height: 132px; position: relative; display: grid; place-items: center; }
+    .room { height: 202px; position: relative; display: grid; place-items: center; }
     .room::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 15px; height: 1px; background: #748a4c55; }
     .room-decoration { position: absolute; font-size: 15px; opacity: .4; pointer-events: none; }
     .spark-one { top: 28px; left: 23px; }
@@ -193,10 +193,10 @@
     .shell-footer { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 15px; font-size: 8px; font-weight: 750; letter-spacing: 2px; color: #6f8450; }
     .speaker { display: flex; gap: 3px; transform: rotate(-8deg); }
     .speaker i { width: 3px; height: 10px; background: #7c90566b; border-radius: 2px; box-shadow: 1px 1px #d7e3af; }
-    .game { height: 132px; position: relative; padding-top: 10px; text-align: center; }
+    .game { height: 202px; position: relative; padding-top: 10px; text-align: center; }
     .game-title { font-size: 11px; margin: 0; letter-spacing: .7px; }
-    .jars { position: relative; height: 77px; margin: 0 auto; width: 237px; }
-    .jar { border: 0; background: transparent; position: absolute; top: 4px; left: 0; width: 75px; height: 72px; display: flex; flex-direction: column; align-items: center; padding: 5px 0 0; transition: transform .38s ease-in-out; }
+    .jars { position: relative; height: 113px; margin: 0 auto; width: 100%; }
+    .jar { border: 0; background: transparent; position: absolute; top: 21px; left: 0; width: 33.333%; height: 72px; display: flex; flex-direction: column; align-items: center; padding: 5px 0 0; transition: transform .38s ease-in-out; }
     .jar-body { display: block; position: relative; width: 40px; height: 43px; border: 2px solid var(--pixel); border-radius: 5px 5px 8px 8px; margin-top: 4px; background: #acbf7b80; }
     .jar-body::before { content: ''; position: absolute; width: 40px; height: 7px; top: -7px; left: -2px; background: var(--pixel); border-radius: 2px; }
     .jar-body::after { content: ''; position: absolute; height: 22px; width: 2px; top: 7px; left: 5px; background: #dae5af; }
@@ -208,6 +208,42 @@
     .game-close, .restart { font-family: inherit; font-size: 9px; font-weight: bold; background: transparent; border: 1px solid #667d48; border-radius: 3px; padding: 5px 10px; min-height: 28px; }
     .game-close { min-height: 30px; margin-top: 2px; }
     .restart { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: var(--lcd); z-index: 2; }
+    .game.paused * { animation-play-state: paused !important; }
+    .game-meta { height: 17px; margin: 5px 0 0; font-size: 9px; font-weight: bold; }
+    .game-menu, .memory-pads, .catch-lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; height: 113px; align-items: center; }
+    .game-choice, .memory-pad, .catch-lane { font: inherit; border: 1px solid #667d48; border-radius: 7px; background: #dce6b35e; min-width: 0; padding: 8px 2px; }
+    .game-choice { min-height: 94px; font-size: 10px; font-weight: bold; line-height: 1.4; }
+    .game-choice b { display: block; font-size: 24px; margin-bottom: 5px; }
+    .game-choice small { display: block; font-size: 8px; font-weight: normal; margin-top: 5px; }
+    .game-choice:active, .memory-pad:active { transform: translateY(2px); }
+    .game-footer { display: flex; justify-content: center; gap: 5px; }
+    .game-footer button { min-height: 36px; padding: 5px 7px; }
+    .game-close:disabled { opacity: .5; }
+    .memory-pad { height: 80px; font-size: 25px; box-shadow: 0 3px #84995b; }
+    .memory-pad small { display: block; margin-top: 5px; font-size: 10px; }
+    .memory-pad.lit { background: var(--pixel); color: var(--lcd); transform: translateY(3px); box-shadow: none; }
+    .memory-pad:disabled { opacity: 1; }
+    .catch-field { position: relative; height: 113px; overflow: hidden; }
+    .catch-lanes { gap: 0; }
+    .catch-lane { height: 100%; border-radius: 0; border-width: 0 1px 0 0; border-style: dashed; background: transparent; padding: 0; position: relative; }
+    .catch-lane:last-child { border: 0; }
+    .catch-lane::after { content: '⌴'; position: absolute; bottom: 2px; left: 0; right: 0; font-size: 36px; font-weight: bold; opacity: .15; }
+    .catch-lane.selected::after { opacity: 1; }
+    .catch-lane.selected { background: #dce6b350; }
+    .catch-drop { position: absolute; top: 4px; width: 33.333%; font-size: 23px; line-height: 28px; pointer-events: none; animation: drop linear both; }
+    @keyframes drop { from { transform: translateY(0); } to { transform: translateY(70px); } }
+    .pet-tools { display: flex; justify-content: center; gap: 8px; margin-top: 17px; }
+    .pet-tools button { min-height: 40px; border: 1px solid #82975a; border-radius: 20px; background: #e4eac573; padding: 6px 12px; font-size: 11px; font-weight: 650; }
+    .pet-tools button:active { background: #eef2d8; transform: translateY(1px); }
+    .pet-tools button:disabled { opacity: .5; }
+    .jukebox { max-width: 805px; margin: 12px auto 25px; border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; background: #eef0df; }
+    .track-title { font-size: 12px; font-weight: 750; margin: 0; }
+    .track-title span { display: block; color: #69765b; font-size: 10px; font-weight: 500; margin-top: 4px; }
+    .audio-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+    .audio-controls button { font-size: 11px; min-height: 44px; border: 1px solid #acb88d; border-radius: 9px; padding: 6px 10px; background: var(--paper); }
+    .audio-controls button[aria-pressed="true"] { background: #dce5bf; }
+    .audio-volume { display: flex; flex-direction: column; gap: 3px; font-size: 9px; }
+    .audio-volume input { width: 88px; height: 28px; accent-color: var(--pixel); margin: 0; }
     .room.is-dead .tombstone { margin-top: -19px; }
     .care-strip { max-width: 805px; margin: 13px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     .care-tip { display: flex; justify-content: center; gap: 12px; padding: 0 15px; }
@@ -281,9 +317,9 @@
     @media (min-width: 1500px) and (min-height: 950px) { .intro { padding-top: 55px; } .playground { padding-top: 43px; padding-bottom: 45px; min-height: 620px; } }
     @media (max-width: 960px) { .note-left { left: calc(50% - 350px); width: 130px; } .note-right { right: calc(50% - 347px); width: 125px; } .note strong { font-size: 20px; } .orbit { width: 580px; } }
     @media (max-width: 760px) { .page { padding: 0 24px; } .masthead { height: 64px; } .brand-logo { width: 132px; } .brand { font-size: 23px; } .edition { font-size: 8px; letter-spacing: 1.2px; } .note { display: none; } .orbit { width: 430px; height: 370px; max-width: calc(100vw - 48px); transform: none; } .intro { padding-top: 16px; } .eyebrow { display: none; } h1 { font-size: 32px; letter-spacing: -1.6px; } .intro > p:last-child { font-size: 12px; margin-top: 6px; } .playground { min-height: 0; padding: 32px 0 26px; } .care-tip { gap: 9px; padding: 0 10px; } .tip-icon { display: none; } }
-    @media (max-width: 440px) { .page { padding: 0 17px; } .edition { font-size: 7px; letter-spacing: .8px; gap: 6px; } .device { width: 340px; padding: 27px 24px 21px; border-radius: 92px 92px 101px 101px / 78px 78px 106px 106px; } .device-brand { font-size: 12px; margin-bottom: 13px; } .screen { padding: 11px 11px 0; height: 281px; } .bezel { padding: 8px; } .meters { column-gap: 13px; } .playground { padding: 34px 0 26px; } .care-strip { margin-top: 3px; padding: 20px 0; } .care-tip { padding: 0 5px; text-align: center; } .care-tip h2 { font-size: 10px; } .care-tip p { font-size: 8px; } footer { font-size: 8px; gap: 12px; } footer span:last-child { font-size: 11px; } }
+    @media (max-width: 440px) { .page { padding: 0 17px; } .edition { font-size: 7px; letter-spacing: .8px; gap: 6px; } .device { width: 340px; padding: 27px 24px 21px; border-radius: 92px 92px 101px 101px / 78px 78px 106px 106px; } .device-brand { font-size: 12px; margin-bottom: 13px; } .screen { padding: 11px 11px 0; height: 365px; } .bezel { padding: 8px; } .meters { column-gap: 13px; } .playground { padding: 34px 0 26px; } .care-strip { margin-top: 3px; padding: 20px 0; } .care-tip { padding: 0 5px; text-align: center; } .care-tip h2 { font-size: 10px; } .care-tip p { font-size: 8px; } footer { font-size: 8px; gap: 12px; } footer span:last-child { font-size: 11px; } }
     @media (display-mode: standalone) { .intro, .edition, .brand-banner { display: none; } .masthead { height: 60px; } .playground { min-height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 8px 0 16px; } .install-actions { display: none; } }
-    @media (max-width: 370px) { .page { padding: 0 12px; } .device { width: 294px; padding: 26px 17px 22px; border-radius: 85px 85px 96px 96px / 72px 72px 96px 96px; } .bezel { padding: 7px; } .screen { padding-left: 9px; padding-right: 9px; } .controls { gap: 19px; } .action { width: 55px; height: 52px; } .jars { width: 213px; } .jar { width: 69px; } .edition { max-width: 120px; line-height: 1.6; } h1 { font-size: 35px; } .intro > p:last-child { font-size: 11px; } }
+    @media (max-width: 370px) { .page { padding: 0 12px; } .device { width: 294px; padding: 26px 17px 22px; border-radius: 85px 85px 96px 96px / 72px 72px 96px 96px; } .bezel { padding: 7px; } .screen { padding-left: 9px; padding-right: 9px; } .controls { gap: 19px; } .action { width: 55px; height: 52px; } .edition { max-width: 120px; line-height: 1.6; } h1 { font-size: 35px; } .intro > p:last-child { font-size: 11px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .effect.pop, .sleep-z, .sweat { opacity: 1; } }
   </style>
 </head>
@@ -315,33 +351,54 @@
               </div>
               <div class="room" id="room" data-stage="seed" data-mood="idle">
                 <span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
-                <button class="pet-button" id="pet" aria-label="Put your pickle to sleep" aria-pressed="false"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span><i class="sweat"></i></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
+                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span><i class="sweat"></i></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
                 <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
               </div>
-              <section class="game" id="game" aria-labelledby="game-title" hidden><h2 class="game-title" id="game-title">FIND THE LITTLE HEART</h2><div class="jars" id="jars">
-                <button class="jar" data-jar="0" aria-label="Jar 1" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">1</span></button>
-                <button class="jar" data-jar="1" aria-label="Jar 2" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">2</span></button>
-                <button class="jar" data-jar="2" aria-label="Jar 3" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">3</span></button>
-              </div><button class="game-close" id="game-close">Back to pickle</button></section>
-              <div class="lcd-message" id="message" role="status" aria-live="polite">a little dill is born. hi, you!</div><p class="screen-hint" id="screen-hint">tap your pickle to tuck it in</p>
+              <section class="game" id="game" aria-labelledby="game-title" hidden>
+                <h2 class="game-title" id="game-title">THE DILL ARCADE</h2><p class="game-meta" id="game-meta">a little play. a lot of happy.</p>
+                <div class="game-menu" id="game-menu">
+                  <button class="game-choice" data-game="hunt"><b aria-hidden="true">♥</b>Heart hunt<small>follow the jar</small></button>
+                  <button class="game-choice" data-game="memory"><b aria-hidden="true">♫</b>Dill says<small>echo the tune</small></button>
+                  <button class="game-choice" data-game="catch"><b aria-hidden="true">⌴</b>Brine catch<small>catch & dodge</small></button>
+                </div>
+                <div class="jars" id="jars" hidden>
+                  <button class="jar" data-jar="0" aria-label="Jar 1" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">1</span></button>
+                  <button class="jar" data-jar="1" aria-label="Jar 2" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">2</span></button>
+                  <button class="jar" data-jar="2" aria-label="Jar 3" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">3</span></button>
+                </div>
+                <div class="memory-pads" id="memory-pads" hidden>
+                  <button class="memory-pad" data-pad="0" aria-label="Play note 1, circle" disabled>●<small>1</small></button>
+                  <button class="memory-pad" data-pad="1" aria-label="Play note 2, diamond" disabled>◆<small>2</small></button>
+                  <button class="memory-pad" data-pad="2" aria-label="Play note 3, star" disabled>★<small>3</small></button>
+                </div>
+                <div class="catch-field" id="catch-field" hidden><div class="catch-lanes">
+                  <button class="catch-lane" data-lane="0" aria-label="Move basket left"></button>
+                  <button class="catch-lane" data-lane="1" aria-label="Move basket center"></button>
+                  <button class="catch-lane" data-lane="2" aria-label="Move basket right"></button>
+                </div><span class="catch-drop" id="catch-drop" aria-hidden="true" hidden>♥</span></div>
+                <div class="game-footer"><button class="game-close" id="game-again" hidden>Play again</button><button class="game-close" id="game-menu-button" hidden>Games</button><button class="game-close" id="game-close">Back to pickle</button></div>
+              </section>
+              <div class="lcd-message" id="message" role="status" aria-live="polite">a little dill is born. hi, you!</div><p class="screen-hint" id="screen-hint">tap your pickle for +8 happy ♥</p>
             </div></div>
             <div class="controls" aria-label="Care actions">
               <div class="control"><button class="action" id="feed" aria-label="Feed brine" aria-keyshortcuts="1"><svg aria-hidden="true"><use href="#icon-jar"/></svg></button><span class="control-label" id="feed-label">FEED</span></div>
-              <div class="control"><button class="action" id="play" aria-label="Play guess the jar" aria-keyshortcuts="2"><svg aria-hidden="true"><use href="#icon-play"/></svg></button><span class="control-label" id="play-label">PLAY</span></div>
+              <div class="control"><button class="action" id="play" aria-label="Open the dill arcade" aria-keyshortcuts="2"><svg aria-hidden="true"><use href="#icon-play"/></svg></button><span class="control-label" id="play-label">PLAY</span></div>
               <div class="control"><button class="action" id="clean" aria-label="Clean your pickle" aria-keyshortcuts="3"><svg aria-hidden="true"><use href="#icon-clean"/></svg></button><span class="control-label" id="clean-label">CLEAN</span></div>
             </div>
+            <div class="pet-tools"><button id="cuddle" type="button" aria-keyshortcuts="P">Pet +8 ♥</button><button id="sleep" type="button" aria-pressed="false" aria-keyshortcuts="S">Nap ☾</button></div>
             <div class="shell-footer" aria-hidden="true"><span>BRINE, PLEASE.</span><span class="speaker"><i></i><i></i><i></i><i></i></span></div>
           </div>
         </div>
         <aside class="note note-right" aria-hidden="true"><svg><use href="#icon-heart"/></svg><br><strong>A little attention<br>goes a long way.</strong><p>Feed. Play. Clean. Repeat.<br>You're doing great, probably.</p></aside>
       </section>
+      <section class="jukebox" aria-label="Sound controls"><p class="track-title">♫ BRINE TIME<span>Original 8-bit pickle funk · 132 BPM</span></p><div class="audio-controls"><button id="music-toggle" type="button" aria-pressed="true">Music on</button><button id="sfx-toggle" type="button" aria-pressed="true">SFX on</button><label class="audio-volume">Volume<input id="volume" type="range" min="0" max="100" value="45" aria-label="Audio volume"></label></div></section>
       <section class="care-strip" aria-label="Quick care guide">
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-jar"/></svg></span><div><h2>Keep it in good brine.</h2><p>Full belly, happy pickle.</p></div></div>
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-heart"/></svg></span><div><h2>Make a little time.</h2><p>Even pickles need to play.</p></div></div>
-        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-moon"/></svg></span><div><h2>Let your dill chill.</h2><p>Tap your pal to sleep or wake.</p></div></div>
+        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-moon"/></svg></span><div><h2>Let your dill chill.</h2><p>Use Nap to rest. Pet for happy.</p></div></div>
       </section>
-      <div class="below"><p class="saved" id="save-status" role="status">Your little friend is saved on this browser.</p><div class="save-actions" aria-label="Progress backups"><button class="save-button" id="download-save" type="button">Download save ↓</button><label class="save-button save-file-control" id="import-save" tabindex="-1">Import save ↑<input id="backup-file" type="file" aria-label="Import save"></label><button class="save-button" id="undo-import" type="button" hidden>Undo import ↶</button></div><p class="backup-notice" id="backup-notice" role="status"></p><div class="install-actions" id="install-actions"><button class="save-button" id="install-app" type="button" hidden>Install little dill ↓</button><p class="install-hint" id="install-hint" hidden>Add little dill to your home screen: tap Share, then <b>Add to Home Screen</b>.</p></div><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for a sip of brine, <b>Play</b> to follow the heart as the jars shuffle, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. Tap your pickle to sleep or wake; sleep restores energy. A round costs 9 energy. Find the heart for +22 happiness, or get +8 for trying.<br><br>Your seed becomes a sprout at 30 seconds, a pickle at 5 minutes, and an elder at 30 minutes. Keep all four meters topped up. A very low meter can cause sickness; restore every meter to at least 30 to recover. Leaving a meter empty for 3 active minutes ends this little life, but you can plant a new one.<br><br>Progress saves automatically in this browser. Use <b>Download save</b> to keep an encrypted backup, and <b>Import save</b> to restore it on this or another device. No password or account is needed. Files are opened locally and never uploaded. Clearing browser data also clears your local progress.<br><br>little dill can be installed as an app. Use <b>Install little dill</b> where your browser offers it, or on iPhone and iPad tap Share, then Add to Home Screen. The installed app opens offline.<br><br>While you're away, needs decay for at most 15 minutes, and your pickle can get sick but won't die. A sleeping pickle keeps resting. Care buttons make soft little beeps.</p></details></div>
+      <div class="below"><p class="saved" id="save-status" role="status">Your little friend is saved on this browser.</p><div class="save-actions" aria-label="Progress backups"><button class="save-button" id="download-save" type="button">Download save ↓</button><label class="save-button save-file-control" id="import-save" tabindex="-1">Import save ↑<input id="backup-file" type="file" aria-label="Import save"></label><button class="save-button" id="undo-import" type="button" hidden>Undo import ↶</button></div><p class="backup-notice" id="backup-notice" role="status"></p><div class="install-actions" id="install-actions"><button class="save-button" id="install-app" type="button" hidden>Install little dill ↓</button><p class="install-hint" id="install-hint" hidden>Add little dill to your home screen: tap Share, then <b>Add to Home Screen</b>.</p></div><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for brine, <b>Play</b> for three arcade games, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. <b>Tap your pickle</b> or press <b>P</b> for +8 happiness every 2 seconds, with no energy cost. Feeding and cleaning also bring a little joy. Use <b>Nap</b> or <b>S</b> to sleep or wake; naps restore energy.<br><br><b>Heart hunt:</b> follow the heart through three rounds of shuffling jars. <b>Dill says:</b> repeat a growing sequence of notes and shapes. <b>Brine catch:</b> move your basket with 1/2/3, arrow keys, or a tap; catch hearts and dodge salt (×). Each game costs 6 energy and awards 10–34 happiness on completion, including a reward for trying. Use <b>Play again</b> for another round, or <b>Esc</b> to leave. Leaving the page or opening a save pauses the arcade without losing your entry energy. Best scores stay in this browser.<br><br>Your seed becomes a sprout at 30 seconds, a pickle at 5 minutes, and an elder at 30 minutes. Keep all four meters topped up. A very low meter can cause sickness; restore every meter to at least 30 to recover. Leaving a meter empty for 3 active minutes ends this little life, but you can plant a new one.<br><br>Progress saves automatically in this browser. Use <b>Download save</b> to keep an encrypted backup, and <b>Import save</b> to restore it on this or another device. No password or account is needed. Files are opened locally and never uploaded. Clearing browser data also clears your local progress.<br><br>little dill can be installed as an app. Use <b>Install little dill</b> where your browser offers it, or on iPhone and iPad tap Share, then Add to Home Screen. The installed app opens offline.<br><br>While you're away, needs decay for at most 15 minutes, and your pickle can get sick but won't die. A sleeping pickle keeps resting. Care and games have their own 8-bit sound effects. Brine Time starts with your first tap or keypress. Music and effects have separate switches and a shared volume slider; your choices are remembered. Sound pauses when the page is hidden and the music mellows out during naps.</p></details></div>
       <picture class="brand-banner" aria-hidden="true">
         <source type="image/webp" srcset="./assets/illustrations/banner-small.webp 768w, ./assets/illustrations/banner.webp 1536w" sizes="(max-width: 860px) calc(100vw - 48px), 805px">
         <img src="./assets/illustrations/banner.png" width="2172" height="724" alt="" loading="lazy" decoding="async">
@@ -360,6 +417,7 @@
     <div class="dialog-actions"><button class="save-button" type="button" id="backup-cancel">Cancel</button><label class="save-button save-file-control">Choose another file<input id="backup-file-other" type="file" aria-label="Choose another save file"></label><button class="save-button save-primary" type="button" id="backup-restore" hidden>Restore this pickle</button></div>
   </dialog>
   <script src="./save-codec.js"></script>
+  <script src="./audio.js"></script>
   <script>
     (() => {
       'use strict';
@@ -380,9 +438,19 @@
       let feedback = { text: 'a little dill is born. hi, you!', until: Date.now() + 6500 };
       let happyUntil = 0;
       let lastAction = 0;
-      let audioContext;
+      const sound = window.LittleDillAudio?.create();
+      const sfx = (name, pitch) => sound?.play(name, pitch);
+      const memoryPads = [...document.querySelectorAll('.memory-pad')];
+      const catchLanes = [...document.querySelectorAll('.catch-lane')];
+      const GAME_NAMES = { hunt: 'HEART HUNT', memory: 'DILL SAYS', catch: 'BRINE CATCH' };
+      let lastPet = -Infinity;
+      let records = {};
+      try {
+        const stored = JSON.parse(localStorage.getItem('little-dill.arcade.v1'));
+        if (stored && typeof stored === 'object' && !Array.isArray(stored)) records = stored;
+      } catch { /* Optional scores. */ }
       let game = null;
-      let gameTimers = [];
+      const gameTimers = new Set();
       let effectTimer;
       let saveAvailable = true;
       let autosaveBlocked = false;
@@ -429,7 +497,7 @@
         endGame(false); clearTimeout(effectTimer);
         $('effect').textContent = ''; $('effect').classList.remove('pop');
         state = { ...pet, updatedAt: Math.min(pet.updatedAt, Date.now()) };
-        happyUntil = 0; lastAction = 0; feedback.until = 0;
+        happyUntil = 0; lastAction = 0; lastPet = -Infinity; feedback.until = 0;
         autosaveBlocked = false;
         syncTime(true); save(); render();
       }
@@ -472,7 +540,7 @@
       }
       $('backup-cancel').addEventListener('click', () => { clearBackupPreview(); backupDialog.close(); });
       backupDialog.addEventListener('cancel', clearBackupPreview);
-      backupDialog.addEventListener('close', () => { if (!backupDialog.open) clearBackupPreview(); });
+      backupDialog.addEventListener('close', () => { if (!backupDialog.open) { clearBackupPreview(); resumeGame(); } });
       async function importBackup(input) {
         const file = input.files[0];
         if (!file) return;
@@ -480,6 +548,7 @@
         clearBackupPreview();
         const operation = ++backupOperation;
         backupBusy = true;
+        pauseGame();
         if (!backupDialog.open) backupDialog.showModal();
         $('backup-progress').textContent = 'Opening your safety jar…';
         try {
@@ -547,7 +616,7 @@
         if (state.dead) return 'dead';
         if (state.sleeping) return 'sleeping';
         if (state.sick) return 'sick';
-        if (Date.now() < happyUntil) return 'happy';
+        if (Date.now() < happyUntil || (state.happiness >= 80 && state.energy >= 25)) return 'happy';
         if (state.fullness < 30 || state.energy < 20 || state.happiness < 25) return 'hungry';
         return 'idle';
       }
@@ -556,9 +625,9 @@
         if (state.sleeping) return state.energy >= 100 ? 'fully rested. dreaming of you.' : 'shhh. marinating in a dream.';
         if (state.sick) return 'feeling sour. get all meters to 30.';
         if (state.fullness < 30) return 'a sip of brine would be divine.';
-        if (state.energy < 20) return 'one sleepy pickle. tap to tuck in.';
+        if (state.energy < 20) return 'one sleepy pickle. time for a nap.';
         if (state.hygiene < 40) return 'a little funky in here. clean up?';
-        if (state.happiness < 30) return 'got a minute for a little game?';
+        if (state.happiness < 30) return 'a little pet or play would help. ♥';
         return ['just a pickle. having a day.', 'life is pretty dill-ightful.', 'small, salty, and so loved.', 'no thoughts. just brine.'][Math.floor(state.ageTicks / 10) % 4];
       }
       function render() {
@@ -579,18 +648,29 @@
         room.classList.toggle('is-dead', state.dead);
         $('screen').classList.toggle('asleep', state.sleeping);
         $('pet').hidden = state.dead;
-        $('pet').setAttribute('aria-pressed', String(state.sleeping));
-        $('pet').setAttribute('aria-label', state.sleeping ? 'Wake your pickle' : 'Put your pickle to sleep');
+        $('pet').setAttribute('aria-label', state.sleeping ? 'Wake your pickle' : 'Pet your pickle for happiness');
+        $('sleep').textContent = state.sleeping ? 'Wake ☀' : 'Nap ☾';
+        $('sleep').setAttribute('aria-pressed', String(state.sleeping));
+        $('sleep').disabled = state.dead || !!game;
+        $('cuddle').disabled = state.dead || !!game || state.sleeping;
+        sound?.setResting(state.sleeping || state.dead);
         $('tombstone').hidden = !state.dead;
         $('restart').hidden = !state.dead;
         $('poop').hidden = state.hygiene >= 40 || state.dead;
-        $('screen-hint').textContent = state.dead ? 'every ending is a new beginning' : game ? 'pick a jar · or press 1 / 2 / 3' : state.sleeping ? 'tap your pickle to rise & brine' : 'tap your pickle to tuck it in';
-        const labels = ['FEED', 'PLAY', 'CLEAN'];
-        const names = ['Feed brine', 'Play guess the jar', 'Clean your pickle'];
+        $('screen-hint').textContent = state.dead ? 'every ending is a new beginning' : game ? (game.type === 'catch' && game.phase === 'catch' ? '1 / 2 / 3 or ← → · Esc to exit' : 'tap or use 1 / 2 / 3 · Esc to exit') : state.sleeping ? 'tap your pickle to rise & brine' : 'tap your pickle for +8 happy ♥';
+        let labels = ['FEED', 'PLAY', 'CLEAN'];
+        let names = ['Feed brine', 'Open the dill arcade', 'Clean your pickle'];
+        if (game) {
+          if (game.phase === 'menu') { labels = ['HUNT', 'TUNE', 'CATCH']; names = ['Play Heart hunt', 'Play Dill says', 'Play Brine catch']; }
+          else if (game.phase === 'result') { labels = ['AGAIN', 'GAMES', 'HOME']; names = ['Play again', 'Choose another game', 'Back to pickle']; }
+          else if (game.type === 'hunt') { labels = ['JAR 1', 'JAR 2', 'JAR 3']; names = labels.map(label => 'Choose ' + label.toLowerCase()); }
+          else if (game.type === 'memory') { labels = ['NOTE 1', 'NOTE 2', 'NOTE 3']; names = labels.map(label => 'Play ' + label.toLowerCase()); }
+          else { labels = ['LEFT', 'CENTER', 'RIGHT']; names = labels.map(label => 'Move basket ' + label.toLowerCase()); }
+        }
         actionButtons.forEach((button, index) => {
-          button.disabled = state.dead || (!!game && game.phase !== 'choose');
-          button.setAttribute('aria-label', game ? 'Choose jar ' + (index + 1) : names[index]);
-          $(button.id + '-label').textContent = game ? 'JAR ' + (index + 1) : labels[index];
+          button.disabled = state.dead || (!!game && (game.paused || !['menu', 'choose', 'repeat', 'catch', 'result'].includes(game.phase)));
+          button.setAttribute('aria-label', names[index]);
+          $(button.id + '-label').textContent = labels[index];
         });
         const message = state.dead ? defaultMessage() : game ? game.message : Date.now() < feedback.until ? feedback.text : defaultMessage();
         if ($('message').textContent !== message) $('message').textContent = message;
@@ -615,27 +695,21 @@
           scheduleIdle();
         }, 2800 + Math.random() * 4200);
       }
-      function beep(notes = [440, 660]) {
-        try {
-          const Audio = window.AudioContext || window.webkitAudioContext;
-          if (!Audio) return;
-          audioContext ||= new Audio();
-          if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
-          notes.forEach((frequency, index) => {
-            const oscillator = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            const start = audioContext.currentTime + index * .085;
-            oscillator.type = 'sine';
-            oscillator.frequency.value = frequency;
-            gain.gain.setValueAtTime(0, start);
-            gain.gain.linearRampToValueAtTime(.045, start + .008);
-            gain.gain.exponentialRampToValueAtTime(.001, start + .09);
-            oscillator.connect(gain); gain.connect(audioContext.destination);
-            oscillator.start(start); oscillator.stop(start + .1);
-            oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
-          });
-        } catch { /* Audio is decorative; care still works if it is unavailable. */ }
+      function renderSound() {
+        const prefs = sound?.preferences || { music: false, sfx: false, volume: 0 };
+        for (const key of ['music', 'sfx']) {
+          $(key + '-toggle').textContent = (key === 'music' ? 'Music' : 'SFX') + (prefs[key] ? ' on' : ' off');
+          $(key + '-toggle').setAttribute('aria-pressed', String(prefs[key]));
+        }
+        $('volume').value = Math.round(prefs.volume * 100);
       }
+      for (const key of ['music', 'sfx']) $(key + '-toggle').addEventListener('click', () => {
+        sound?.configure({ [key]: !sound.preferences[key] }); sound?.unlock(); renderSound();
+      });
+      $('volume').addEventListener('input', event => { sound?.configure({ volume: Number(event.target.value) / 100 }); });
+      document.addEventListener('pointerdown', () => sound?.unlock(), { passive: true });
+      document.addEventListener('keydown', () => sound?.unlock());
+      renderSound();
       function effect(text) {
         clearTimeout(effectTimer);
         const element = $('effect');
@@ -645,27 +719,132 @@
         element.classList.add('pop');
         effectTimer = setTimeout(() => { element.textContent = ''; element.classList.remove('pop'); }, 1600);
       }
+      function addHappy(amount) {
+        const before = state.happiness;
+        state.happiness = clamp(before + amount);
+        happyUntil = Date.now() + 5000;
+        return Math.round(state.happiness - before);
+      }
+      function petPickle() {
+        syncTime();
+        if (state.dead || game) return;
+        if (state.sleeping) { toggleSleep(); return; }
+        if (Date.now() - lastPet < 2000) { say('so loved. another pet in a moment. ♥'); render(); return; }
+        lastPet = Date.now(); lastAction = Date.now();
+        const added = addHappy(8);
+        say(added ? '+' + added + ' happy. you’re my favorite human.' : '100% happy. maximum pickle joy!');
+        effect(added ? '+' + added + ' happy ♥' : '♥ so loved ♥'); act('hop', 650); sfx('pet');
+        assessHealth(); save(); render();
+      }
+      function toggleSleep() {
+        syncTime();
+        if (state.dead || game) return;
+        state.sleeping = !state.sleeping; happyUntil = 0;
+        say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
+        act(state.sleeping ? 'yawn' : 'wake', state.sleeping ? 1200 : 900);
+        sfx(state.sleeping ? 'sleep' : 'wake'); save(); render();
+      }
       function care(action) {
         syncTime();
         if (state.dead) { render(); return; }
-        if (game) { chooseJar(game.order[action]); return; }
-        if (state.sleeping) { say('zzZ... tap your pickle to wake up.'); beep([260]); render(); return; }
-        if (Date.now() - lastAction < 450) return;
+        if (game) { gameInput(action); return; }
+        if (state.sleeping) { say('zzZ... use Wake to rise & brine.'); sfx('blocked'); render(); return; }
         lastAction = Date.now();
         if (action === 0) {
-          if (state.fullness >= 99) { say('full to the brim. thanks, though!'); act('wiggle', 550); beep([390]); }
-          else { const added = Math.min(22, 100 - state.fullness); state.fullness = clamp(state.fullness + 22); say('ahh, the finest brine. chef’s kiss.'); effect('+' + Math.round(added) + ' food'); act('munch', 1100); happyUntil = Date.now() + 3400; beep([520, 780, 1040]); }
-        } else if (action === 1) {
-          if (state.energy < 12) { say('too sleepy to play. tuck me in?'); beep([330, 260]); }
-          else { startGame(); return; }
-        } else {
+          if (state.fullness >= 99) { say('full to the brim. try a little pet!'); act('wiggle', 550); sfx('blocked'); }
+          else {
+            const added = Math.min(22, 100 - state.fullness);
+            state.fullness = clamp(state.fullness + 22);
+            const happy = addHappy(3);
+            say('finest brine. +' + Math.round(added) + ' food, +' + happy + ' happy.');
+            effect('+' + Math.round(added) + ' food'); act('munch', 1100); sfx('feed');
+          }
+        } else if (action === 1) { openArcade(); return; }
+        else if (state.hygiene >= 99) { say('already sparkling. how about a game?'); sfx('blocked'); }
+        else {
           state.hygiene = 100;
-          say('squeaky clean. still a little salty.'); effect('✧ squeaky clean ✧'); act('shimmy', 700); happyUntil = Date.now() + 3000; beep([660, 880, 1100]);
+          const happy = addHappy(4);
+          say('squeaky clean. +' + happy + ' happy, too.'); effect('✧ squeaky clean ✧'); act('shimmy', 700); sfx('clean');
         }
         assessHealth(); save(); render();
       }
-      function later(callback, delay) { gameTimers.push(setTimeout(() => { if (game) callback(); }, delay)); }
+      function clearGameTimers() {
+        for (const timer of gameTimers) clearTimeout(timer.id);
+        gameTimers.clear();
+      }
+      function armTimer(timer) {
+        timer.at = performance.now() + timer.remaining;
+        timer.id = setTimeout(() => { gameTimers.delete(timer); if (game && !game.paused) timer.callback(); }, timer.remaining);
+      }
+      function later(callback, delay) {
+        const timer = { callback, remaining: delay };
+        gameTimers.add(timer);
+        if (!game.paused) armTimer(timer);
+      }
+      function pauseGame() {
+        if (!game || game.paused) return;
+        game.paused = true;
+        for (const timer of gameTimers) { clearTimeout(timer.id); timer.remaining = Math.max(0, timer.at - performance.now()); }
+        $('game').classList.add('paused'); render();
+      }
+      function resumeGame() {
+        if (!game?.paused || document.hidden || backupDialog.open) return;
+        game.paused = false;
+        for (const timer of gameTimers) armTimer(timer);
+        $('game').classList.remove('paused'); render();
+      }
+      function gameView(view) {
+        for (const id of ['game-menu', 'jars', 'memory-pads', 'catch-field']) $(id).hidden = id !== view;
+        $('game-again').hidden = true; $('game-menu-button').hidden = view === 'game-menu';
+        $('game').classList.remove('paused');
+      }
+      function openArcade() {
+        clearGameTimers();
+        game = { phase: 'menu', message: '6 energy per game · 10–34 happy ♥' };
+        room.hidden = true; $('game').hidden = false;
+        gameView('game-menu'); $('game-title').textContent = 'THE DILL ARCADE';
+        $('game-meta').textContent = 'pick your kind of pickle play';
+        sfx('select'); render(); document.querySelector('.game-choice').focus({ preventScroll: true });
+      }
+      function updateScore() {
+        const best = Math.max(0, Number(records[game.type]) || 0);
+        $('game-meta').textContent = game.type === 'hunt' ? 'ROUND ' + game.round + '/3 · ' + game.score + ' FOUND · BEST ' + best : game.type === 'memory' ? 'LEVEL ' + game.round + '/5 · BEST ' + best : 'DROP ' + game.round + '/12 · ' + game.score + ' PTS · BEST ' + best;
+      }
+      function startGame(type) {
+        syncTime();
+        if (state.dead || state.sleeping || !GAME_NAMES[type]) return;
+        if (state.energy < 6) {
+          endGame(false); say('a little nap first! games need 6 energy.'); sfx('blocked'); render(); $('sleep').focus({ preventScroll: true }); return;
+        }
+        clearGameTimers();
+        state.energy = clamp(state.energy - 6);
+        game = { type, phase: 'watch', round: 1, score: 0, message: '', sequence: [], basket: 1, combo: 0 };
+        room.hidden = true; $('game').hidden = false;
+        gameView(type === 'hunt' ? 'jars' : type === 'memory' ? 'memory-pads' : 'catch-field');
+        $('game-title').textContent = GAME_NAMES[type];
+        $('game-close').focus({ preventScroll: true }); sfx('start'); save();
+        if (type === 'hunt') huntRound();
+        else if (type === 'memory') memoryRound();
+        else { game.phase = 'ready'; game.message = 'catch ♥ · dodge salt × · move below'; moveBasket(1); updateScore(); render(); later(catchRound, 1600); }
+      }
+      function finishGame(message, reward) {
+        syncTime();
+        if (!game || state.dead || game.phase === 'result') return;
+        clearGameTimers(); game.phase = 'result';
+        const added = addHappy(reward);
+        game.message = message + ' +' + added + ' happy ♥';
+        records[game.type] = Math.max(Number(records[game.type]) || 0, game.score);
+        try { localStorage.setItem('little-dill.arcade.v1', JSON.stringify(records)); } catch { /* Scores are optional. */ }
+        $('game-again').hidden = false; $('game-menu-button').hidden = false;
+        memoryPads.forEach(button => { button.disabled = true; });
+        jarButtons.forEach(button => { button.disabled = true; });
+        catchLanes.forEach(button => { button.disabled = true; });
+        $('catch-drop').hidden = true;
+        updateScore(); sfx(game.score > 0 ? 'win' : 'pet'); assessHealth(); save(); render();
+        $('game-again').focus({ preventScroll: true });
+      }
       function positionJars() {
+        if (!game?.order) return;
         const step = $('jars').clientWidth / 3;
         game.order.forEach((id, slot) => {
           const button = jarButtons[id];
@@ -674,70 +853,152 @@
           button.setAttribute('aria-label', 'Jar ' + (slot + 1));
         });
       }
-      function startGame() {
-        state.energy = clamp(state.energy - 9);
-        game = { phase: 'watch', winner: Math.floor(Math.random() * 3), order: [0, 1, 2], message: 'keep your eye on the heart...' };
-        room.hidden = true; $('game').hidden = false;
-        jarButtons.forEach((button, id) => { button.disabled = true; button.classList.toggle('revealed', id === game.winner); button.classList.remove('picked'); button.querySelector('.prize').textContent = id === game.winner ? '♥' : '·'; });
-        positionJars(); $('game-close').focus({ preventScroll: true }); beep([440, 550, 660]); save(); render();
+      function huntRound() {
+        game.phase = 'watch'; game.winner = Math.floor(Math.random() * 3); game.order = [0, 1, 2];
+        game.message = 'follow the heart. here it is!';
+        jarButtons.forEach((button, id) => {
+          button.disabled = true; button.classList.toggle('revealed', id === game.winner); button.classList.remove('picked');
+          button.querySelector('.prize').textContent = id === game.winner ? '♥' : '·';
+          button.style.transitionDuration = (reduceMotion.matches ? 0 : 440 - game.round * 35) + 'ms';
+        });
+        positionJars(); updateScore(); render();
         later(() => {
-          game.phase = 'shuffle'; game.message = 'a little shuffle. a little mystery.';
-          jarButtons.forEach(button => button.classList.remove('revealed')); render();
+          game.phase = 'shuffle'; game.message = 'keep an eye on that little heart.';
+          jarButtons.forEach((button, id) => button.classList.toggle('revealed', reduceMotion.matches && id === game.winner)); render();
         }, 1300);
-        [1700, 2300, 2900].forEach(delay => later(() => {
+        const swaps = game.round + 2;
+        for (let turn = 0; turn < swaps; turn++) later(() => {
           const first = Math.floor(Math.random() * 3);
           const second = (first + 1 + Math.floor(Math.random() * 2)) % 3;
           [game.order[first], game.order[second]] = [game.order[second], game.order[first]];
-          positionJars();
-        }, delay));
-        later(() => { game.phase = 'choose'; game.message = 'where’s the heart? pick a jar!'; jarButtons.forEach(button => { button.disabled = false; }); render(); }, 3450);
+          positionJars(); sfx('shuffle');
+        }, 1700 + turn * 620);
+        later(() => {
+          game.phase = 'choose'; game.message = 'where’s the heart? pick 1, 2, or 3.';
+          jarButtons.forEach(button => { button.disabled = false; button.classList.remove('revealed'); }); render();
+          jarButtons[game.order[0]].focus({ preventScroll: true });
+        }, 1700 + swaps * 620);
       }
       function chooseJar(id) {
-        syncTime();
-        if (!game || game.phase !== 'choose') return;
+        if (!game || game.paused || game.type !== 'hunt' || game.phase !== 'choose') return;
         const won = id === game.winner;
-        game.phase = 'result'; game.message = won ? 'you found it! +22 happy ♥' : 'nice try, little friend. +8 happy';
-        state.happiness = clamp(state.happiness + (won ? 22 : 8));
-        happyUntil = Date.now() + 5000;
+        game.phase = 'reveal'; if (won) game.score++;
+        game.message = won ? 'heart found! lovely little detective.' : 'there it is! another chance coming.';
         jarButtons.forEach(button => { button.disabled = true; button.classList.add('revealed'); });
-        jarButtons[id].classList.add('picked');
-        // Give keyboard users a stable exit after the selected jar is disabled.
+        jarButtons[id].classList.add('picked'); sfx(won ? 'catch' : 'miss'); updateScore(); render();
         $('game-close').focus({ preventScroll: true });
-        beep(won ? [523, 659, 784, 1047] : [440, 523]); assessHealth(); save(); render();
+        later(() => {
+          if (game.round === 3) finishGame(game.score + '/3 hearts found.', 10 + game.score * 8);
+          else { game.round++; huntRound(); }
+        }, 1100);
+      }
+      function flashPad(index) {
+        const pad = memoryPads[index];
+        pad.classList.add('lit'); sfx('tap', index);
+        if (game.phase === 'watch') { game.message = 'listen: note ' + (index + 1) + ' ' + ['●', '◆', '★'][index]; render(); }
+        later(() => pad.classList.remove('lit'), 300);
+      }
+      function memoryRound() {
+        clearGameTimers(); memoryPads.forEach(button => { button.disabled = true; button.classList.remove('lit'); });
+        game.phase = 'watch'; game.input = 0;
+        while (game.sequence.length < game.round + 1) game.sequence.push(Math.floor(Math.random() * 3));
+        game.message = 'watch the shapes. remember the tune.'; updateScore(); render();
+        game.sequence.forEach((pad, index) => later(() => flashPad(pad), 700 + index * 650));
+        later(() => {
+          game.phase = 'repeat'; game.message = 'your turn! repeat all ' + game.sequence.length + ' notes.';
+          memoryPads.forEach(button => { button.disabled = false; }); render(); memoryPads[0].focus({ preventScroll: true });
+          later(() => { if (game.phase === 'repeat') finishGame('good practice!', 10 + game.score * 4); }, 10000 + game.sequence.length * 2000);
+        }, 700 + game.sequence.length * 650);
+      }
+      function chooseNote(index) {
+        if (!game || game.paused || game.type !== 'memory' || game.phase !== 'repeat') return;
+        flashPad(index);
+        if (index !== game.sequence[game.input]) { finishGame('nice try, little maestro.', 10 + game.score * 4); return; }
+        game.input++;
+        game.message = game.input + '/' + game.sequence.length + ' notes. keep going!'; render();
+        if (game.input === game.sequence.length) {
+          // Remove the response deadline before starting the next sequence.
+          clearGameTimers(); memoryPads.forEach(button => { button.classList.remove('lit'); button.disabled = true; });
+          game.score = game.round; game.phase = 'between'; game.message = 'nailed it! one more note…'; sfx('catch'); render();
+          if (game.round === 5) finishGame('five levels! encore!', 34);
+          else later(() => { game.round++; memoryRound(); }, 900);
+        }
+      }
+      function moveBasket(index) {
+        if (!game || game.paused || game.type !== 'catch' || !['ready', 'catch'].includes(game.phase)) return;
+        game.basket = clamp(index, 0, 2);
+        catchLanes.forEach((button, lane) => { button.disabled = false; button.classList.toggle('selected', lane === game.basket); button.setAttribute('aria-pressed', String(lane === game.basket)); });
+      }
+      function catchRound() {
+        game.phase = 'catch';
+        const lane = Math.floor(Math.random() * 3);
+        const salt = game.round % 4 === 0;
+        const duration = Math.max(850, 1550 - game.round * 45);
+        const drop = $('catch-drop');
+        drop.hidden = false; drop.textContent = salt ? '×' : '♥'; drop.style.left = lane * 100 / 3 + '%';
+        drop.style.animation = 'none'; void drop.offsetWidth; drop.style.animation = '';
+        drop.style.animationDuration = duration + 'ms';
+        game.message = (salt ? 'salt! dodge lane ' : 'heart! catch lane ') + (lane + 1) + (game.combo > 1 ? ' · ' + game.combo + ' streak' : '');
+        moveBasket(game.basket); updateScore(); render();
+        later(() => {
+          drop.hidden = true;
+          const caught = game.basket === lane;
+          if (caught && !salt) { game.combo++; game.score += game.combo >= 3 ? 2 : 1; sfx('catch'); }
+          else if (caught && salt) { game.combo = 0; game.score = Math.max(0, game.score - 1); sfx('miss'); }
+          else if (!salt) game.combo = 0;
+          game.message = caught ? (salt ? 'a little too salty! −1 point.' : 'crunch! ' + game.combo + ' in a row!') : salt ? 'smooth dodge. stay crunchy.' : 'missed it. next heart is yours.';
+          updateScore(); render();
+          if (game.round === 12) finishGame(game.score + ' points. nicely brined!', 10 + Math.min(24, game.score * 2));
+          else later(() => { game.round++; catchRound(); }, 260);
+        }, duration);
+      }
+      function gameInput(index) {
+        if (!game || game.paused) return;
+        if (game.phase === 'menu') startGame(['hunt', 'memory', 'catch'][index]);
+        else if (game.phase === 'result') {
+          if (index === 0) startGame(game.type);
+          else if (index === 1) openArcade();
+          else endGame();
+        } else if (game.type === 'hunt') chooseJar(game.order[index]);
+        else if (game.type === 'memory') chooseNote(index);
+        else if (game.type === 'catch') { moveBasket(index); sfx('select'); }
       }
       function endGame(focus = true) {
-        gameTimers.forEach(clearTimeout); gameTimers = []; game = null;
+        clearGameTimers(); game = null;
+        memoryPads.forEach(button => button.classList.remove('lit'));
         $('game').hidden = true; room.hidden = false; render();
         if (focus) (state.dead ? $('restart') : $('play')).focus({ preventScroll: true });
       }
       actionButtons.forEach((button, index) => button.addEventListener('click', () => care(index)));
       jarButtons.forEach((button, id) => button.addEventListener('click', () => chooseJar(id)));
+      memoryPads.forEach((button, index) => button.addEventListener('click', () => chooseNote(index)));
+      catchLanes.forEach((button, index) => button.addEventListener('click', () => { moveBasket(index); sfx('select'); }));
+      document.querySelectorAll('.game-choice').forEach(button => button.addEventListener('click', () => startGame(button.dataset.game)));
+      $('game-again').addEventListener('click', () => { if (game?.phase === 'result') startGame(game.type); });
+      $('game-menu-button').addEventListener('click', openArcade);
       $('game-close').addEventListener('click', () => endGame());
-      $('pet').addEventListener('click', () => {
-        syncTime();
-        if (state.dead || game) { render(); return; }
-        state.sleeping = !state.sleeping;
-        happyUntil = 0;
-        say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
-        act(state.sleeping ? 'yawn' : 'wake', state.sleeping ? 1200 : 900);
-        beep(state.sleeping ? [523, 392, 262] : [392, 523, 659]); save(); render();
-      });
+      $('pet').addEventListener('click', petPickle);
+      $('cuddle').addEventListener('click', petPickle);
+      $('sleep').addEventListener('click', toggleSleep);
       $('restart').addEventListener('click', () => {
         if (!state.dead) return;
-        endGame(false); state = freshPet(); happyUntil = 0; lastAction = 0;
-        say('a fresh start. a brand-new little dill.', 5000); beep([523, 659, 784]); save(); render(); act('hop', 650); $('pet').focus({ preventScroll: true });
+        endGame(false); state = freshPet(); happyUntil = 0; lastAction = 0; lastPet = -Infinity;
+        say('a fresh start. a brand-new little dill.', 5000); sfx('wake'); save(); render(); act('hop', 650); $('pet').focus({ preventScroll: true });
       });
       document.addEventListener('keydown', event => {
         if (backupDialog.open || event.altKey || event.ctrlKey || event.metaKey || event.repeat || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
         if (['1', '2', '3'].includes(event.key)) { event.preventDefault(); care(Number(event.key) - 1); }
+        if (event.key.toLowerCase() === 'p') { event.preventDefault(); petPickle(); }
+        if (event.key.toLowerCase() === 's') { event.preventDefault(); toggleSleep(); }
+        if (game?.type === 'catch' && ['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); moveBasket(game.basket + (event.key === 'ArrowLeft' ? -1 : 1)); }
         if (event.key === 'Escape' && game) { event.preventDefault(); endGame(); }
       });
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { syncTime(); save(); }
-        else { syncTime(true); render(); }
+        if (document.hidden) { pauseGame(); sound?.setActive(false); syncTime(); save(); }
+        else { syncTime(true); resumeGame(); sound?.setActive(true); render(); }
       });
-      window.addEventListener('pagehide', () => { syncTime(true); save(); });
-      window.addEventListener('pageshow', event => { if (event.persisted) { syncTime(true); render(); } });
+      window.addEventListener('pagehide', () => { pauseGame(); sound?.setActive(false); syncTime(true); save(); });
+      window.addEventListener('pageshow', event => { if (event.persisted) { syncTime(true); resumeGame(); sound?.setActive(!document.hidden); render(); } });
       window.addEventListener('resize', () => { if (game) positionJars(); });
       window.addEventListener('storage', event => {
         if (event.key !== STORAGE_KEY || !event.newValue) return;

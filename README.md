@@ -6,6 +6,22 @@ A tiny pickle. A big responsibility. Your pocket pickle pet.
 
 Open `index.html` to play, or serve this folder with any static web server. Progress saves in your browser.
 
+## Play with your pickle
+
+- **Pet:** tap your pickle or press **P** for +8 happiness every two seconds. This costs no energy, so even a tired or unhappy pickle can recover. Use the separate **Nap / Wake** button or **S** to rest. Tapping a sleeping pickle wakes it.
+- **Care:** Feed adds up to 22 food and 3 happiness; Clean restores hygiene and adds 4 happiness. Full/clean pickles suggest another activity. **1 / 2 / 3** operate the three physical buttons.
+- **Arcade:** Play opens three games. Entry costs 6 energy; completed games award 10–34 happiness, including a participation reward. Results show the actual happiness gained (capped at 100). Replay directly or choose another game. Each game's best score stays in this browser, separately from pet backups.
+  - **Heart hunt:** track the heart through three increasingly busy jar shuffles.
+  - **Dill says:** repeat a growing sequence of shapes and notes across five levels. Shapes and numbered pads work with sound off.
+  - **Brine catch:** choose a lane with a tap, 1/2/3, or arrow keys. Catch hearts, dodge salt, and build a streak for extra points over twelve drops.
+- Active games pause while the page is hidden or a save preview is open. Returning resumes the remaining timers; closing a game with **Esc**, Games, or Back ends it without a completion reward. Care still follows the normal away-time rules.
+
+## Pickle radio
+
+**Brine Time** is an original, locally synthesized 132 BPM chiptune: triangle bass, square-wave arpeggios and melody, synthesized kick, noise snare and hats, a breakdown, and a layered final section in a 32-bar loop. No audio files, network services, libraries, or licensed tracks are required.
+
+Audio starts after a tap or keypress. Independent **Music** and **SFX** switches and a shared volume slider are remembered in this browser. Feeding, cleaning, petting, sleep/wake, notes, catches, misses, and wins have distinct cues. Music softens while the pickle sleeps; all audio pauses when the page is hidden. Care and games also work when Web Audio or browser storage is unavailable.
+
 ## Save your pickle
 
 - **Autosave:** progress saves locally after care actions and every three seconds while playing, with another save when the page is hidden. Existing saves still work. Browser data is specific to the browser and site address; clearing it removes the local save.
@@ -19,10 +35,10 @@ The app includes a stable format key so files transfer across devices without pa
 
 Encrypted backups require Web Crypto support in a secure context (HTTPS or localhost; local-file support depends on the browser). For local development, use `python3 -m http.server 4178 --bind 127.0.0.1` and open `http://127.0.0.1:4178`.
 
-Run the dependency-free save tests with Node 24:
+Run the dependency-free gameplay, audio, and save tests with Node 24:
 
 ```sh
-node --test tests/save-codec.test.cjs
+node --test tests/*.test.cjs
 ```
 
 ## Install as an app

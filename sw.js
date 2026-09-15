@@ -1,8 +1,9 @@
 /* Bump CACHE_VERSION with every deploy so installed apps pick up new files. */
-const CACHE_VERSION = 'little-dill-v1';
+const CACHE_VERSION = 'little-dill-v2';
 const PRECACHE = [
   './',
   './save-codec.js',
+  './audio.js',
   './site.webmanifest',
   './favicon.svg',
   './favicon.ico',
