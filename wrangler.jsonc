@@ -1,10 +1,39 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "little-dill",
+  "name": "pickle",
   "compatibility_date": "2026-08-01",
   "assets": {
     "directory": "./",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "none"
+    "not_found_handling": "none",
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/api/*"
+    ]
+  },
+  "main": "server/worker.mjs",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PUSH_KEYS",
+        "class_name": "PushKeys"
+      },
+      {
+        "name": "REMINDERS",
+        "class_name": "Reminder"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "PushKeys",
+        "Reminder"
+      ]
+    }
+  ],
+  "vars": {
+    "PUBLIC_ORIGIN": "https://pickle.ryanyannelli.workers.dev"
   }
 }

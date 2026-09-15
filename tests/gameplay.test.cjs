@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
-const source = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const source = fs.readFileSync(require.resolve('../pet-life.js'), 'utf8') + '\n' + html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 // Exercise the shipped game handlers with a tiny DOM and deterministic clock.
 // Browser verification separately covers layout, native inputs, and Web Audio.
@@ -13,7 +13,7 @@ function client(changes = {}, options = {}) {
   class Element {
     constructor() {
       this.textContent = ''; this.hidden = false; this.disabled = false; this.open = false;
-      this.dataset = {}; this.style = {}; this.children = new Map(); this.listeners = new Map(); this.attributes = {};
+      this.dataset = {}; this.style = { setProperty(name, value) { this[name] = value; } }; this.children = new Map(); this.listeners = new Map(); this.attributes = {};
       const classes = new Set();
       this.classList = { add: (...names) => names.forEach(n => classes.add(n)), remove: (...names) => names.forEach(n => classes.delete(n)),
         contains: n => classes.has(n), toggle: (n, force = !classes.has(n)) => force ? classes.add(n) : classes.delete(n) };
@@ -83,7 +83,7 @@ test('petting increases and persists happiness without energy, and never blocks 
   app.click('cuddle');
   assert.equal(app.saved().happiness, 28, 'rapid pets do not duplicate rewards');
   app.run(2000); app.key('p');
-  assert.equal(app.saved().happiness, 36);
+  assert.ok(Math.abs(app.saved().happiness - 36) < .01);
   app.click('play');
   assert.equal(app.get('game').hidden, false);
   assert.equal(app.get('game-title').textContent, 'THE DILL ARCADE');
@@ -95,7 +95,7 @@ test('care gives happiness, caps at 100, and persists recovery from sickness', (
   assert.equal(app.saved().sick, false);
   app.click('feed'); app.click('clean');
   assert.equal(app.saved().happiness, 39);
-  assert.equal(app.saved().fullness, 82);
+  assert.equal(app.saved().fullness, 100);
   assert.equal(app.saved().hygiene, 100);
   const capped = client({ happiness: 98 }); capped.click('pet');
   assert.equal(capped.saved().happiness, 100);
@@ -107,7 +107,7 @@ test('a tired pickle can gain happiness and nap; games enforce energy on every e
   app.click('pet'); assert.equal(app.saved().happiness, 28);
   app.start('hunt'); assert.equal(app.get('game').hidden, true);
   assert.match(app.get('message').textContent, /6 energy/);
-  app.key('s'); app.run(12000);
+  app.key('s'); app.run(12 * 60000);
   assert.ok(app.saved().energy >= 8);
   app.click('pet'); assert.equal(app.saved().sleeping, false);
   app.start('hunt'); assert.equal(app.get('game').hidden, false);
@@ -130,7 +130,7 @@ test('Heart Hunt pays once after three rounds and replay starts a fresh paid gam
   const happy = app.saved().happiness;
   app.jars[0].dispatch('click'); assert.equal(app.saved().happiness, happy);
   const energy = app.saved().energy;
-  app.click('game-again'); assert.equal(app.saved().energy, energy - 6);
+  app.click('game-again'); assert.ok(Math.abs(app.saved().energy - (energy - 6)) < .001);
   assert.equal(app.get('game-again').hidden, true);
 });
 

@@ -14,6 +14,11 @@
   const stats = ['fullness', 'happiness', 'energy', 'hygiene'];
 
   function validateState(value) {
+    if (value?.version === 2) {
+      const life = root.LittleDillLife || (typeof require === 'function' ? require('./pet-life.js') : null);
+      if (!life) throw new Error('Reload little dill to open this newer save.');
+      return life.validate(value);
+    }
     if (!value || value.version !== 1 ||
         !stats.every(key => Number.isFinite(value[key]) && value[key] >= 0 && value[key] <= 100) ||
         !Number.isSafeInteger(value.ageTicks) || value.ageTicks < 0 || value.ageTicks > 1e9 ||

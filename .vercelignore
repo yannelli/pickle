@@ -11,3 +11,4 @@ assets/README.md
 assets/PROMPTS.md
 .gitignore
 .vercelignore
+server/
