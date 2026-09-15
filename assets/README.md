@@ -30,7 +30,7 @@ Keep the outlined logo's proportions and leave at least one eye-width of clear s
 
 The deployment URL is not chosen yet. In `index.html`, replace the relative values of **both** `og:image` and `twitter:image` with the public HTTPS URL ending in `/assets/social/og.png`. Include any deployment subdirectory. Then add a canonical link and `og:url` using the final public page URL. Relative asset paths keep the app usable in local previews and subdirectory deployments until then.
 
-Social crawlers must be able to fetch the page and PNG without authentication. A raw image URL from the private GitHub repository will not work for public cards. Once deployed, check the actual shared URL with the target service. The manifest provides branding metadata; it does not add offline caching or a service worker.
+Social crawlers must be able to fetch the page and PNG without authentication. A raw image URL from the private GitHub repository will not work for public cards. Once deployed, check the actual shared URL with the target service. The manifest provides branding metadata; offline caching comes from `../sw.js`.
 
 ## Sources and exports
 

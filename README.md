@@ -25,6 +25,12 @@ Run the dependency-free save tests with Node 24:
 node --test tests/save-codec.test.cjs
 ```
 
+## Install as an app
+
+The page is an installable PWA: `site.webmanifest` supplies the identity and icons, and `sw.js` caches the app shell so the installed app opens offline. Chrome and Edge show an **Install little dill** button on the page; Safari on iPhone and iPad uses Share, then Add to Home Screen. Installation needs HTTPS or localhost.
+
+`sw.js` serves pages network-first with a cached fallback, and assets from cache while refreshing in the background. There is no build step, so bump `CACHE_VERSION` in `sw.js` with each deploy to drop the old cache on installed devices.
+
 ## Web assets
 
 [Browse the asset gallery](assets/preview.html) · [Asset guide and generation prompts](assets/README.md)
