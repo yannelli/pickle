@@ -185,6 +185,19 @@
     .pet-actor.act-shimmy { animation: shimmy .7s ease-in-out both; }
     .pet-actor.act-wake { animation: wake .9s ease-in-out both; }
     .pet-button:has(.act-wake) .pet-shadow { animation: shadow-hop .9s ease-in-out both; }
+    .room[data-mood="scared"] .pickle { animation: tremble .16s linear infinite; }
+    .room[data-mood="scared"] .pet-shadow { animation: none; }
+    .room[data-mood="scared"] .eye { width: 7px; height: 9px; top: -2px; animation: none; }
+    .room[data-mood="scared"] .mouth { border: 2px solid #263f29; border-radius: 50%; width: 8px; height: 9px; left: 12px; top: 9px; }
+    .room[data-mood="scared"] .cheek { width: 4px; height: 2px; }
+    .room[data-mood="scared"] .arm.left { animation: none; transform: rotate(85deg); }
+    .room[data-mood="scared"] .arm.right { animation: none; transform: rotate(-85deg); }
+    .room[data-mood="scared"] .sweat { display: block; animation: sweat .9s ease-in infinite; }
+    .room[data-bites="1"] .pickle { clip-path: polygon(-60% -30%, 160% -30%, 160% 16%, 100% 16%, 90% 17%, 84% 22%, 79% 27%, 80% 33%, 85% 38%, 92% 41%, 100% 44%, 160% 44%, 160% 130%, -60% 130%); }
+    .room[data-bites="2"] .pickle { clip-path: polygon(-60% -30%, 160% -30%, 160% 16%, 100% 16%, 90% 17%, 84% 22%, 79% 27%, 80% 33%, 85% 38%, 92% 41%, 100% 44%, 160% 44%, 160% 130%, -60% 130%, -60% 74%, 0 74%, 12% 72%, 19% 67%, 22% 60%, 18% 53%, 10% 48%, 0 50%, -60% 50%); }
+    .pet-actor.act-bitten { animation: bitten .5s ease-out both; }
+    .crumbs { display: none; position: absolute; bottom: 44px; left: calc(50% + 42px); width: 36px; height: 8px; background: radial-gradient(circle, var(--pixel) 1.5px, transparent 2px) 0 0 / 9px 8px, radial-gradient(circle, var(--pixel) 1px, transparent 1.5px) 4px 4px / 9px 8px; }
+    .room.is-eaten .crumbs { display: block; }
     .screen.asleep { background: #b7c590; }
     .poop { position: absolute; left: 36px; bottom: 17px; width: 22px; height: 8px; border-radius: 5px; background: var(--pixel); }
     .poop::before, .poop::after { content: ''; position: absolute; background: var(--pixel); width: 16px; height: 7px; border-radius: 6px 6px 0 0; left: 3px; top: -5px; }
@@ -359,6 +372,8 @@
     @keyframes munch { 0%, 100% { transform: scale(1, 1); } 10%, 30%, 50%, 70%, 90% { transform: scale(1.05, .95); } 20%, 40%, 60%, 80% { transform: scale(.98, 1.02); } }
     @keyframes chomp { 0% { height: 7px; } 100% { height: 2px; } }
     @keyframes shimmy { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(-12deg) scale(1.04, .97); } 30% { transform: rotate(11deg); } 45% { transform: rotate(-9deg); } 60% { transform: rotate(7deg); } 75% { transform: rotate(-4deg); } 90% { transform: rotate(2deg); } }
+    @keyframes tremble { 0%, 100% { transform: translateX(-1.5px) rotate(-2deg); } 50% { transform: translateX(1.5px) rotate(2deg); } }
+    @keyframes bitten { 0% { transform: translateX(0) rotate(0); } 15% { transform: translateX(-7px) rotate(-10deg) scale(1.08, .9); } 40% { transform: translateX(5px) rotate(6deg); } 65% { transform: translateX(-3px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0); } }
     @keyframes wake { 0% { transform: scale(1.1, .9); } 30% { transform: translateY(-9px) scale(.95, 1.08); } 55% { transform: translateY(0) scale(1.08, .93); } 75% { transform: scale(.98, 1.02); } 100% { transform: scale(1, 1); } }
     @keyframes reward { 0% { opacity: 0; transform: translate(-50%, 12px); } 20%, 60% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
     @media (min-width: 1500px) and (min-height: 950px) { .intro { padding-top: 55px; } .playground { padding-top: 43px; padding-bottom: 45px; min-height: 620px; } }
@@ -409,7 +424,7 @@
                 <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
                 <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
-                <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
+                <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><span class="crumbs" aria-hidden="true"></span><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
               </div>
               <section class="game" id="game" aria-labelledby="game-title" hidden>
                 <h2 class="game-title" id="game-title">THE DILL ARCADE</h2><p class="game-meta" id="game-meta">a little play. a lot of happy.</p>
@@ -508,6 +523,11 @@
       const catchLanes = [...document.querySelectorAll('.catch-lane')];
       const GAME_NAMES = { hunt: 'HEART HUNT', memory: 'DILL SAYS', catch: 'BRINE CATCH' };
       let lastPet = -Infinity;
+      let snack = null;
+      let holdTimer;
+      let suppressPetClick = false;
+      let typed = '';
+      const BITE_LINES = ['CRONCH. ...ow.', 'half a dill. 100% betrayed.'];
       let records = {};
       try {
         const stored = JSON.parse(localStorage.getItem('little-dill.arcade.v1'));
@@ -642,6 +662,7 @@
         const previousStage = Life.stage(state, state.updatedAt);
         Life.advance(state);
         if (state.dead && game) endGame(false);
+        if (state.dead && snack) cancelSnack(false);
         if (stage() !== previousStage && state.phase === 'living' && !state.dead) say('look at you grow. hello, ' + stage() + '!', 5000);
         save();
       }
@@ -680,7 +701,7 @@
         const days = Math.floor(Life.age(state) / Life.DAY);
         $('profile-name').textContent = state.name;
         $('profile-kind').textContent = variety.name + ' · ' + (elder ? elder.name : stage() + ' pickle') + ' · ' + days + (days === 1 ? ' day old' : ' days old');
-        $('profile-quip').textContent = state.dead ? 'A good dill. A very good friend.' : elder ? elder.quip : { baby: 'Small pickle. Enormous feelings.', young: 'Growing into those big dill dreams.', adult: 'Thriving. Mostly thinking about snacks.' }[stage()];
+        $('profile-quip').textContent = state.dead ? (state.eaten ? 'A good dill. A great snack. A questionable choice.' : 'A good dill. A very good friend.') : elder ? elder.quip : { baby: 'Small pickle. Enormous feelings.', young: 'Growing into those big dill dreams.', adult: 'Thriving. Mostly thinking about snacks.' }[stage()];
         const hours = Math.max(0, Math.round((Life.nextCareAt(state) - Date.now()) / Life.HOUR));
         $('care-outlook').textContent = state.dead ? 'You can start a new little life whenever you’re ready.' : state.sick ? 'A little care will help: bring all four meters to 30.' : 'A daily check-in is plenty. ' + (hours <= 2 ? 'A little care would be lovely now.' : 'Comfortably brined for about ' + hours + ' more hours.');
         $('growth-outlook').textContent = elder ? 'A new elder look every 3 days. No age limit. Lap ' + elder.lap + '.' : 'Baby → young at 1 day → adult at 3 days → elder at 14 days.';
@@ -707,6 +728,7 @@
       });
       function mood() {
         if (state.dead) return 'dead';
+        if (snack) return 'scared';
         if (state.sleeping) return 'sleeping';
         if (state.sick) return 'sick';
         if (Date.now() < happyUntil || (state.happiness >= 80 && state.energy >= 25)) return 'happy';
@@ -714,7 +736,7 @@
         return 'idle';
       }
       function defaultMessage() {
-        if (state.dead) return 'a good dill. gone, but not forgotten.';
+        if (state.dead) return state.eaten ? 'you ate ' + state.name + '. it was delicious. you monster.' : 'a good dill. gone, but not forgotten.';
         if (state.sleeping) return state.energy >= 100 ? 'fully rested. dreaming of you.' : 'shhh. marinating in a dream.';
         if (state.sick) return 'feeling sour. get all meters to 30.';
         if (state.fullness < 30) return 'a sip of brine would be divine.';
@@ -740,21 +762,26 @@
         room.dataset.stage = stage();
         room.dataset.mood = mood();
         room.classList.toggle('is-dead', state.dead);
+        room.classList.toggle('is-eaten', !!state.eaten);
+        room.dataset.bites = String(snack?.bites || 0);
+        $('tombstone').innerHTML = state.eaten ? 'YUM.<br>little dill' : 'R.I.P.<br>little dill';
+        $('tombstone').setAttribute('aria-label', state.eaten ? 'Your pickle has been eaten. Crumbs remain.' : 'Your pickle has passed away');
         $('screen').classList.toggle('asleep', state.sleeping);
         $('pet').hidden = state.dead || state.phase !== 'living';
-        $('pet').setAttribute('aria-label', state.sleeping ? 'Wake your pickle' : 'Pet your pickle for happiness');
+        $('pet').setAttribute('aria-label', snack ? 'Spare your pickle' : state.sleeping ? 'Wake your pickle' : 'Pet your pickle for happiness');
         $('sleep').textContent = state.sleeping ? 'Wake ☀' : 'Nap ☾';
         $('sleep').setAttribute('aria-pressed', String(state.sleeping));
-        $('sleep').disabled = state.phase !== 'living' || state.dead || !!game;
-        $('cuddle').disabled = state.phase !== 'living' || state.dead || !!game || state.sleeping;
+        $('sleep').disabled = state.phase !== 'living' || state.dead || !!game || !!snack;
+        $('cuddle').disabled = state.phase !== 'living' || state.dead || !!game || state.sleeping || !!snack;
         sound?.setResting(state.sleeping || state.dead);
         $('tombstone').hidden = !state.dead;
         $('restart').hidden = !state.dead;
         $('poop').hidden = state.hygiene >= 40 || state.dead;
-        $('screen-hint').textContent = state.dead ? 'every ending is a new beginning' : game ? (game.type === 'catch' && game.phase === 'catch' ? '1 / 2 / 3 or ← → · Esc to exit' : 'tap or use 1 / 2 / 3 · Esc to exit') : state.sleeping ? 'tap your pickle to rise & brine' : 'tap your pickle for +8 happy ♥';
+        $('screen-hint').textContent = state.dead ? (state.eaten ? 'burp. every ending is a new beginning' : 'every ending is a new beginning') : snack ? (snack.bites ? 'chomp again... if you dare · Esc to stop' : 'NEVER · NOPE · CHOMP') : game ? (game.type === 'catch' && game.phase === 'catch' ? '1 / 2 / 3 or ← → · Esc to exit' : 'tap or use 1 / 2 / 3 · Esc to exit') : state.sleeping ? 'tap your pickle to rise & brine' : 'tap your pickle for +8 happy ♥';
         let labels = ['FEED', 'PLAY', 'CLEAN'];
         let names = ['Feed brine', 'Open the dill arcade', 'Clean your pickle'];
-        if (game) {
+        if (snack) { labels = ['NEVER', 'NOPE', 'CHOMP']; names = ['Spare your pickle', 'Spare your pickle', snack.bites ? 'Take another bite' : 'Take a bite']; }
+        else if (game) {
           if (game.phase === 'menu') { labels = ['HUNT', 'TUNE', 'CATCH']; names = ['Play Heart hunt', 'Play Dill says', 'Play Brine catch']; }
           else if (game.phase === 'result') { labels = ['AGAIN', 'GAMES', 'HOME']; names = ['Play again', 'Choose another game', 'Back to pickle']; }
           else if (game.type === 'hunt') { labels = ['JAR 1', 'JAR 2', 'JAR 3']; names = labels.map(label => 'Choose ' + label.toLowerCase()); }
@@ -819,8 +846,41 @@
         happyUntil = Date.now() + 5000;
         return Math.round(state.happiness - before);
       }
+      function startSnack() {
+        if (snack || state.phase !== 'living' || state.dead || state.sleeping || game || backupDialog.open) return;
+        snack = { bites: 0, until: Date.now() + 9000 };
+        lastAction = Date.now();
+        say('wait. are you going to... EAT me?!', 9000); act('wiggle', 550); sfx('shuffle'); render();
+      }
+      function cancelSnack(announce = true) {
+        if (!snack) return;
+        const bitten = snack.bites > 0;
+        snack = null;
+        if (announce) { say(bitten ? 'you took a BITE and stopped?! ...it grows back. i won’t forget.' : 'phew. i’m a friend, not a snack.', 5000); act('shimmy', 700); sfx('select'); }
+        render();
+      }
+      function chomp() {
+        if (!snack) return;
+        snack.bites++; snack.until = Date.now() + 12000;
+        sfx('crunch');
+        if (snack.bites < 3) {
+          const before = state.happiness;
+          state.happiness = clamp(before - 10); happyUntil = 0;
+          const lost = Math.round(before - state.happiness);
+          say(BITE_LINES[snack.bites - 1] + (lost ? ' −' + lost + ' happy.' : ''), 6000);
+          effect(snack.bites === 1 ? 'CRONCH' : 'CRUNCH'); act('bitten', 500);
+          assessHealth(); save(); render(); return;
+        }
+        snack = null;
+        Object.assign(state, { dead: true, eaten: true, sleeping: false, diedAt: Date.now() });
+        effect('burp.'); sfx('blocked');
+        save(); render(); reminders?.sync(); $('restart').focus({ preventScroll: true });
+      }
+      function snackInput(action) { if (action === 2) chomp(); else cancelSnack(); }
       function petPickle() {
+        if (suppressPetClick) { suppressPetClick = false; return; }
         syncTime();
+        if (snack) { cancelSnack(); return; }
         if (state.phase !== 'living' || state.dead || game) return;
         if (state.sleeping) { toggleSleep(); return; }
         if (Date.now() - lastPet < 2000) { say('so loved. another pet in a moment. ♥'); render(); return; }
@@ -832,7 +892,7 @@
       }
       function toggleSleep() {
         syncTime();
-        if (state.phase !== 'living' || state.dead || game) return;
+        if (state.phase !== 'living' || state.dead || game || snack) return;
         state.sleeping = !state.sleeping; happyUntil = 0;
         say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
         act(state.sleeping ? 'yawn' : 'wake', state.sleeping ? 1200 : 900);
@@ -841,6 +901,7 @@
       function care(action) {
         syncTime();
         if (state.phase !== 'living' || state.dead) { render(); return; }
+        if (snack) { snackInput(action); return; }
         if (game) { gameInput(action); return; }
         if (state.sleeping) { say('zzZ... use Wake to rise & brine.'); sfx('blocked'); render(); return; }
         lastAction = Date.now();
@@ -1072,6 +1133,20 @@
       $('game-menu-button').addEventListener('click', openArcade);
       $('game-close').addEventListener('click', () => endGame());
       $('pet').addEventListener('click', petPickle);
+      $('pet').addEventListener('pointerdown', event => {
+        if (event.button) return;
+        clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          if (snack || state.phase !== 'living' || state.dead || state.sleeping || game) return;
+          suppressPetClick = true; startSnack();
+        }, 1300);
+      });
+      for (const type of ['pointerup', 'pointercancel', 'pointerleave']) $('pet').addEventListener(type, () => {
+        clearTimeout(holdTimer);
+        // The release click consumes the flag; this fallback covers browsers that skip the click after a long press.
+        if (suppressPetClick) setTimeout(() => { suppressPetClick = false; }, 400);
+      });
+      $('pet').addEventListener('contextmenu', event => event.preventDefault());
       $('cuddle').addEventListener('click', petPickle);
       $('sleep').addEventListener('click', toggleSleep);
       $('restart').addEventListener('click', () => {
@@ -1086,9 +1161,14 @@
         if (event.key.toLowerCase() === 's') { event.preventDefault(); toggleSleep(); }
         if (game?.type === 'catch' && ['ArrowLeft', 'ArrowRight'].includes(event.key)) { event.preventDefault(); moveBasket(game.basket + (event.key === 'ArrowLeft' ? -1 : 1)); }
         if (event.key === 'Escape' && game) { event.preventDefault(); endGame(); }
+        if (event.key === 'Escape' && snack) { event.preventDefault(); cancelSnack(); }
+        if (/^[a-z]$/i.test(event.key)) {
+          typed = (typed + event.key.toLowerCase()).slice(-3);
+          if (typed === 'eat') { typed = ''; startSnack(); }
+        }
       });
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { pauseGame(); sound?.setActive(false); syncTime(); save(); }
+        if (document.hidden) { pauseGame(); cancelSnack(false); sound?.setActive(false); syncTime(); save(); }
         else { syncTime(true); resumeGame(); sound?.setActive(true); render(); }
       });
       window.addEventListener('pagehide', () => { pauseGame(); sound?.setActive(false); syncTime(true); save(); });
@@ -1097,7 +1177,7 @@
       window.addEventListener('storage', event => {
         if (event.key !== STORAGE_KEY || !event.newValue) return;
         const restored = parseSaved(event.newValue);
-        if (restored) { state = restored; endGame(false); feedback.until = 0; previousPet = null; $('undo-import').hidden = true; render(); }
+        if (restored) { state = restored; endGame(false); cancelSnack(false); feedback.until = 0; previousPet = null; $('undo-import').hidden = true; render(); }
       });
       try {
         const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -1116,7 +1196,7 @@
         }
       } catch { saveAvailable = false; }
       save(); render(); scheduleIdle(); reminders?.init();
-      setInterval(() => { if (!document.hidden) { syncTime(); render(); } }, TICK_MS);
+      setInterval(() => { if (!document.hidden) { if (snack && Date.now() > snack.until) cancelSnack(); syncTime(); render(); } }, TICK_MS);
       setInterval(() => { if (!document.hidden && state.phase !== 'living') { syncTime(); render(); } }, 1000);
 
       const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;

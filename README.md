@@ -33,6 +33,7 @@ Old local saves and encrypted v1 backups migrate automatically into a separate v
   - **Heart hunt:** track the heart through three increasingly busy jar shuffles.
   - **Dill says:** repeat a growing sequence of shapes and notes across five levels.
   - **Brine catch:** use a tap, 1/2/3, or arrow keys to catch hearts, dodge salt, and build a streak over twelve drops.
+- **Do not eat your pickle.** Typing a certain three-letter word, or holding your pickle down for a moment, is not care. You will be asked to reconsider. Twice.
 - Games pause while the page is hidden or a save preview is open. **Esc**, Games, or Back ends the current game without a completion reward.
 
 ## Gentle push reminders

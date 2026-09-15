@@ -153,12 +153,13 @@
         feed: [55, 62, 67], clean: [79, 86, 91], pet: [74, 77, 81],
         sleep: [74, 69, 62], wake: [62, 69, 74], start: [62, 65, 69, 74],
         win: [74, 77, 81, 86], miss: [62, 60], tap: [72 + pitch * 4],
-        catch: [77, 81], shuffle: [55, 58], select: [74], blocked: [50, 48]
+        catch: [77, 81], shuffle: [55, 58], select: [74], blocked: [50, 48], crunch: [45, 41, 38]
       };
       (riffs[name] || riffs.select).forEach((note, index) => {
         tone(ctx, effects, effectVoices, note, now + index * .075, .12, .11, name === 'feed' ? 'triangle' : 'square');
       });
       if (name === 'clean') noise(ctx, effects, effectVoices, buffer, now, .22, .1, 3500);
+      if (name === 'crunch') noise(ctx, effects, effectVoices, buffer, now, .14, .16, 900);
     }
     function setActive(value) {
       active = value;

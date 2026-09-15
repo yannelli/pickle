@@ -203,6 +203,30 @@ test('sleep and dead states refuse care and games; storage failures do not stop 
 });
 
 
+test('eating your pickle needs a confirmation, hurts per bite, and ends the little life on the third', () => {
+  const app = client();
+  app.key('e'); app.key('a'); app.key('t');
+  assert.match(app.get('message').textContent, /EAT me/);
+  assert.equal(app.get('screen-hint').textContent, 'NEVER · NOPE · CHOMP');
+  app.key('1');
+  assert.match(app.get('message').textContent, /friend, not a snack/);
+  assert.equal(app.saved().dead, false);
+  app.key('e'); app.key('a'); app.key('t'); app.run(13000);
+  assert.match(app.get('screen-hint').textContent, /tap your pickle/, 'an unanswered question times out');
+  app.key('e'); app.key('a'); app.key('t'); app.key('3');
+  assert.ok(Math.abs(app.saved().happiness - 10) < .01);
+  assert.equal(app.get('room').dataset.bites, '1');
+  app.key('3'); app.key('3');
+  assert.equal(app.saved().dead, true);
+  assert.equal(app.saved().eaten, true);
+  assert.match(app.get('message').textContent, /you ate Little Dill/);
+  assert.match(app.get('screen-hint').textContent, /burp/);
+  const dead = client({ dead: true }); dead.key('e'); dead.key('a'); dead.key('t');
+  assert.doesNotMatch(dead.get('message').textContent, /EAT me/);
+  const asleep = client({ sleeping: true }); asleep.key('e'); asleep.key('a'); asleep.key('t');
+  assert.doesNotMatch(asleep.get('message').textContent, /EAT me/);
+});
+
 test('migrated saves use a new key so an older tab cannot overwrite the new life', () => {
   const app = client();
   const legacy = app.storage.get('little-dill.v1');

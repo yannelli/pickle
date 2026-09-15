@@ -61,10 +61,13 @@
       !['brinedAt', 'hatchAt', 'bornAt', 'lastCareAt', 'updatedAt', 'diedAt'].every(key => timestamp(value[key])) ||
       !Number.isFinite(value.neglectMs) || value.neglectMs < 0 || value.neglectMs > 48 * HOUR ||
       !['sleeping', 'sick', 'dead'].every(key => typeof value[key] === 'boolean') || (value.dead && value.sleeping) ||
-      (value.phase !== 'new' && value.hatchAt < value.brinedAt) || (value.phase === 'living' && value.bornAt > value.updatedAt)) {
+      (value.phase !== 'new' && value.hatchAt < value.brinedAt) || (value.phase === 'living' && value.bornAt > value.updatedAt) ||
+      (value.eaten !== undefined && (typeof value.eaten !== 'boolean' || (value.eaten && !value.dead)))) {
       throw new Error('This file contains invalid pickle progress.');
     }
-    return Object.fromEntries(Object.keys(fresh()).map(key => [key, value[key]]));
+    const pet = Object.fromEntries(Object.keys(fresh()).map(key => [key, value[key]]));
+    if (value.eaten) pet.eaten = true;
+    return pet;
   }
   function restore(value, now = Date.now()) {
     if (value?.version === 2) return validate(value);
