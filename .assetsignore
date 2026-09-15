@@ -4,6 +4,7 @@
 .opencode/
 .DS_Store
 node_modules/
+tests/
 wrangler.jsonc
 vercel.json
 .vercelignore

@@ -178,6 +178,29 @@
     .saved { margin: 0; font-size: 10px; color: #8b917e; }
     .saved::before { content: ''; width: 5px; height: 5px; border-radius: 50%; display: inline-block; background: #8b9f69; margin-right: 7px; vertical-align: 1px; }
     .saved.unavailable::before { background: #b77f42; }
+    .save-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin: 13px 0 0; }
+    .save-button { min-height: 44px; padding: 10px 16px; border: 1px solid #cbd3b6; border-radius: 12px; background: #efefde; font-size: 12px; font-weight: 650; }
+    .save-button:hover { background: #e6ebd2; }
+    .save-button:active { transform: translateY(1px); }
+    .save-button:disabled { opacity: .55; }
+    .save-file-control { position: relative; display: inline-flex; align-items: center; cursor: pointer; overflow: hidden; }
+    .save-file-control input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+    .save-file-control:focus-within { outline: 3px solid #bd6037; outline-offset: 5px; }
+    .backup-notice { max-width: 520px; margin: 10px auto 0; color: #66764f; font-size: 12px; line-height: 1.65; }
+    .backup-notice:empty { display: none; }
+    .save-dialog { width: min(460px, calc(100% - 24px)); max-height: calc(100dvh - 32px); padding: clamp(20px, 5vw, 30px); overflow: auto; overscroll-behavior: contain; border: 1px solid #cbd3b6; border-radius: 24px; color: var(--ink); background: var(--paper); box-shadow: 0 24px 90px #172a2540; }
+    .save-dialog::backdrop { background: #263f2966; backdrop-filter: blur(4px); }
+    .save-dialog h2 { margin: 0 0 12px; font-size: 27px; letter-spacing: -1px; }
+    .save-dialog p { font-size: 13px; line-height: 1.7; }
+    .save-dialog .save-error { color: #993e24; font-size: 12px; }
+    .save-error:empty { display: none; }
+    .dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .save-primary { background: #304a35; border-color: #304a35; color: #f7f5e9; }
+    .save-primary:hover { background: #435f3d; }
+    .save-preview { padding: 15px; margin-top: 18px; border: 1px solid #cbd3b6; border-radius: 15px; background: #eef0df; }
+    .save-preview h3 { margin: 0; font-size: 16px; }
+    .save-preview dl { display: grid; grid-template-columns: 1fr auto; gap: 7px; font-size: 13px; }
+    .save-preview dd { margin: 0; font-weight: 700; }
     details { max-width: 610px; margin: 14px auto 0; font-size: 11px; color: #7d886d; line-height: 1.8; }
     summary { cursor: pointer; list-style: none; text-decoration: underline; text-underline-offset: 4px; width: fit-content; margin: auto; padding: 5px 12px; }
     summary::-webkit-details-marker { display: none; }
@@ -253,7 +276,7 @@
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-heart"/></svg></span><div><h2>Make a little time.</h2><p>Even pickles need to play.</p></div></div>
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-moon"/></svg></span><div><h2>Let your dill chill.</h2><p>Tap your pal to sleep or wake.</p></div></div>
       </section>
-      <div class="below"><p class="saved" id="save-status">Your little friend is saved on this browser.</p><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for a sip of brine, <b>Play</b> to follow the heart as the jars shuffle, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. Tap your pickle to sleep or wake; sleep restores energy. A round costs 9 energy. Find the heart for +22 happiness, or get +8 for trying.<br><br>Your seed becomes a sprout at 30 seconds, a pickle at 5 minutes, and an elder at 30 minutes. Keep all four meters topped up. A very low meter can cause sickness; restore every meter to at least 30 to recover. Leaving a meter empty for 3 active minutes ends this little life, but you can plant a new one.<br><br>Progress saves automatically in this browser. While you're away, needs decay for at most 15 minutes, and your pickle can get sick but won't die. A sleeping pickle keeps resting. Care buttons make soft little beeps.</p></details></div>
+      <div class="below"><p class="saved" id="save-status" role="status">Your little friend is saved on this browser.</p><div class="save-actions" aria-label="Progress backups"><button class="save-button" id="download-save" type="button">Download save ↓</button><label class="save-button save-file-control" id="import-save" tabindex="-1">Import save ↑<input id="backup-file" type="file" aria-label="Import save"></label><button class="save-button" id="undo-import" type="button" hidden>Undo import ↶</button></div><p class="backup-notice" id="backup-notice" role="status"></p><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for a sip of brine, <b>Play</b> to follow the heart as the jars shuffle, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. Tap your pickle to sleep or wake; sleep restores energy. A round costs 9 energy. Find the heart for +22 happiness, or get +8 for trying.<br><br>Your seed becomes a sprout at 30 seconds, a pickle at 5 minutes, and an elder at 30 minutes. Keep all four meters topped up. A very low meter can cause sickness; restore every meter to at least 30 to recover. Leaving a meter empty for 3 active minutes ends this little life, but you can plant a new one.<br><br>Progress saves automatically in this browser. Use <b>Download save</b> to keep an encrypted backup, and <b>Import save</b> to restore it on this or another device. No password or account is needed. Files are opened locally and never uploaded. Clearing browser data also clears your local progress.<br><br>While you're away, needs decay for at most 15 minutes, and your pickle can get sick but won't die. A sleeping pickle keeps resting. Care buttons make soft little beeps.</p></details></div>
       <picture class="brand-banner" aria-hidden="true">
         <source type="image/webp" srcset="./assets/illustrations/banner-small.webp 768w, ./assets/illustrations/banner.webp 1536w" sizes="(max-width: 860px) calc(100vw - 48px), 805px">
         <img src="./assets/illustrations/banner.png" width="2172" height="724" alt="" loading="lazy" decoding="async">
@@ -261,6 +284,17 @@
     </main>
     <footer><span>A POCKET-SIZED LABOR OF LOVE.</span><span>Stay a little salty.</span></footer>
   </div>
+  <dialog class="save-dialog" id="save-dialog" aria-labelledby="backup-title" aria-describedby="backup-description">
+    <h2 id="backup-title">Welcome back, little dill.</h2>
+    <p id="backup-description">Your save stays on this device. Check your pickle before restoring it.</p>
+    <section class="save-preview" id="backup-preview" aria-labelledby="backup-preview-title" tabindex="-1" hidden>
+      <h3 id="backup-preview-title">Your pickle, as saved.</h3><p id="backup-saved-at"></p><dl id="backup-stats"></dl>
+      <p>Restoring replaces your current pickle. Up to 15 minutes of away time will apply. You can undo the import until you leave this page.</p>
+    </section>
+    <p class="save-error" id="backup-error" role="alert"></p><p id="backup-progress" role="status"></p>
+    <div class="dialog-actions"><button class="save-button" type="button" id="backup-cancel">Cancel</button><label class="save-button save-file-control">Choose another file<input id="backup-file-other" type="file" aria-label="Choose another save file"></label><button class="save-button save-primary" type="button" id="backup-restore" hidden>Restore this pickle</button></div>
+  </dialog>
+  <script src="./save-codec.js"></script>
   <script>
     (() => {
       'use strict';
@@ -282,6 +316,12 @@
       let gameTimers = [];
       let effectTimer;
       let saveAvailable = true;
+      let autosaveBlocked = false;
+      const backupDialog = $('save-dialog');
+      let backupOperation = 0;
+      let backupBusy = false;
+      let pendingRestore = null;
+      let previousPet = null;
 
       function parseSaved(raw) {
         try {
@@ -294,11 +334,110 @@
         } catch { return null; }
       }
       function save() {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveAvailable = true; }
+        try {
+          if (autosaveBlocked) throw new Error('Preserve the unreadable local save.');
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveAvailable = true;
+        }
         catch { saveAvailable = false; }
-        $('save-status').textContent = saveAvailable ? 'Your little friend is saved on this browser.' : 'Saving is unavailable. Your pickle lives here until this page closes.';
+        const status = saveAvailable ? 'Your little friend is saved on this browser.' : 'Local saving is unavailable. Download a backup before closing this page.';
+        if ($('save-status').textContent !== status) $('save-status').textContent = status;
         $('save-status').classList.toggle('unavailable', !saveAvailable);
+        return saveAvailable;
       }
+
+      function backupNotice(text) { $('backup-notice').textContent = text; }
+      function clearBackupPreview() {
+        backupOperation++; pendingRestore = null; backupBusy = false;
+        $('backup-error').textContent = ''; $('backup-progress').textContent = '';
+        $('backup-preview').hidden = true; $('backup-restore').hidden = true;
+      }
+      function backupsAvailable() {
+        if (window.LittleDillSaves?.available()) return true;
+        backupNotice('Encrypted backups need HTTPS or localhost in a browser with encryption support. Your local autosave still works when browser storage is available.');
+        return false;
+      }
+      function replacePet(pet) {
+        endGame(false); clearTimeout(effectTimer);
+        $('effect').textContent = ''; $('effect').classList.remove('pop');
+        state = { ...pet, updatedAt: Math.min(pet.updatedAt, Date.now()) };
+        happyUntil = 0; lastAction = 0; feedback.until = 0;
+        autosaveBlocked = false;
+        syncTime(true); save(); render();
+      }
+      function showBackupPreview(restored) {
+        pendingRestore = restored;
+        $('backup-saved-at').textContent = 'Saved ' + new Date(restored.savedAt).toLocaleString();
+        const pet = restored.pet;
+        const entries = [['Age', Math.floor(pet.ageTicks * TICK_MS / 60000) + ' minutes'],
+          ['Food', Math.round(pet.fullness) + '/100'], ['Happy', Math.round(pet.happiness) + '/100'],
+          ['Energy', Math.round(pet.energy) + '/100'], ['Clean', Math.round(pet.hygiene) + '/100'],
+          ['Condition', pet.dead ? 'Passed away' : pet.sleeping ? 'Sleeping' : pet.sick ? 'Feeling sick' : 'Awake']];
+        $('backup-stats').replaceChildren(...entries.flatMap(([label, value]) => {
+          const term = document.createElement('dt'), detail = document.createElement('dd');
+          term.textContent = label; detail.textContent = value; return [term, detail];
+        }));
+        $('backup-preview').hidden = false; $('backup-restore').hidden = false;
+        $('backup-preview').focus();
+      }
+      $('download-save').addEventListener('click', async () => {
+        if (!backupsAvailable() || $('download-save').disabled) return;
+        $('download-save').disabled = true; $('download-save').textContent = 'Sealing your save…';
+        try {
+          syncTime();
+          const raw = await window.LittleDillSaves.encode({ ...state });
+          const url = URL.createObjectURL(new Blob([raw], { type: 'application/octet-stream' }));
+          const link = document.createElement('a');
+          link.href = url; link.download = 'little-dill-' + new Date().toISOString().replace(/[:.]/g, '-') + '.dill';
+          document.body.append(link); link.click(); link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+          backupNotice('Your encrypted download has started. Keep the .dill file to restore your pickle on any device.');
+        } catch {
+          backupNotice('The download could not be created. Your pickle is still here; please try again.');
+        } finally {
+          $('download-save').disabled = false; $('download-save').textContent = 'Download save ↓';
+        }
+      });
+      for (const input of [$('backup-file'), $('backup-file-other')]) {
+        input.addEventListener('click', event => { if (!backupsAvailable()) event.preventDefault(); });
+        input.addEventListener('change', event => importBackup(event.currentTarget));
+      }
+      $('backup-cancel').addEventListener('click', () => { clearBackupPreview(); backupDialog.close(); });
+      backupDialog.addEventListener('cancel', clearBackupPreview);
+      backupDialog.addEventListener('close', () => { if (!backupDialog.open) clearBackupPreview(); });
+      async function importBackup(input) {
+        const file = input.files[0];
+        if (!file) return;
+        input.value = '';
+        clearBackupPreview();
+        const operation = ++backupOperation;
+        backupBusy = true;
+        if (!backupDialog.open) backupDialog.showModal();
+        $('backup-progress').textContent = 'Opening your safety jar…';
+        try {
+          if (file.size > window.LittleDillSaves.MAX_FILE_BYTES) throw new Error('Choose a .dill save file under 16 KB.');
+          const restored = await window.LittleDillSaves.decode(await file.text());
+          if (operation !== backupOperation || !backupDialog.open) return;
+          showBackupPreview(restored);
+        } catch (error) {
+          if (operation === backupOperation && backupDialog.open) $('backup-error').textContent = error.message || 'This save could not be opened. Your current pickle is safe.';
+        } finally {
+          if (operation === backupOperation) { backupBusy = false; $('backup-progress').textContent = ''; }
+        }
+      }
+      $('backup-restore').addEventListener('click', () => {
+        if (!pendingRestore || backupBusy) return;
+        syncTime(); previousPet = { ...state };
+        replacePet(pendingRestore.pet);
+        $('undo-import').hidden = false;
+        backupNotice(saveAvailable ? 'Your pickle is restored and saved here. You can undo this import until you leave the page.' : 'Your pickle is restored for this visit, but browser storage is unavailable. Keep your backup file safe.');
+        backupDialog.close(); $('undo-import').focus();
+      });
+      $('undo-import').addEventListener('click', () => {
+        if (!previousPet) return;
+        replacePet(previousPet); previousPet = null; $('undo-import').hidden = true;
+        backupNotice(saveAvailable ? 'Import undone. Your previous pickle is saved here again.' : 'Import undone for this visit. Download a backup before leaving.');
+        $('import-save').focus();
+      });
       function stage() {
         if (state.ageTicks < 10) return 'seed';
         if (state.ageTicks < 100) return 'sprout';
@@ -500,7 +639,7 @@
         say('a fresh start. a brand-new little dill.', 5000); beep([523, 659, 784]); save(); render(); $('pet').focus({ preventScroll: true });
       });
       document.addEventListener('keydown', event => {
-        if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
+        if (backupDialog.open || event.altKey || event.ctrlKey || event.metaKey || event.repeat || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
         if (['1', '2', '3'].includes(event.key)) { event.preventDefault(); care(Number(event.key) - 1); }
         if (event.key === 'Escape' && game) { event.preventDefault(); endGame(); }
       });
@@ -514,15 +653,22 @@
       window.addEventListener('storage', event => {
         if (event.key !== STORAGE_KEY || !event.newValue) return;
         const restored = parseSaved(event.newValue);
-        if (restored) { state = restored; endGame(false); feedback.until = 0; render(); }
+        if (restored) { state = restored; endGame(false); feedback.until = 0; previousPet = null; $('undo-import').hidden = true; render(); }
       });
       try {
-        const restored = parseSaved(localStorage.getItem(STORAGE_KEY));
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const restored = parseSaved(raw);
         if (restored) {
           state = restored;
           const elapsed = Date.now() - state.updatedAt;
           syncTime(true);
           say(elapsed > 60000 ? 'you’re back! your little dill missed you.' : 'welcome back to your little pickle.', 4500);
+        } else if (raw !== null) {
+          autosaveBlocked = true;
+          // Keep the unreadable original before starting a fresh local save.
+          localStorage.setItem(STORAGE_KEY + '.recovery', raw);
+          autosaveBlocked = false;
+          backupNotice('The old local save could not be read. A recovery copy was kept in this browser, and a new pickle is ready. You can also import a backup.');
         }
       } catch { saveAvailable = false; }
       save(); render();
