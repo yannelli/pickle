@@ -23,7 +23,7 @@ A daily feed, clean, game, and pet is enough even if the game goes badly. A heal
 
 Baby pickles have a round body and pacifier; young pickles are taller with a leaf; adults reach their full shape; elders wear glasses and changing accessories. Growth happens at **1 day** (young), **3 days** (adult), and **14 days** (elder). Every three days after that brings another of **32 elder forms**, with unique hat/accessory pairings, names, and lines. After the complete collection, elder laps continue indefinitely. Six varieties retain their own colors and shapes throughout life.
 
-Old local saves and encrypted v1 backups migrate automatically, preserving stats, life/death status, and the equivalent growth stage. They receive a new grace period when upgrading from the old rapid-decay model. Existing pickles are named Little Dill.
+Old local saves and encrypted v1 backups migrate automatically into a separate v2 local-save key (so older open tabs cannot overwrite the new life), preserving stats, life/death status, and the equivalent growth stage. They receive a new grace period when upgrading from the old rapid-decay model. Existing pickles are named Little Dill.
 
 ## Play with your pickle
 

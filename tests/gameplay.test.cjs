@@ -69,7 +69,7 @@ function client(changes = {}, options = {}) {
   };
   const until = predicate => { for (let i = 0; !predicate() && i < 1200; i++) run(25); assert.ok(predicate(), 'condition reached in 30 seconds'); };
   return { get, jars, pads, lanes, cues, storage, run, until, document,
-    click: id => get(id).click(), saved: () => JSON.parse(storage.get('little-dill.v1')),
+    click: id => get(id).click(), saved: () => JSON.parse(storage.get('little-dill.v2') || storage.get('little-dill.v1')),
     key: key => dispatch('keydown', { key, target: { tagName: 'BODY' }, preventDefault() {} }),
     visible: visible => { document.hidden = !visible; dispatch('visibilitychange'); },
     start: type => { get('play').click(); choices[['hunt', 'memory', 'catch'].indexOf(type)].click(); } };
@@ -200,4 +200,15 @@ test('sleep and dead states refuse care and games; storage failures do not stop 
   blocked.until(() => !blocked.pads[0].disabled); blocked.key('2');
   assert.match(blocked.get('message').textContent, /\+10 happy/);
   assert.match(blocked.get('save-status').textContent, /unavailable/);
+});
+
+
+test('migrated saves use a new key so an older tab cannot overwrite the new life', () => {
+  const app = client();
+  const legacy = app.storage.get('little-dill.v1');
+  app.click('pet');
+  assert.equal(app.saved().version, 2);
+  assert.equal(app.storage.get('little-dill.v1'), legacy);
+  app.storage.set('little-dill.v1', JSON.stringify({ ...JSON.parse(legacy), happiness: 0 }));
+  assert.equal(app.saved().happiness, 28);
 });

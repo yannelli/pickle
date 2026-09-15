@@ -483,7 +483,8 @@
   <script>
     (() => {
       'use strict';
-      const STORAGE_KEY = 'little-dill.v1';
+      const STORAGE_KEY = 'little-dill.v2';
+      const LEGACY_STORAGE_KEY = 'little-dill.v1';
       const TICK_MS = 3000;
       const Life = window.LittleDillLife;
       const STATS = ['fullness', 'happiness', 'energy', 'hygiene'];
@@ -1099,7 +1100,7 @@
         if (restored) { state = restored; endGame(false); feedback.until = 0; previousPet = null; $('undo-import').hidden = true; render(); }
       });
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
         const restored = parseSaved(raw);
         if (restored) {
           state = restored;
