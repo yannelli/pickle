@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>little dill.</title>
+  <rect width="64" height="64" rx="14" fill="#f7f5e9"/>
+  <g stroke="#304a35" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M31 11c-2-3-1-5 2-7" stroke-width="2.5"/>
+    <path d="M34 10c10 0 16 7 15 18l-3 13c-1 10-6 15-16 15S14 49 15 39l3-13c1-10 6-16 16-16Z" fill="#829f52" stroke-width="2.5"/>
+    <path d="M25 21c1-3 3-5 7-5" stroke="#c0d38e" stroke-width="3"/>
+    <path d="M26 31v1m12-1v1" stroke-width="3.5"/>
+    <path d="M28 39c2 3 5 3 7 0" stroke-width="2.5"/>
+    <path d="M21 44h1m17 3h1m1-23h1" stroke="#63803f" stroke-width="2.5"/>
+  </g>
+</svg>

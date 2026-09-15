@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5e9">
+  <meta name="description" content="A tiny pickle. A big responsibility. Meet your new pocket pet.">
+  <title>little dill. — Your pocket pickle</title>
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="little dill.">
+  <meta property="og:title" content="little dill. — Your pocket pickle">
+  <meta property="og:description" content="A tiny pickle. A big responsibility. Meet your new pocket pet.">
+  <!-- At deployment, make both sharing-image URLs absolute and add og:url and a canonical link. -->
+  <meta property="og:image" content="./assets/social/og.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="little dill. — Your pocket pickle. A smiling pickle hugs a sage-green virtual-pet keychain.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="little dill. — Your pocket pickle">
+  <meta name="twitter:description" content="A tiny pickle. A big responsibility. Meet your new pocket pet.">
+  <meta name="twitter:image" content="./assets/social/og.png">
+  <meta name="twitter:image:alt" content="little dill. — Your pocket pickle. A smiling pickle hugs a sage-green virtual-pet keychain.">
+  <meta name="application-name" content="little dill.">
+  <meta name="apple-mobile-web-app-title" content="little dill.">
+  <link rel="icon" href="./favicon.ico" sizes="16x16 32x32 48x48">
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
+  <link rel="manifest" href="./site.webmanifest">
+  <style>
+    :root { --ink: #304a35; --muted: #77816a; --paper: #f7f5e9; --lcd: #ccda9d; --pixel: #3c5733; --line: #dedfcd; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font-family: 'Avenir Next', Avenir, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+    button { font: inherit; color: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    button:focus-visible, summary:focus-visible { outline: 3px solid #bd6037; outline-offset: 5px; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; }
+    svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .icon-library { position: absolute; width: 0; height: 0; overflow: hidden; }
+    .page { max-width: 1240px; margin: auto; padding: 0 46px; }
+    .masthead { height: 93px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; gap: 10px; align-items: center; font-size: 25px; font-weight: 850; letter-spacing: -1.3px; }
+    .brand-logo { display: block; width: 160px; height: auto; max-width: 100%; }
+    .brand-banner { display: block; max-width: 805px; margin: 12px auto 0; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; }
+    .brand-banner img { display: block; width: 100%; height: auto; }
+    .edition { font-size: 10px; letter-spacing: 2px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
+    .edition::before { content: ''; width: 6px; height: 6px; background: #839952; border-radius: 50%; }
+    .intro { text-align: center; padding-top: 38px; }
+    .eyebrow { font-size: 10px; letter-spacing: 3.1px; font-weight: 750; margin: 0 0 11px; color: #7c8667; }
+    h1 { font-size: clamp(38px, 4.6vw, 59px); line-height: 1.12; font-weight: 750; letter-spacing: -2.9px; margin: 0; }
+    h1 em { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; color: #779349; }
+    .intro > p:last-child { color: #7a816e; font-size: 14px; margin: 13px 0 0; }
+    .playground { position: relative; min-height: 583px; display: grid; place-items: center; padding: 29px 0 31px; }
+    .orbit { position: absolute; width: 620px; height: 450px; border: 1px dashed #daddc5; border-radius: 50%; transform: rotate(-22deg); pointer-events: none; }
+    .orbit::before, .orbit::after { content: '+'; position: absolute; font-size: 27px; color: #b8c397; background: var(--paper); top: 210px; left: -9px; }
+    .orbit::after { top: 213px; left: auto; right: -9px; }
+    .note { position: absolute; z-index: 1; width: 165px; font-size: 14px; line-height: 1.65; }
+    .note-left { left: calc(50% - 423px); top: 172px; transform: rotate(-7deg); }
+    .note-kicker { display: block; font-size: 10px; text-transform: uppercase; font-weight: 750; letter-spacing: 2px; color: #8b9677; margin-bottom: 7px; }
+    .note strong { font-family: Georgia, serif; font-style: italic; font-weight: 400; font-size: 23px; line-height: 1.3; }
+    .note-left svg { width: 75px; height: 54px; margin: 14px 0 0 64px; color: #9bab7c; stroke-width: 1.4; }
+    .note-right { right: calc(50% - 420px); top: 287px; transform: rotate(6deg); }
+    .note-right > svg { color: #9eae76; width: 33px; height: 33px; margin-bottom: 8px; }
+    .note-right p { font-size: 12px; color: #859074; margin: 7px 0 0; }
+    .device-wrap { position: relative; z-index: 2; }
+    .device-wrap::after { content: ''; position: absolute; width: 300px; height: 25px; background: #435a2421; filter: blur(13px); left: 50%; bottom: -19px; transform: translateX(-50%); border-radius: 50%; z-index: -1; }
+    .keychain { position: absolute; right: 21px; top: -18px; width: 48px; height: 51px; border: 7px solid #bbbfa9; border-radius: 50%; box-shadow: inset 1px 2px 1px #8e947a, 2px 1px 0 #eaecdd; transform: rotate(31deg); z-index: -1; }
+    .device { width: 390px; padding: 28px 31px 22px; border: 2px solid #7e9454; border-radius: 112px 112px 120px 120px / 89px 89px 117px 117px; background: linear-gradient(125deg, #d1dfac 3%, #becf8f 41%, #aabe78 100%); box-shadow: inset 4px 5px 5px #eff7d1a1, inset -7px -8px 3px #8b9f5b80, 0 7px 0 #7f9255, 0 9px 0 1px #71834c, 0 18px 24px #35492112; position: relative; }
+    .device::before { content: ''; position: absolute; inset: 12px; border: 1px solid #dfe8b98c; border-radius: inherit; pointer-events: none; }
+    .device-brand { display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 14px; font-weight: 850; letter-spacing: 5px; margin: 0 0 14px; text-shadow: 0 1px #e8eec4; color: #627c42; }
+    .device-brand span { letter-spacing: 0; font-size: 12px; opacity: .55; }
+    .bezel { padding: 10px; background: #7a8d59; border-radius: 24px; box-shadow: 0 2px 0 #e6ecc5, inset 0 3px 3px #52613977; border: 1px solid #728353; }
+    .screen { height: 287px; overflow: hidden; position: relative; background: var(--lcd); color: var(--pixel); border: 2px solid #526639; border-radius: 14px; padding: 13px 13px 0; box-shadow: inset 3px 4px 9px #53673539; font-family: 'Courier New', monospace; }
+    .screen::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 3px, #30401d06 3px 4px); pointer-events: none; z-index: 5; }
+    .screen-top { display: flex; align-items: center; justify-content: space-between; font-size: 9px; font-weight: 700; letter-spacing: .8px; height: 15px; }
+    .life { display: flex; align-items: center; gap: 6px; }
+    .life-dot { width: 5px; height: 5px; background: currentColor; }
+    .battery { width: 19px; height: 9px; border: 1px solid currentColor; position: relative; padding: 1px; }
+    .battery::after { content: ''; position: absolute; right: -3px; width: 2px; height: 4px; top: 1.5px; background: currentColor; }
+    .battery-fill { display: block; height: 100%; background: currentColor; }
+    .meters { display: grid; grid-template-columns: 1fr 1fr; gap: 9px 17px; padding-top: 11px; }
+    .stat-top { display: flex; justify-content: space-between; font-size: 9px; font-weight: 700; letter-spacing: .4px; margin-bottom: 4px; }
+    .stat-value { opacity: .75; }
+    .meter { height: 6px; background: #aebf86; position: relative; overflow: hidden; }
+    .meter::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 2px), var(--lcd) calc(10% - 2px) 10%); }
+    .meter-fill { background: var(--pixel); display: block; height: 100%; transition: width .3s; }
+    .stat.low .stat-top::before { content: '!'; margin-right: 3px; }
+    .stat.low .stat-top { text-decoration: underline; text-underline-offset: 2px; }
+    .room { height: 132px; position: relative; display: grid; place-items: center; }
+    .room::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 15px; height: 1px; background: #748a4c55; }
+    .room-decoration { position: absolute; font-size: 15px; opacity: .4; pointer-events: none; }
+    .spark-one { top: 28px; left: 23px; }
+    .spark-two { top: 15px; right: 40px; font-size: 10px; }
+    .grass { bottom: 18px; right: 29px; font-size: 13px; }
+    .pet-button { border: 0; padding: 0; width: 132px; height: 130px; background: transparent; position: relative; display: grid; place-items: center; z-index: 1; }
+    .pet-button:focus-visible { outline-offset: -5px; border-radius: 16px; }
+    .pet-shadow { position: absolute; height: 9px; width: 65px; bottom: 12px; left: 50%; transform: translateX(-50%); background: #68804430; border-radius: 50%; }
+    .pickle { position: relative; width: 62px; height: 92px; background: #78954b; border: 3px solid var(--pixel); border-radius: 31px 28px 28px 25px; box-shadow: inset 5px 1px #a1b56b, inset -5px -2px #5f7f40; animation: bob 2s ease-in-out infinite; transform-origin: center bottom; }
+    .pickle::before { content: ''; position: absolute; width: 11px; height: 9px; left: 20px; top: -9px; border-top: 3px solid var(--pixel); border-left: 3px solid var(--pixel); transform: rotate(20deg); }
+    .pickle::after { content: ''; position: absolute; width: 6px; height: 5px; background: #4e7139; border-radius: 2px; top: 20px; left: 9px; box-shadow: 28px -7px #4e7139, 32px 30px #4e7139, 2px 43px #4e7139, 20px 52px #4e7139; }
+    .face { position: absolute; top: 34px; left: 12px; width: 32px; height: 27px; z-index: 1; }
+    .eye { position: absolute; top: 0; width: 5px; height: 7px; background: #263f29; box-shadow: 0 1px #bed190; }
+    .eye.left { left: 1px; }
+    .eye.right { right: 1px; }
+    .cheek { position: absolute; top: 9px; width: 7px; height: 3px; background: #acc07b; }
+    .cheek.left { left: -4px; }
+    .cheek.right { right: -4px; }
+    .mouth { position: absolute; width: 12px; height: 7px; border-bottom: 3px solid #263f29; border-left: 2px solid #263f29; border-right: 2px solid #263f29; top: 10px; left: 10px; border-radius: 0 0 7px 7px; }
+    .arm { position: absolute; width: 14px; height: 15px; border-bottom: 3px solid var(--pixel); top: 53px; }
+    .arm.left { left: -13px; border-left: 3px solid var(--pixel); border-radius: 0 0 0 12px; transform: rotate(-15deg); }
+    .arm.right { right: -13px; border-right: 3px solid var(--pixel); border-radius: 0 0 12px 0; transform: rotate(15deg); }
+    .foot { position: absolute; bottom: -6px; width: 14px; height: 5px; background: var(--pixel); }
+    .foot.left { left: 6px; } .foot.right { right: 6px; }
+    .pet-size { transition: transform .7s; }
+    .room[data-stage="seed"] .pet-size { transform: scale(.74, .67); }
+    .room[data-stage="sprout"] .pet-size { transform: scale(.87); }
+    .room[data-stage="elder"] .pickle { background: #8c9d61; box-shadow: inset 5px 1px #b9c78d, inset -5px -2px #6d814d; }
+    .room[data-stage="elder"] .face::after { content: ''; position: absolute; width: 38px; height: 12px; border: 2px solid var(--pixel); top: -3px; left: -3px; border-radius: 4px; background: linear-gradient(90deg, transparent 46%, var(--pixel) 46% 53%, transparent 53%); }
+    .room[data-mood="happy"] .pickle { animation: happy .48s ease-in-out infinite alternate; }
+    .room[data-mood="happy"] .eye { height: 5px; background: transparent; border-top: 3px solid #263f29; border-radius: 50% 50% 0 0; }
+    .room[data-mood="hungry"] .pickle { animation: droop 2s ease-in-out infinite; }
+    .room[data-mood="hungry"] .mouth, .room[data-mood="sick"] .mouth { border-top: 3px solid #263f29; border-bottom: 0; border-radius: 7px 7px 0 0; height: 5px; }
+    .room[data-mood="sick"] .pickle { animation: wobble 1.3s ease-in-out infinite; }
+    .room[data-mood="sick"] .eye.right { background: transparent; width: 8px; height: 8px; }
+    .room[data-mood="sick"] .eye.right::before, .room[data-mood="sick"] .eye.right::after { content: ''; position: absolute; width: 9px; height: 3px; top: 2px; background: #263f29; transform: rotate(45deg); }
+    .room[data-mood="sick"] .eye.right::after { transform: rotate(-45deg); }
+    .room[data-mood="sleeping"] .pickle { animation: sleep-breathe 3s ease-in-out infinite; }
+    .room[data-mood="sleeping"] .eye { height: 2px; top: 5px; width: 7px; }
+    .room[data-mood="sleeping"] .mouth { border: 2px solid #263f29; border-radius: 50%; width: 5px; height: 5px; left: 14px; }
+    .sleep-z { display: none; position: absolute; right: 25px; top: 14px; font-weight: 700; font-size: 17px; animation: float-up 2.7s ease-out infinite; }
+    .room[data-mood="sleeping"] .sleep-z { display: block; }
+    .screen.asleep { background: #b7c590; }
+    .poop { position: absolute; left: 36px; bottom: 17px; width: 22px; height: 8px; border-radius: 5px; background: var(--pixel); }
+    .poop::before, .poop::after { content: ''; position: absolute; background: var(--pixel); width: 16px; height: 7px; border-radius: 6px 6px 0 0; left: 3px; top: -5px; }
+    .poop::after { width: 8px; top: -10px; left: 7px; }
+    .effect { position: absolute; z-index: 3; left: 50%; top: 17px; transform: translateX(-50%); font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none; }
+    .effect.pop { animation: reward 1.6s ease-out both; }
+    .tombstone { width: 73px; height: 79px; padding-top: 20px; background: #9bad78; border: 3px solid var(--pixel); border-radius: 33px 33px 3px 3px; text-align: center; font-size: 12px; line-height: 1.6; font-weight: bold; position: relative; }
+    .tombstone::before { content: ''; position: absolute; left: 35px; top: -14px; height: 12px; width: 9px; border-left: 3px solid var(--pixel); border-top: 3px solid var(--pixel); transform: rotate(20deg); }
+    .lcd-message { min-height: 41px; border-top: 1px solid #71864966; padding: 7px 0 6px; text-align: center; font-size: 10px; line-height: 1.4; font-weight: 700; letter-spacing: -.1px; }
+    .screen-hint { text-align: center; font-size: 9px; letter-spacing: .6px; margin: 0; opacity: .7; }
+    .controls { display: flex; justify-content: center; gap: 24px; margin-top: 21px; }
+    .control { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+    .action { border-radius: 50%; width: 59px; height: 55px; background: linear-gradient(135deg, #fcf9e7, #e8e4ca); border: 1.5px solid #71814c; box-shadow: inset 1px 2px 1px #ffffff, 0 4px 0 #87945e, 0 5px 0 #6f7e48, 0 6px 8px #5667383d; display: grid; place-items: center; transition: transform .12s, box-shadow .12s, filter .15s; }
+    .action:hover:not(:disabled) { filter: brightness(1.04); transform: translateY(-1px); }
+    .action:active:not(:disabled) { transform: translateY(4px); box-shadow: inset 0 2px 3px #a7ae8566, 0 1px 0 #6f7e48; }
+    .action:disabled { opacity: .5; }
+    .control:nth-child(2) { margin-top: 9px; }
+    .control-label { font-size: 9px; font-weight: 800; letter-spacing: 1.7px; color: #566d39; }
+    .shell-footer { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 15px; font-size: 8px; font-weight: 750; letter-spacing: 2px; color: #6f8450; }
+    .speaker { display: flex; gap: 3px; transform: rotate(-8deg); }
+    .speaker i { width: 3px; height: 10px; background: #7c90566b; border-radius: 2px; box-shadow: 1px 1px #d7e3af; }
+    .game { height: 132px; position: relative; padding-top: 10px; text-align: center; }
+    .game-title { font-size: 11px; margin: 0; letter-spacing: .7px; }
+    .jars { position: relative; height: 77px; margin: 0 auto; width: 237px; }
+    .jar { border: 0; background: transparent; position: absolute; top: 4px; left: 0; width: 75px; height: 72px; display: flex; flex-direction: column; align-items: center; padding: 5px 0 0; transition: transform .38s ease-in-out; }
+    .jar-body { display: block; position: relative; width: 40px; height: 43px; border: 2px solid var(--pixel); border-radius: 5px 5px 8px 8px; margin-top: 4px; background: #acbf7b80; }
+    .jar-body::before { content: ''; position: absolute; width: 40px; height: 7px; top: -7px; left: -2px; background: var(--pixel); border-radius: 2px; }
+    .jar-body::after { content: ''; position: absolute; height: 22px; width: 2px; top: 7px; left: 5px; background: #dae5af; }
+    .prize { display: grid; place-items: center; height: 100%; opacity: 0; font-size: 22px; }
+    .jar.revealed .prize { opacity: 1; }
+    .jar.picked .jar-body { outline: 2px dashed var(--pixel); outline-offset: 4px; }
+    .jar-number { font-size: 9px; margin-top: 3px; font-weight: bold; }
+    .jar:disabled { opacity: 1; }
+    .game-close, .restart { font-family: inherit; font-size: 9px; font-weight: bold; background: transparent; border: 1px solid #667d48; border-radius: 3px; padding: 5px 10px; min-height: 28px; }
+    .game-close { min-height: 30px; margin-top: 2px; }
+    .restart { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: var(--lcd); z-index: 2; }
+    .room.is-dead .tombstone { margin-top: -19px; }
+    .care-strip { max-width: 805px; margin: 13px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .care-tip { display: flex; justify-content: center; gap: 12px; padding: 0 15px; }
+    .care-tip + .care-tip { border-left: 1px solid var(--line); }
+    .tip-icon { border: 1px solid #d9dec5; border-radius: 50%; flex-shrink: 0; width: 36px; height: 36px; display: grid; place-items: center; }
+    .tip-icon svg { width: 18px; height: 18px; color: #6e8450; }
+    .care-tip h2 { font-size: 11px; font-weight: 750; margin: 1px 0 4px; }
+    .care-tip p { margin: 0; font-size: 10px; color: #8a8d7a; }
+    .below { text-align: center; padding: 18px 0 22px; }
+    .saved { margin: 0; font-size: 10px; color: #8b917e; }
+    .saved::before { content: ''; width: 5px; height: 5px; border-radius: 50%; display: inline-block; background: #8b9f69; margin-right: 7px; vertical-align: 1px; }
+    .saved.unavailable::before { background: #b77f42; }
+    details { max-width: 610px; margin: 14px auto 0; font-size: 11px; color: #7d886d; line-height: 1.8; }
+    summary { cursor: pointer; list-style: none; text-decoration: underline; text-underline-offset: 4px; width: fit-content; margin: auto; padding: 5px 12px; }
+    summary::-webkit-details-marker { display: none; }
+    details p { text-align: left; padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; }
+    footer { display: flex; justify-content: space-between; padding: 22px 0; margin-top: 7px; font-size: 9px; letter-spacing: .5px; color: #929581; }
+    footer span:last-child { font-family: Georgia, serif; font-style: italic; font-size: 12px; }
+    @keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+    @keyframes happy { from { transform: translateY(0) rotate(-8deg); } to { transform: translateY(-12px) rotate(7deg); } }
+    @keyframes droop { 0%, 100% { transform: translateY(3px) rotate(-8deg); } 50% { transform: translateY(5px) rotate(-5deg); } }
+    @keyframes wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+    @keyframes sleep-breathe { 0%, 100% { transform: rotate(-13deg) scaleY(.94); } 50% { transform: rotate(-13deg) scaleY(1); } }
+    @keyframes float-up { 0% { opacity: 0; transform: translate(0, 12px); } 25% { opacity: .8; } 100% { opacity: 0; transform: translate(12px, -8px); } }
+    @keyframes reward { 0% { opacity: 0; transform: translate(-50%, 12px); } 20%, 60% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
+    @media (min-width: 1500px) and (min-height: 950px) { .intro { padding-top: 55px; } .playground { padding-top: 43px; padding-bottom: 45px; min-height: 620px; } }
+    @media (max-width: 960px) { .note-left { left: calc(50% - 350px); width: 130px; } .note-right { right: calc(50% - 347px); width: 125px; } .note strong { font-size: 20px; } .orbit { width: 580px; } }
+    @media (max-width: 760px) { .page { padding: 0 24px; } .masthead { height: 73px; } .brand { font-size: 23px; } .edition { font-size: 8px; letter-spacing: 1.2px; } .note { display: none; } .orbit { width: 430px; height: 370px; max-width: calc(100vw - 48px); transform: none; } .intro { padding-top: 31px; } h1 { letter-spacing: -2px; } .intro > p:last-child { font-size: 12px; } .care-tip { gap: 9px; padding: 0 10px; } .tip-icon { display: none; } }
+    @media (max-width: 440px) { .page { padding: 0 17px; } .edition { font-size: 7px; letter-spacing: .8px; gap: 6px; } .device { width: 340px; padding: 27px 24px 21px; border-radius: 92px 92px 101px 101px / 78px 78px 106px 106px; } .device-brand { font-size: 12px; margin-bottom: 13px; } .screen { padding: 11px 11px 0; height: 281px; } .bezel { padding: 8px; } .meters { column-gap: 13px; } .playground { min-height: 555px; padding: 28px 0 31px; } .care-strip { margin-top: 3px; padding: 20px 0; } .care-tip { padding: 0 5px; text-align: center; } .care-tip h2 { font-size: 10px; } .care-tip p { font-size: 8px; } footer { font-size: 8px; gap: 12px; } footer span:last-child { font-size: 11px; } }
+    @media (max-width: 370px) { .page { padding: 0 12px; } .device { width: 294px; padding: 26px 17px 22px; border-radius: 85px 85px 96px 96px / 72px 72px 96px 96px; } .bezel { padding: 7px; } .screen { padding-left: 9px; padding-right: 9px; } .controls { gap: 19px; } .action { width: 55px; height: 52px; } .jars { width: 213px; } .jar { width: 69px; } .edition { max-width: 120px; line-height: 1.6; } h1 { font-size: 35px; } .intro > p:last-child { font-size: 11px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .effect.pop { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="icon-jar" viewBox="0 0 24 24"><path d="M7 3h10v3H7zM7 6l-2 4v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9l-2-4M5 12h14"/><path d="M10 15v3m4-3v2"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24"><path d="m8 8 8-3 5 8-7 7-9-5 3-7Z"/><path d="m8 8 6 4 7 1m-7-1v8M8 8l8-3"/><path d="m9 13 .01 0m8-3 .01 0" stroke-width="3"/></symbol>
+    <symbol id="icon-clean" viewBox="0 0 24 24"><path d="m12 3 2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3ZM20 2v4m-2-2h4"/></symbol>
+    <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.5 4.5a5 5 0 0 0-7 0L12 6l-1.5-1.5a5 5 0 0 0-7 7L12 20l8.5-8.5a5 5 0 0 0 0-7Z"/></symbol>
+    <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"/><path d="M17 3v4m-2-2h4"/></symbol>
+  </defs></svg>
+  <div class="page">
+    <header class="masthead"><div class="brand"><img class="brand-logo" src="./assets/brand/logo.svg" width="466" height="128" alt="little dill."></div><div class="edition">THE ORIGINAL POCKET PICKLE</div></header>
+    <main>
+      <section class="intro" aria-labelledby="title"><p class="eyebrow">SMALL PET. BIG FEELINGS.</p><h1>Kind of a big <em>dill.</em></h1><p>A little brine. A little love. A tiny friend to look after.</p></section>
+      <section class="playground" aria-label="Your pickle pet">
+        <div class="orbit" aria-hidden="true"></div>
+        <aside class="note note-left" aria-hidden="true"><span class="note-kicker">Meet your new dependent</span><strong>100% pickle.<br>100% your problem.</strong><svg viewBox="0 0 80 55"><path d="M3 8c10 26 40 35 64 21m-13-4 16 3-9 13"/></svg></aside>
+        <div class="device-wrap"><div class="keychain" aria-hidden="true"></div>
+          <div class="device">
+            <div class="device-brand" aria-hidden="true"><span>✳</span> PICKLE <span>✳</span></div>
+            <div class="bezel"><div class="screen" id="screen">
+              <div class="screen-top"><span class="life"><span class="life-dot" aria-hidden="true"></span><span id="stage">SEED</span></span><span id="age">0m OLD</span><span class="battery" aria-hidden="true"><i class="battery-fill" id="battery"></i></span></div>
+              <div class="meters" aria-label="Pet health">
+                <div class="stat" data-stat="fullness"><div class="stat-top"><span>FOOD</span><span class="stat-value">85</span></div><div class="meter" role="meter" aria-label="Fullness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="85"><span class="meter-fill" style="width:85%"></span></div></div>
+                <div class="stat" data-stat="happiness"><div class="stat-top"><span>HAPPY</span><span class="stat-value">80</span></div><div class="meter" role="meter" aria-label="Happiness" aria-valuemin="0" aria-valuemax="100" aria-valuenow="80"><span class="meter-fill" style="width:80%"></span></div></div>
+                <div class="stat" data-stat="energy"><div class="stat-top"><span>ENERGY</span><span class="stat-value">90</span></div><div class="meter" role="meter" aria-label="Energy" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90"><span class="meter-fill" style="width:90%"></span></div></div>
+                <div class="stat" data-stat="hygiene"><div class="stat-top"><span>CLEAN</span><span class="stat-value">95</span></div><div class="meter" role="meter" aria-label="Hygiene" aria-valuemin="0" aria-valuemax="100" aria-valuenow="95"><span class="meter-fill" style="width:95%"></span></div></div>
+              </div>
+              <div class="room" id="room" data-stage="seed" data-mood="idle">
+                <span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
+                <button class="pet-button" id="pet" aria-label="Put your pickle to sleep" aria-pressed="false"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pickle" style="display:block"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span></span><span class="sleep-z" aria-hidden="true">z Z</span></button>
+                <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
+                <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
+              </div>
+              <section class="game" id="game" aria-labelledby="game-title" hidden><h2 class="game-title" id="game-title">FIND THE LITTLE HEART</h2><div class="jars" id="jars">
+                <button class="jar" data-jar="0" aria-label="Jar 1" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">1</span></button>
+                <button class="jar" data-jar="1" aria-label="Jar 2" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">2</span></button>
+                <button class="jar" data-jar="2" aria-label="Jar 3" disabled><span class="jar-body"><span class="prize" aria-hidden="true">♥</span></span><span class="jar-number">3</span></button>
+              </div><button class="game-close" id="game-close">Back to pickle</button></section>
+              <div class="lcd-message" id="message" role="status" aria-live="polite">a little dill is born. hi, you!</div><p class="screen-hint" id="screen-hint">tap your pickle to tuck it in</p>
+            </div></div>
+            <div class="controls" aria-label="Care actions">
+              <div class="control"><button class="action" id="feed" aria-label="Feed brine" aria-keyshortcuts="1"><svg aria-hidden="true"><use href="#icon-jar"/></svg></button><span class="control-label" id="feed-label">FEED</span></div>
+              <div class="control"><button class="action" id="play" aria-label="Play guess the jar" aria-keyshortcuts="2"><svg aria-hidden="true"><use href="#icon-play"/></svg></button><span class="control-label" id="play-label">PLAY</span></div>
+              <div class="control"><button class="action" id="clean" aria-label="Clean your pickle" aria-keyshortcuts="3"><svg aria-hidden="true"><use href="#icon-clean"/></svg></button><span class="control-label" id="clean-label">CLEAN</span></div>
+            </div>
+            <div class="shell-footer" aria-hidden="true"><span>BRINE, PLEASE.</span><span class="speaker"><i></i><i></i><i></i><i></i></span></div>
+          </div>
+        </div>
+        <aside class="note note-right" aria-hidden="true"><svg><use href="#icon-heart"/></svg><br><strong>A little attention<br>goes a long way.</strong><p>Feed. Play. Clean. Repeat.<br>You're doing great, probably.</p></aside>
+      </section>
+      <section class="care-strip" aria-label="Quick care guide">
+        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-jar"/></svg></span><div><h2>Keep it in good brine.</h2><p>Full belly, happy pickle.</p></div></div>
+        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-heart"/></svg></span><div><h2>Make a little time.</h2><p>Even pickles need to play.</p></div></div>
+        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-moon"/></svg></span><div><h2>Let your dill chill.</h2><p>Tap your pal to sleep or wake.</p></div></div>
+      </section>
+      <div class="below"><p class="saved" id="save-status">Your little friend is saved on this browser.</p><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for a sip of brine, <b>Play</b> to follow the heart as the jars shuffle, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. Tap your pickle to sleep or wake; sleep restores energy. A round costs 9 energy. Find the heart for +22 happiness, or get +8 for trying.<br><br>Your seed becomes a sprout at 30 seconds, a pickle at 5 minutes, and an elder at 30 minutes. Keep all four meters topped up. A very low meter can cause sickness; restore every meter to at least 30 to recover. Leaving a meter empty for 3 active minutes ends this little life, but you can plant a new one.<br><br>Progress saves automatically in this browser. While you're away, needs decay for at most 15 minutes, and your pickle can get sick but won't die. A sleeping pickle keeps resting. Care buttons make soft little beeps.</p></details></div>
+      <picture class="brand-banner" aria-hidden="true">
+        <source type="image/webp" srcset="./assets/illustrations/banner-small.webp 768w, ./assets/illustrations/banner.webp 1536w" sizes="(max-width: 860px) calc(100vw - 48px), 805px">
+        <img src="./assets/illustrations/banner.png" width="2172" height="724" alt="" loading="lazy" decoding="async">
+      </picture>
+    </main>
+    <footer><span>A POCKET-SIZED LABOR OF LOVE.</span><span>Stay a little salty.</span></footer>
+  </div>
+  <script>
+    (() => {
+      'use strict';
+      const STORAGE_KEY = 'little-dill.v1';
+      const TICK_MS = 3000;
+      const STATS = ['fullness', 'happiness', 'energy', 'hygiene'];
+      const $ = (id) => document.getElementById(id);
+      const clamp = (number, min = 0, max = 100) => Math.min(max, Math.max(min, number));
+      const freshPet = () => ({ version: 1, fullness: 85, happiness: 80, energy: 90, hygiene: 95, ageTicks: 0, neglect: 0, sleeping: false, sick: false, dead: false, updatedAt: Date.now() });
+      const room = $('room');
+      const actionButtons = [$('feed'), $('play'), $('clean')];
+      const jarButtons = [...document.querySelectorAll('.jar')];
+      let state = freshPet();
+      let feedback = { text: 'a little dill is born. hi, you!', until: Date.now() + 6500 };
+      let happyUntil = 0;
+      let lastAction = 0;
+      let audioContext;
+      let game = null;
+      let gameTimers = [];
+      let effectTimer;
+      let saveAvailable = true;
+
+      function parseSaved(raw) {
+        try {
+          const value = JSON.parse(raw);
+          if (!value || value.version !== 1) return null;
+          if (!STATS.every(key => Number.isFinite(value[key]) && value[key] >= 0 && value[key] <= 100)) return null;
+          if (!['ageTicks', 'neglect', 'updatedAt'].every(key => Number.isFinite(value[key]) && value[key] >= 0)) return null;
+          if (!['sleeping', 'sick', 'dead'].every(key => typeof value[key] === 'boolean')) return null;
+          return { version: 1, ...Object.fromEntries(STATS.map(key => [key, value[key]])), ageTicks: Math.floor(Math.min(value.ageTicks, 1e9)), neglect: Math.min(value.neglect, 60), updatedAt: Math.min(value.updatedAt, Date.now()), sleeping: value.sleeping && !value.dead, sick: value.sick, dead: value.dead };
+        } catch { return null; }
+      }
+      function save() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveAvailable = true; }
+        catch { saveAvailable = false; }
+        $('save-status').textContent = saveAvailable ? 'Your little friend is saved on this browser.' : 'Saving is unavailable. Your pickle lives here until this page closes.';
+        $('save-status').classList.toggle('unavailable', !saveAvailable);
+      }
+      function stage() {
+        if (state.ageTicks < 10) return 'seed';
+        if (state.ageTicks < 100) return 'sprout';
+        if (state.ageTicks < 600) return 'pickle';
+        return 'elder';
+      }
+      function assessHealth(offline = false) {
+        if (Math.min(...STATS.map(key => state[key])) <= 8 || state.neglect >= 10) state.sick = true;
+        if (STATS.every(key => state[key] >= 30)) { state.sick = false; state.neglect = 0; }
+        if (offline) state.neglect = Math.min(state.neglect, 30);
+        else if (state.neglect >= 60) { state.dead = true; state.sleeping = false; }
+      }
+      function advance(ticks, offline) {
+        for (let i = 0; i < ticks && !state.dead; i++) {
+          const resting = state.sleeping;
+          state.fullness = clamp(state.fullness - (resting ? .1 : .28));
+          state.happiness = clamp(state.happiness - (resting ? .07 : .18));
+          state.hygiene = clamp(state.hygiene - (resting ? .1 : .24));
+          state.energy = clamp(state.energy + (resting ? 1.7 : -.22));
+          state.ageTicks++;
+          state.neglect = STATS.some(key => state[key] <= 0) ? state.neglect + 1 : Math.max(0, state.neglect - 2);
+          assessHealth(offline);
+        }
+      }
+      function syncTime(away = false) {
+        const now = Date.now();
+        const ticks = Math.floor(Math.max(0, now - state.updatedAt) / TICK_MS);
+        if (!ticks) return;
+        const offline = away || ticks > 5;
+        const previousStage = stage();
+        advance(Math.min(ticks, offline ? 300 : 5), offline);
+        state.updatedAt = offline ? now : state.updatedAt + ticks * TICK_MS;
+        if (state.dead && game) endGame(false);
+        if (stage() !== previousStage && !state.dead) say('look at you grow. hello, ' + stage() + '!', 5000);
+        save();
+      }
+      function mood() {
+        if (state.dead) return 'dead';
+        if (state.sleeping) return 'sleeping';
+        if (state.sick) return 'sick';
+        if (Date.now() < happyUntil) return 'happy';
+        if (state.fullness < 30 || state.energy < 20 || state.happiness < 25) return 'hungry';
+        return 'idle';
+      }
+      function defaultMessage() {
+        if (state.dead) return 'a good dill. gone, but not forgotten.';
+        if (state.sleeping) return state.energy >= 100 ? 'fully rested. dreaming of you.' : 'shhh. marinating in a dream.';
+        if (state.sick) return 'feeling sour. get all meters to 30.';
+        if (state.fullness < 30) return 'a sip of brine would be divine.';
+        if (state.energy < 20) return 'one sleepy pickle. tap to tuck in.';
+        if (state.hygiene < 40) return 'a little funky in here. clean up?';
+        if (state.happiness < 30) return 'got a minute for a little game?';
+        return ['just a pickle. having a day.', 'life is pretty dill-ightful.', 'small, salty, and so loved.', 'no thoughts. just brine.'][Math.floor(state.ageTicks / 10) % 4];
+      }
+      function render() {
+        for (const key of STATS) {
+          const stat = document.querySelector('[data-stat="' + key + '"]');
+          const value = Math.round(state[key]);
+          stat.querySelector('.stat-value').textContent = value;
+          stat.querySelector('.meter-fill').style.width = value + '%';
+          stat.querySelector('.meter').setAttribute('aria-valuenow', value);
+          stat.classList.toggle('low', value < 25);
+        }
+        $('stage').textContent = stage().toUpperCase();
+        const minutes = Math.floor(state.ageTicks * TICK_MS / 60000);
+        $('age').textContent = (minutes < 60 ? minutes + 'm' : Math.floor(minutes / 60) + 'h ' + minutes % 60 + 'm') + ' OLD';
+        $('battery').style.width = state.energy + '%';
+        room.dataset.stage = stage();
+        room.dataset.mood = mood();
+        room.classList.toggle('is-dead', state.dead);
+        $('screen').classList.toggle('asleep', state.sleeping);
+        $('pet').hidden = state.dead;
+        $('pet').setAttribute('aria-pressed', String(state.sleeping));
+        $('pet').setAttribute('aria-label', state.sleeping ? 'Wake your pickle' : 'Put your pickle to sleep');
+        $('tombstone').hidden = !state.dead;
+        $('restart').hidden = !state.dead;
+        $('poop').hidden = state.hygiene >= 40 || state.dead;
+        $('screen-hint').textContent = state.dead ? 'every ending is a new beginning' : game ? 'pick a jar · or press 1 / 2 / 3' : state.sleeping ? 'tap your pickle to rise & brine' : 'tap your pickle to tuck it in';
+        const labels = ['FEED', 'PLAY', 'CLEAN'];
+        const names = ['Feed brine', 'Play guess the jar', 'Clean your pickle'];
+        actionButtons.forEach((button, index) => {
+          button.disabled = state.dead || (!!game && game.phase !== 'choose');
+          button.setAttribute('aria-label', game ? 'Choose jar ' + (index + 1) : names[index]);
+          $(button.id + '-label').textContent = game ? 'JAR ' + (index + 1) : labels[index];
+        });
+        const message = state.dead ? defaultMessage() : game ? game.message : Date.now() < feedback.until ? feedback.text : defaultMessage();
+        if ($('message').textContent !== message) $('message').textContent = message;
+      }
+      function say(text, duration = 3500) { feedback = { text, until: Date.now() + duration }; }
+      function beep(notes = [440, 660]) {
+        try {
+          const Audio = window.AudioContext || window.webkitAudioContext;
+          if (!Audio) return;
+          audioContext ||= new Audio();
+          if (audioContext.state === 'suspended') audioContext.resume().catch(() => {});
+          notes.forEach((frequency, index) => {
+            const oscillator = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            const start = audioContext.currentTime + index * .085;
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            gain.gain.setValueAtTime(0, start);
+            gain.gain.linearRampToValueAtTime(.045, start + .008);
+            gain.gain.exponentialRampToValueAtTime(.001, start + .09);
+            oscillator.connect(gain); gain.connect(audioContext.destination);
+            oscillator.start(start); oscillator.stop(start + .1);
+            oscillator.onended = () => { oscillator.disconnect(); gain.disconnect(); };
+          });
+        } catch { /* Audio is decorative; care still works if it is unavailable. */ }
+      }
+      function effect(text) {
+        clearTimeout(effectTimer);
+        const element = $('effect');
+        element.classList.remove('pop');
+        element.textContent = text;
+        void element.offsetWidth;
+        element.classList.add('pop');
+        effectTimer = setTimeout(() => { element.textContent = ''; element.classList.remove('pop'); }, 1600);
+      }
+      function care(action) {
+        syncTime();
+        if (state.dead) { render(); return; }
+        if (game) { chooseJar(game.order[action]); return; }
+        if (state.sleeping) { say('zzZ... tap your pickle to wake up.'); beep([260]); render(); return; }
+        if (Date.now() - lastAction < 450) return;
+        lastAction = Date.now();
+        if (action === 0) {
+          if (state.fullness >= 99) { say('full to the brim. thanks, though!'); beep([390]); }
+          else { const added = Math.min(22, 100 - state.fullness); state.fullness = clamp(state.fullness + 22); say('ahh, the finest brine. chef’s kiss.'); effect('+' + Math.round(added) + ' food'); happyUntil = Date.now() + 2400; beep([520, 780, 1040]); }
+        } else if (action === 1) {
+          if (state.energy < 12) { say('too sleepy to play. tuck me in?'); beep([330, 260]); }
+          else { startGame(); return; }
+        } else {
+          state.hygiene = 100;
+          say('squeaky clean. still a little salty.'); effect('✧ squeaky clean ✧'); happyUntil = Date.now() + 2400; beep([660, 880, 1100]);
+        }
+        assessHealth(); save(); render();
+      }
+      function later(callback, delay) { gameTimers.push(setTimeout(() => { if (game) callback(); }, delay)); }
+      function positionJars() {
+        const step = $('jars').clientWidth / 3;
+        game.order.forEach((id, slot) => {
+          const button = jarButtons[id];
+          button.style.transform = 'translateX(' + slot * step + 'px)';
+          button.querySelector('.jar-number').textContent = slot + 1;
+          button.setAttribute('aria-label', 'Jar ' + (slot + 1));
+        });
+      }
+      function startGame() {
+        state.energy = clamp(state.energy - 9);
+        game = { phase: 'watch', winner: Math.floor(Math.random() * 3), order: [0, 1, 2], message: 'keep your eye on the heart...' };
+        room.hidden = true; $('game').hidden = false;
+        jarButtons.forEach((button, id) => { button.disabled = true; button.classList.toggle('revealed', id === game.winner); button.classList.remove('picked'); button.querySelector('.prize').textContent = id === game.winner ? '♥' : '·'; });
+        positionJars(); $('game-close').focus({ preventScroll: true }); beep([440, 550, 660]); save(); render();
+        later(() => {
+          game.phase = 'shuffle'; game.message = 'a little shuffle. a little mystery.';
+          jarButtons.forEach(button => button.classList.remove('revealed')); render();
+        }, 1300);
+        [1700, 2300, 2900].forEach(delay => later(() => {
+          const first = Math.floor(Math.random() * 3);
+          const second = (first + 1 + Math.floor(Math.random() * 2)) % 3;
+          [game.order[first], game.order[second]] = [game.order[second], game.order[first]];
+          positionJars();
+        }, delay));
+        later(() => { game.phase = 'choose'; game.message = 'where’s the heart? pick a jar!'; jarButtons.forEach(button => { button.disabled = false; }); render(); }, 3450);
+      }
+      function chooseJar(id) {
+        syncTime();
+        if (!game || game.phase !== 'choose') return;
+        const won = id === game.winner;
+        game.phase = 'result'; game.message = won ? 'you found it! +22 happy ♥' : 'nice try, little friend. +8 happy';
+        state.happiness = clamp(state.happiness + (won ? 22 : 8));
+        happyUntil = Date.now() + 5000;
+        jarButtons.forEach(button => { button.disabled = true; button.classList.add('revealed'); });
+        jarButtons[id].classList.add('picked');
+        // Give keyboard users a stable exit after the selected jar is disabled.
+        $('game-close').focus({ preventScroll: true });
+        beep(won ? [523, 659, 784, 1047] : [440, 523]); assessHealth(); save(); render();
+      }
+      function endGame(focus = true) {
+        gameTimers.forEach(clearTimeout); gameTimers = []; game = null;
+        $('game').hidden = true; room.hidden = false; render();
+        if (focus) (state.dead ? $('restart') : $('play')).focus({ preventScroll: true });
+      }
+      actionButtons.forEach((button, index) => button.addEventListener('click', () => care(index)));
+      jarButtons.forEach((button, id) => button.addEventListener('click', () => chooseJar(id)));
+      $('game-close').addEventListener('click', () => endGame());
+      $('pet').addEventListener('click', () => {
+        syncTime();
+        if (state.dead || game) { render(); return; }
+        state.sleeping = !state.sleeping;
+        happyUntil = 0;
+        say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
+        beep(state.sleeping ? [523, 392, 262] : [392, 523, 659]); save(); render();
+      });
+      $('restart').addEventListener('click', () => {
+        if (!state.dead) return;
+        endGame(false); state = freshPet(); happyUntil = 0; lastAction = 0;
+        say('a fresh start. a brand-new little dill.', 5000); beep([523, 659, 784]); save(); render(); $('pet').focus({ preventScroll: true });
+      });
+      document.addEventListener('keydown', event => {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.repeat || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
+        if (['1', '2', '3'].includes(event.key)) { event.preventDefault(); care(Number(event.key) - 1); }
+        if (event.key === 'Escape' && game) { event.preventDefault(); endGame(); }
+      });
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { syncTime(); save(); }
+        else { syncTime(true); render(); }
+      });
+      window.addEventListener('pagehide', () => { syncTime(true); save(); });
+      window.addEventListener('pageshow', event => { if (event.persisted) { syncTime(true); render(); } });
+      window.addEventListener('resize', () => { if (game) positionJars(); });
+      window.addEventListener('storage', event => {
+        if (event.key !== STORAGE_KEY || !event.newValue) return;
+        const restored = parseSaved(event.newValue);
+        if (restored) { state = restored; endGame(false); feedback.until = 0; render(); }
+      });
+      try {
+        const restored = parseSaved(localStorage.getItem(STORAGE_KEY));
+        if (restored) {
+          state = restored;
+          const elapsed = Date.now() - state.updatedAt;
+          syncTime(true);
+          say(elapsed > 60000 ? 'you’re back! your little dill missed you.' : 'welcome back to your little pickle.', 4500);
+        }
+      } catch { saveAvailable = false; }
+      save(); render();
+      setInterval(() => { if (!document.hidden) { syncTime(); render(); } }, TICK_MS);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+.DS_Store
+.opencode/
+.wrangler/
+.vercel/
+node_modules/

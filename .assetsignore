@@ -1,0 +1,14 @@
+.git/
+.wrangler/
+.vercel/
+.opencode/
+.DS_Store
+node_modules/
+wrangler.jsonc
+vercel.json
+.vercelignore
+.assetsignore
+.gitignore
+README.md
+assets/README.md
+assets/PROMPTS.md
