@@ -12,6 +12,43 @@
     [72, 0, 77, 0, 81, 0, 84, 81, 79, 0, 77, 79, 0, 81, 0, 77],
     [79, 0, 76, 0, 72, 74, 76, 0, 79, 0, 82, 79, 0, 76, 72, 73]
   ];
+  const TRACKS = [
+    { bpm: 132, chords: CHORDS, lead: LEAD, bass: [0, 3, 6, 8, 10, 14], kick: [0, 6, 8], swing: .012, voice: 'square', hats: 1 },
+    {
+      name: 'Dill Disco', bpm: 120,
+      chords: [[48, 52, 55, 59], [45, 48, 52, 55], [53, 57, 60, 64], [55, 59, 62, 65]],
+      lead: [
+        [76, 0, 79, 81, 0, 79, 76, 0, 74, 76, 0, 79, 0, 72, 74, 0],
+        [72, 0, 76, 79, 0, 76, 72, 0, 71, 72, 0, 76, 0, 69, 71, 0],
+        [77, 0, 81, 84, 0, 81, 79, 0, 77, 79, 0, 81, 0, 76, 77, 0],
+        [79, 0, 83, 86, 0, 83, 81, 0, 79, 77, 0, 74, 0, 71, 74, 0]
+      ],
+      bass: [0, 2, 6, 8, 10, 14], kick: [0, 4, 8, 12], swing: 0, voice: 'square', hats: 1
+    },
+    {
+      name: 'Moonlight Marinade', bpm: 88,
+      chords: [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 59], [55, 59, 62, 65]],
+      lead: [
+        [81, 0, 0, 0, 79, 0, 76, 0, 0, 0, 72, 0, 76, 0, 0, 0],
+        [77, 0, 0, 0, 76, 0, 72, 0, 0, 0, 69, 0, 72, 0, 0, 0],
+        [76, 0, 0, 0, 74, 0, 71, 0, 0, 0, 67, 0, 71, 0, 0, 0],
+        [74, 0, 0, 0, 71, 0, 69, 0, 0, 0, 67, 0, 71, 0, 74, 0]
+      ],
+      bass: [0, 6, 8, 14], kick: [0, 8], swing: .025, voice: 'triangle', hats: 2
+    },
+    {
+      name: 'Spicy Sprint', bpm: 156,
+      chords: [[52, 55, 59, 62], [48, 52, 55, 59], [55, 59, 62, 66], [50, 54, 57, 60]],
+      lead: [
+        [76, 79, 83, 0, 88, 0, 83, 79, 76, 0, 79, 83, 86, 83, 79, 0],
+        [76, 79, 84, 0, 88, 0, 84, 79, 76, 0, 79, 84, 83, 79, 76, 0],
+        [79, 83, 86, 0, 90, 0, 86, 83, 79, 0, 83, 86, 88, 86, 83, 0],
+        [78, 81, 86, 0, 90, 0, 86, 81, 78, 0, 76, 78, 81, 78, 75, 0]
+      ],
+      bass: [0, 2, 4, 6, 8, 10, 12, 14], kick: [0, 6, 8, 10], swing: 0, voice: 'square', hats: 1
+    }
+  ];
+  const validTrack = value => Number.isInteger(value) && value >= 0 && value < TRACKS.length;
 
   function tone(ctx, bus, voices, note, time, duration, volume, type = 'square', slide) {
     const oscillator = ctx.createOscillator();
@@ -54,35 +91,37 @@
     return buffer;
   }
 
-  function musicStep(ctx, bus, voices, buffer, step, time) {
+  function musicStep(ctx, bus, voices, buffer, step, time, track = 0) {
+    const song = TRACKS[track];
+    const duration = 60 / song.bpm / 4;
     const bar = Math.floor(step / 16) % 32;
     const beat = step % 16;
-    const chord = CHORDS[bar % 4];
+    const chord = song.chords[bar % 4];
     const breakdown = bar >= 16 && bar < 20;
     const drop = bar >= 20;
-    const at = time + (beat % 2 ? .012 : 0);
-    const note = (pitch, length, volume, type = 'square', slide) => tone(ctx, bus, voices, pitch, at, length * STEP, volume, type, slide);
-    if ([0, 3, 6, 8, 10, 14].includes(beat)) {
+    const at = time + (beat % 2 ? song.swing : 0);
+    const note = (pitch, length, volume, type = song.voice, slide) => tone(ctx, bus, voices, pitch, at, length * duration, volume, type, slide);
+    if (song.bass.includes(beat)) {
       const pitch = chord[0] - 12 + (beat === 6 || beat === 14 ? 12 : beat === 10 ? 7 : 0);
       note(pitch, beat === 0 || beat === 8 ? 2.8 : 1.5, .25, 'triangle');
       if (drop) note(pitch + 12, .7, .025);
     }
     if (beat % 2 === 0) note(chord[(beat / 2 + Math.floor(bar / 4)) % 4] + 12, .7, breakdown ? .065 : .035);
     if (!breakdown || beat === 0) {
-      if ([0, 6, 8].includes(beat) || (drop && beat === 11)) note(47, 1.7, .45, 'sine', 22);
+      if (song.kick.includes(beat) || (drop && beat === 11)) note(47, 1.7, .45, 'sine', 22);
       if (beat === 4 || beat === 12) {
         noise(ctx, bus, voices, buffer, at, .12, .16, 1300);
         note(43, .7, .13, 'triangle');
       }
-      noise(ctx, bus, voices, buffer, at, beat === 14 ? .09 : .028, beat % 2 ? .035 : .065, 6500);
+      if (beat % song.hats === 0) noise(ctx, bus, voices, buffer, at, beat === 14 ? .09 : .028, beat % 2 ? .035 : .065, 6500);
       if (bar % 8 === 7 && beat >= 13) noise(ctx, bus, voices, buffer, at, .065, .09, 1900);
     }
     if (bar >= 4 && !breakdown) {
-      const pitch = LEAD[bar % 4][beat];
+      const pitch = song.lead[bar % 4][beat];
       if (pitch) {
         note(pitch, 1.35, .072);
         // A quiet, offbeat echo leaves space around the hook.
-        tone(ctx, bus, voices, pitch, at + STEP * 3, STEP, .018);
+        tone(ctx, bus, voices, pitch, at + duration * 3, duration, .018, song.voice);
         if (drop && beat % 4 === 0) note(pitch + 12, 2.5, .022, 'triangle');
       }
     }
@@ -90,10 +129,10 @@
 
   function create() {
     const KEY = 'little-dill.audio.v1';
-    let prefs = { music: true, sfx: true, volume: .45 };
+    let prefs = { music: true, sfx: true, volume: .45, track: 0 };
     try {
       const stored = JSON.parse(root.localStorage.getItem(KEY));
-      if (stored) prefs = { music: stored.music !== false, sfx: stored.sfx !== false,
+      if (stored) prefs = { music: stored.music !== false, sfx: stored.sfx !== false, track: validTrack(stored.track) ? stored.track : 0,
         volume: Number.isFinite(stored.volume) ? Math.max(0, Math.min(1, stored.volume)) : .45 };
     } catch { /* Sound preferences are optional. */ }
     let ctx, master, music, effects, buffer, timer, next = 0, step = 0;
@@ -112,8 +151,8 @@
         if (ctx.state !== 'running') return;
         if (next < ctx.currentTime) next = ctx.currentTime + .02;
         while (next < ctx.currentTime + .15) {
-          musicStep(ctx, music, musicVoices, buffer, step++, next);
-          next += STEP;
+          musicStep(ctx, music, musicVoices, buffer, step++, next, prefs.track);
+          next += 60 / TRACKS[prefs.track].bpm / 4;
         }
       };
       schedule(); timer = setInterval(schedule, 25);
@@ -139,7 +178,11 @@
       } catch { return false; }
     }
     function configure(changes) {
-      prefs = { ...prefs, ...changes }; persist();
+      const previousTrack = prefs.track;
+      prefs = { ...prefs, ...changes };
+      if (!validTrack(prefs.track)) prefs.track = previousTrack;
+      persist();
+      if (prefs.track !== previousTrack) stopMusic();
       if (!ctx) return;
       master.gain.setTargetAtTime(prefs.volume, ctx.currentTime, .02);
       effects.gain.setTargetAtTime(prefs.sfx ? .7 : 0, ctx.currentTime, .01);
