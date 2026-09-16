@@ -130,8 +130,10 @@ test('all elder accessories are visible SVGs and every form has distinct artwork
   const vm = require('node:vm'), fs = require('node:fs');
   const attrs = new Set(['hidden']);
   const art = { dataset: {}, style: {}, innerHTML: '', toggleAttribute: (name, on) => on ? attrs.add(name) : attrs.delete(name) };
+  const sceneAttrs = new Set(['hidden']);
+  const scene = { dataset: {}, style: {}, innerHTML: '', toggleAttribute: (name, on) => on ? sceneAttrs.add(name) : sceneAttrs.delete(name) };
   const room = { dataset: {}, style: { setProperty() {} } };
-  const sandbox = { LittleDillLife: life, document: { getElementById: () => art } };
+  const sandbox = { LittleDillLife: life, document: { getElementById: id => id === 'scene-art' ? scene : art } };
   vm.runInNewContext(fs.readFileSync(require.resolve('../pet-art.js'), 'utf8'), sandbox);
   const seen = new Set();
   for (let i = 0; i < 32; i++) {
@@ -153,9 +155,13 @@ test('all elder accessories are visible SVGs and every form has distinct artwork
   assert.equal(teens.size, 4);
   for (const vibe of ['shades', 'lounge', 'fire', 'book']) {
     sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, vibe);
-    assert.equal(attrs.has('hidden'), false); assert.ok(!art.innerHTML.includes('undefined')); teens.add(art.innerHTML);
+    assert.equal(attrs.has('hidden'), false); assert.ok(!art.innerHTML.includes('undefined')); teens.add(art.innerHTML + scene.innerHTML);
+    assert.equal(sceneAttrs.has('hidden'), !['lounge', 'fire'].includes(vibe), vibe);
+    assert.ok(!scene.innerHTML.includes('undefined'));
   }
   assert.equal(teens.size, 8);
+  sandbox.LittleDillArt.render(living(), room, NOW, 'book');
+  assert.ok(art.innerHTML.includes('translate(-7 -19)'), 'baby-worn items shift to the baby face');
   sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, 'hop');
-  assert.equal(attrs.has('hidden'), true);
+  assert.equal(attrs.has('hidden'), true); assert.equal(sceneAttrs.has('hidden'), true);
 });
