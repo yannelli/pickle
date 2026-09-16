@@ -105,12 +105,12 @@
     .pet-button:active .pet-actor { transform: scale(1.12, .88); }
     .pickle { display: block; position: relative; width: 62px; height: 92px; background: var(--skin, #78954b); border: 3px solid var(--pixel); border-radius: 31px 28px 28px 25px; box-shadow: inset 5px 1px var(--highlight, #a1b56b), inset -5px -2px var(--shade, #5f7f40); transform-origin: 50% 100%; animation: idle 2.6s ease-in-out infinite; transition: background .5s, box-shadow .5s; }
     .pickle::before { content: ''; position: absolute; width: 11px; height: 9px; left: 20px; top: -9px; border-top: 3px solid var(--pixel); border-left: 3px solid var(--pixel); transform: rotate(20deg); }
-    .pickle::after { content: ''; position: absolute; width: 6px; height: 5px; background: #4e7139; border-radius: 2px; top: 20px; left: 9px; box-shadow: 28px -7px #4e7139, 32px 30px #4e7139, 2px 43px #4e7139, 20px 52px #4e7139; }
+    .pickle::after { content: ''; position: absolute; width: 6px; height: 5px; background: var(--shade, #527637); border-radius: 2px; top: 20px; left: 9px; box-shadow: 28px -7px var(--shade, #527637), 32px 30px var(--shade, #527637), 2px 43px var(--shade, #527637), 20px 52px var(--shade, #527637); }
     .face { position: absolute; top: 34px; left: 12px; width: 32px; height: 27px; z-index: 1; }
     .eye { position: absolute; top: 0; width: 5px; height: 7px; background: #263f29; box-shadow: 0 1px #bed190; transform-origin: 50% 60%; animation: blink 4.4s linear infinite; }
     .eye.left { left: 1px; }
     .eye.right { right: 1px; }
-    .cheek { position: absolute; top: 9px; width: 7px; height: 3px; background: #acc07b; transition: width .3s, height .3s, background .3s; }
+    .cheek { position: absolute; top: 9px; width: 7px; height: 3px; background: var(--highlight, #a1b56b); transition: width .3s, height .3s, background .3s; }
     .cheek.left { left: -4px; }
     .cheek.right { right: -4px; }
     .mouth { position: absolute; width: 12px; height: 7px; border-bottom: 3px solid #263f29; border-left: 2px solid #263f29; border-right: 2px solid #263f29; top: 10px; left: 10px; border-radius: 0 0 7px 7px; }
@@ -120,7 +120,8 @@
     .foot { position: absolute; bottom: -6px; width: 14px; height: 5px; background: var(--pixel); }
     .foot.left { left: 6px; } .foot.right { right: 6px; }
     .sweat { display: none; position: absolute; top: 12px; right: -8px; width: 6px; height: 8px; background: #dfe9b6; border: 2px solid var(--pixel); border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%; opacity: 0; }
-    .room[data-shape="round"] .pickle { border-radius: 48% 46% 43% 45%; transform: scaleX(1.1); }
+    .room[data-shape="round"] .pet-size { transform: scaleX(1.1); }
+    .room[data-shape="round"] .pickle { border-radius: 48% 46% 43% 45%; }
     .room[data-shape="crooked"] .pickle { border-radius: 48px 18px 42px 20px; }
     .room[data-stage="baby"] .pickle { width: 48px; height: 57px; border-radius: 45% 45% 40% 40%; }
     .room[data-stage="baby"] .face { top: 15px; left: 5px; }
@@ -132,14 +133,16 @@
     .room[data-stage="young"] .face { top: 25px; left: 8px; }
     .room[data-stage="young"] .arm { top: 42px; }
     .room[data-stage="young"] .pickle::before { width: 19px; height: 12px; left: 16px; border-radius: 0 12px 0 12px; background: var(--highlight); }
+    .room[data-stage="young"] .pickle::after { top: 14px; box-shadow: 24px -5px var(--shade), 28px 25px var(--shade), 2px 38px var(--shade), 18px 43px var(--shade); }
     .room[data-stage="elder"] .pickle { width: 66px; height: 88px; }
     .room[data-stage="elder"] .face::after { content: ''; position: absolute; width: 38px; height: 12px; border: 2px solid var(--pixel); top: -3px; left: -3px; border-radius: 4px; background: linear-gradient(90deg, transparent 46%, var(--pixel) 46% 53%, transparent 53%); }
+    .room[data-hat="sunglasses"] .face::after { display: none; }
     .elder-art { position: absolute; left: -40px; top: -40px; width: 150px; height: 160px; z-index: 2; overflow: visible; pointer-events: none; }
     .pet-caption { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 10px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
     .room[data-mood="happy"] .pickle { animation: happy .72s ease-in-out infinite; }
     .room[data-mood="happy"] .pet-shadow { animation: shadow-hop .72s ease-in-out infinite; }
     .room[data-mood="happy"] .eye { height: 5px; background: transparent; border-top: 3px solid #263f29; border-radius: 50% 50% 0 0; animation: none; }
-    .room[data-mood="happy"] .cheek { width: 9px; height: 4px; background: #c3d68c; }
+    .room[data-mood="happy"] .cheek { width: 9px; height: 4px; background: var(--highlight, #a1b56b); }
     .room[data-mood="happy"] .mouth { width: 14px; height: 9px; left: 9px; top: 9px; }
     .room[data-mood="happy"] .arm.left { animation: wave-left .72s ease-in-out infinite; }
     .room[data-mood="happy"] .arm.right { animation: wave-right .72s ease-in-out infinite; }
@@ -434,7 +437,7 @@
               </div>
               <div class="room" id="room" data-stage="seed" data-mood="idle">
                 <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
-                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
+                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
                 <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><span class="crumbs" aria-hidden="true"></span><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
               </div>

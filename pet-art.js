@@ -16,7 +16,7 @@
     headband: '<path d="M1 3Q32-7 62 3" stroke-width="9"/><path d="M60 2 78 12 67 17Z" fill="currentColor"/>',
     pirate: '<path d="M-4-3 10-31Q31-19 53-31L68-3Z" fill="currentColor"/><circle cx="32" cy="-15" r="5" fill="#dce7ac"/><path d="m25-8 14 4m-14 0 14-4" stroke="#dce7ac"/>',
     deerstalker: '<path d="M4-2Q3-27 31-28Q61-27 60-2Z" fill="currentColor"/><path d="M-9-1H72M31-26V-3M10-13H55"/>',
-    sunglasses: '<path d="M-1 26H64" stroke-width="4"/><path d="M2 23H25V36H7ZM38 23H62L57 36H38Z" fill="currentColor"/>',
+    sunglasses: '<g transform="translate(0 10)"><path d="M-1 26H64" stroke-width="4"/><path d="M2 23H25V36H7ZM38 23H62L57 36H38Z" fill="currentColor"/></g>',
     witch: '<path d="m8-5 25-35 2 14 21 21Z" fill="currentColor"/><ellipse cx="32" cy="-3" rx="37" ry="5" fill="currentColor"/>',
     top: '<path d="M12-5V-36H51V-5Z" fill="currentColor"/><path d="M12-13H51" stroke="#dce7ac" stroke-width="6"/><path d="M2-3H62" stroke-width="6"/>',
     mushroom: '<path d="M-4 0Q1-38 31-38Q62-38 69 0Z" fill="currentColor"/><g fill="#dce7ac"><circle cx="19" cy="-19" r="5"/><circle cx="43" cy="-23" r="6"/><circle cx="53" cy="-7" r="4"/></g>',
@@ -56,6 +56,7 @@
     room.dataset.shape = variety.shape;
     room.style.setProperty('--skin', variety.color); room.style.setProperty('--highlight', variety.light); room.style.setProperty('--shade', variety.dark);
     const elder = life.elder(pet, now);
+    room.dataset.hat = elder?.hat || '';
     const art = document.getElementById('elder-art');
     const key = elder?.id || '';
     art.toggleAttribute('hidden', !elder);
