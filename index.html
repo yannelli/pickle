@@ -309,7 +309,7 @@
     .track-title { font-size: 12px; font-weight: 750; margin: 0; }
     .track-title span { display: block; color: #69765b; font-size: 10px; font-weight: 500; margin-top: 4px; }
     .audio-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
-    .audio-controls button { font-size: 11px; min-height: 44px; border: 1px solid #acb88d; border-radius: 9px; padding: 6px 10px; background: var(--paper); }
+    .audio-controls button, .audio-controls select { font: inherit; font-size: 11px; color: inherit; min-height: 44px; border: 1px solid #acb88d; border-radius: 9px; padding: 6px 10px; background: var(--paper); }
     .audio-controls button[aria-pressed="true"] { background: #dce5bf; }
     .audio-volume { display: flex; flex-direction: column; gap: 3px; font-size: 9px; }
     .audio-volume input { width: 88px; height: 28px; accent-color: var(--pixel); margin: 0; }
@@ -478,7 +478,7 @@
       <section class="pet-profile" id="pet-profile" aria-labelledby="profile-name" hidden><h2 id="profile-name"></h2><p id="profile-kind"></p><p class="pet-quip" id="profile-quip"></p><p id="care-outlook"></p><p id="growth-outlook"></p></section>
       <details class="elder-club" id="elder-club" hidden><summary id="elder-summary">The elder club · 32 excellent ways to get weird</summary><div class="elder-grid" id="elder-grid"></div></details>
       <section class="reminder-card" aria-labelledby="reminder-title"><div><h2 id="reminder-title">A gentle nudge. Never a nag.</h2><p>Optional care reminders. At most one a day, quiet from 10pm to 9am. No repeat nudges if you’re away.</p><p id="reminder-status" role="status">Your pickle is happy with a daily check-in.</p></div><div class="reminder-actions"><button class="save-button" id="reminder-toggle" type="button">Enable reminders</button><button class="save-button" id="reminder-test" type="button" hidden>Send a test</button></div></section>
-      <section class="jukebox" aria-label="Sound controls"><p class="track-title">♫ BRINE TIME<span>Original 8-bit pickle funk · 132 BPM</span></p><div class="audio-controls"><button id="music-toggle" type="button" aria-pressed="true">Music on</button><button id="sfx-toggle" type="button" aria-pressed="true">SFX on</button><label class="audio-volume">Volume<input id="volume" type="range" min="0" max="100" value="45" aria-label="Audio volume"></label></div></section>
+      <section class="jukebox" aria-label="Sound controls"><p class="track-title">♫ PICKLE RADIO<span>Four original 8-bit tracks</span></p><div class="audio-controls"><select id="music-track" aria-label="Music track"><option value="0">Brine Time · 132 BPM</option><option value="1">Dill Disco · 120 BPM</option><option value="2">Moonlight Marinade · 88 BPM</option><option value="3">Spicy Sprint · 156 BPM</option></select><button id="music-toggle" type="button" aria-pressed="true">Music on</button><button id="sfx-toggle" type="button" aria-pressed="true">SFX on</button><label class="audio-volume">Volume<input id="volume" type="range" min="0" max="100" value="45" aria-label="Audio volume"></label></div></section>
       <section class="care-strip" aria-label="Quick care guide">
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-jar"/></svg></span><div><h2>Keep it in good brine.</h2><p>Full belly, happy pickle.</p></div></div>
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-heart"/></svg></span><div><h2>Make a little time.</h2><p>Even pickles need to play.</p></div></div>
@@ -835,11 +835,15 @@
           $(key + '-toggle').setAttribute('aria-pressed', String(prefs[key]));
         }
         $('volume').value = Math.round(prefs.volume * 100);
+        $('music-track').value = String(prefs.track ?? 0);
       }
       for (const key of ['music', 'sfx']) $(key + '-toggle').addEventListener('click', () => {
         sound?.configure({ [key]: !sound.preferences[key] }); sound?.unlock(); renderSound();
       });
       $('volume').addEventListener('input', event => { sound?.configure({ volume: Number(event.target.value) / 100 }); });
+      $('music-track').addEventListener('change', event => {
+        sound?.configure({ track: Number(event.target.value) }); sound?.unlock(); renderSound();
+      });
       document.addEventListener('pointerdown', () => sound?.unlock(), { passive: true });
       document.addEventListener('keydown', () => sound?.unlock());
       renderSound();
