@@ -100,7 +100,8 @@
     .pet-button { border: 0; padding: 0; width: 132px; height: 130px; background: transparent; position: relative; display: grid; place-items: center; z-index: 1; }
     .pet-button:focus-visible { outline-offset: -5px; border-radius: 16px; }
     .pet-shadow { position: absolute; height: 9px; width: 64px; bottom: 12px; left: calc(50% - 32px); background: #68804430; border-radius: 50%; animation: shadow-idle 2.6s ease-in-out infinite; }
-    .pet-size { display: block; transition: transform .7s; transform-origin: 50% 100%; }
+    .pet-size { display: block; position: relative; transition: transform .7s; transform-origin: 50% 100%; }
+    .scene-art { position: absolute; left: -37px; bottom: -26px; width: 150px; height: 160px; overflow: visible; pointer-events: none; }
     .pet-actor { display: block; position: relative; transform-origin: 50% 100%; transition: transform .12s; }
     .pet-button:active .pet-actor { transform: scale(1.12, .88); }
     .pickle { display: block; position: relative; width: 62px; height: 92px; background: var(--skin, #78954b); border: 3px solid var(--pixel); border-radius: 31px 28px 28px 25px; box-shadow: inset 5px 1px var(--highlight, #a1b56b), inset -5px -2px var(--shade, #5f7f40); transform-origin: 50% 100%; animation: idle 2.6s ease-in-out infinite; transition: background .5s, box-shadow .5s; }
@@ -134,9 +135,13 @@
     .room[data-stage="young"] .arm { top: 42px; }
     .room[data-stage="young"] .pickle::before { width: 19px; height: 12px; left: 16px; border-radius: 0 12px 0 12px; background: var(--highlight); }
     .room[data-stage="young"] .pickle::after { top: 14px; box-shadow: 24px -5px var(--shade), 28px 25px var(--shade), 2px 38px var(--shade), 18px 43px var(--shade); }
+    .room[data-stage="teen"] .pickle { width: 58px; height: 84px; border-radius: 29px 27px 24px 22px; }
+    .room[data-stage="teen"] .face { top: 30px; left: 10px; }
+    .room[data-stage="teen"] .arm { top: 48px; }
+    .room[data-stage="teen"] .pickle::after { top: 17px; box-shadow: 26px -6px var(--shade), 30px 27px var(--shade), 2px 40px var(--shade), 19px 47px var(--shade); }
     .room[data-stage="elder"] .pickle { width: 66px; height: 88px; }
     .room[data-stage="elder"] .face::after { content: ''; position: absolute; width: 38px; height: 12px; border: 2px solid var(--pixel); top: -3px; left: -3px; border-radius: 4px; background: linear-gradient(90deg, transparent 46%, var(--pixel) 46% 53%, transparent 53%); }
-    .room[data-hat="sunglasses"] .face::after { display: none; }
+    .room[data-hat="sunglasses"] .face::after, .room[data-hat="nerdglasses"] .face::after { display: none; }
     .elder-art { position: absolute; left: -40px; top: -40px; width: 150px; height: 160px; z-index: 2; overflow: visible; pointer-events: none; }
     .pet-caption { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 10px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
     .room[data-mood="happy"] .pickle { animation: happy .72s ease-in-out infinite; }
@@ -146,6 +151,20 @@
     .room[data-mood="happy"] .mouth { width: 14px; height: 9px; left: 9px; top: 9px; }
     .room[data-mood="happy"] .arm.left { animation: wave-left .72s ease-in-out infinite; }
     .room[data-mood="happy"] .arm.right { animation: wave-right .72s ease-in-out infinite; }
+    .room[data-vibe="shades"] .pickle, .room[data-vibe="book"] .pickle, .room[data-vibe="fire"] .pickle { animation: idle 2.6s ease-in-out infinite; }
+    .room[data-vibe="lounge"] .pickle { animation: lounge 3.4s ease-in-out infinite; }
+    .room[data-vibe="shades"] .pet-shadow, .room[data-vibe="book"] .pet-shadow, .room[data-vibe="fire"] .pet-shadow { animation: shadow-idle 2.6s ease-in-out infinite; }
+    .room[data-vibe="lounge"] .pet-shadow { animation: none; transform: translateX(-8px) scaleX(1.15); }
+    .room[data-vibe="shades"] .face::after, .room[data-vibe="lounge"] .face::after { display: none; }
+    .room[data-vibe="shades"] .arm.left, .room[data-vibe="fire"] .arm.right { animation: arm-left 2.6s ease-in-out infinite; }
+    .room[data-vibe="shades"] .arm.right { animation: arm-right 2.6s ease-in-out infinite; }
+    .room[data-vibe="lounge"] .arm.left { animation: none; transform: rotate(-40deg); }
+    .room[data-vibe="lounge"] .arm.right { animation: none; transform: rotate(40deg); }
+    .room[data-vibe="book"] .arm.left { animation: none; transform: rotate(100deg); }
+    .room[data-vibe="book"] .arm.right { animation: none; transform: rotate(-100deg); }
+    .room[data-vibe="book"] .eye { height: 5px; top: 3px; background: #263f29; border: 0; border-radius: 0; animation: blink 4.4s linear infinite; }
+    .room[data-vibe="fire"] .arm.left { animation: none; transform: rotate(20deg); }
+    .scene-art .flame { transform-origin: -25px 90px; animation: flicker .45s ease-in-out infinite alternate; }
     .room[data-mood="hungry"] .pickle { animation: hungry 3.2s ease-in-out infinite; }
     .room[data-mood="hungry"] .eye { height: 4px; top: 2px; animation-duration: 6s; }
     .room[data-mood="hungry"] .arm.left { animation: none; transform: rotate(-38deg); }
@@ -365,6 +384,8 @@
     @keyframes arm-left { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(-24deg); } }
     @keyframes arm-right { 0%, 100% { transform: rotate(14deg); } 50% { transform: rotate(24deg); } }
     @keyframes happy { 0%, 100% { transform: translateY(0) scale(1.1, .88); } 18% { transform: translateY(-3px) scale(.92, 1.1); } 50% { transform: translateY(-12px) scale(.98, 1.02) rotate(-3deg); } 78% { transform: translateY(-3px) scale(1, 1) rotate(3deg); } 90% { transform: translateY(0) scale(1.12, .86); } }
+    @keyframes lounge { 0%, 100% { transform: rotate(-16deg) translateX(-6px) scale(1.03, .97); } 50% { transform: rotate(-16deg) translateX(-6px) scale(1, 1); } }
+    @keyframes flicker { from { transform: scale(1, 1); } to { transform: scale(.9, 1.1) skewX(-5deg); } }
     @keyframes shadow-hop { 0%, 100% { transform: scale(1.1, 1); opacity: 1; } 50% { transform: scale(.72, .8); opacity: .55; } }
     @keyframes wave-left { 0%, 100% { transform: rotate(70deg); } 50% { transform: rotate(100deg); } }
     @keyframes wave-right { 0%, 100% { transform: rotate(-70deg); } 50% { transform: rotate(-100deg); } }
@@ -437,7 +458,7 @@
               </div>
               <div class="room" id="room" data-stage="seed" data-mood="idle">
                 <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
-                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
+                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><svg class="scene-art" id="scene-art" viewBox="-40 -40 150 160" hidden></svg><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
                 <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><span class="crumbs" aria-hidden="true"></span><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
               </div>
@@ -487,7 +508,7 @@
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-heart"/></svg></span><div><h2>Make a little time.</h2><p>Even pickles need to play.</p></div></div>
         <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-moon"/></svg></span><div><h2>Let your dill chill.</h2><p>Use Nap to rest. Pet for happy.</p></div></div>
       </section>
-      <div class="below"><p class="saved" id="save-status" role="status">Your little friend is saved on this browser.</p><div class="save-actions" aria-label="Progress backups"><button class="save-button" id="download-save" type="button">Download save ↓</button><label class="save-button save-file-control" id="import-save" tabindex="-1">Import save ↑<input id="backup-file" type="file" aria-label="Import save"></label><button class="save-button" id="undo-import" type="button" hidden>Undo import ↶</button></div><p class="backup-notice" id="backup-notice" role="status"></p><div class="install-actions" id="install-actions"><button class="save-button" id="install-app" type="button" hidden>Install little dill ↓</button><p class="install-hint" id="install-hint" hidden>Add little dill to your home screen: tap Share, then <b>Add to Home Screen</b>.</p></div><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for brine, <b>Play</b> for three arcade games, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. <b>Tap your pickle</b> or press <b>P</b> for +8 happiness every 2 seconds, with no energy cost. Feeding and cleaning also bring a little joy. Use <b>Nap</b> or <b>S</b> to sleep or wake; naps restore energy.<br><br><b>Heart hunt:</b> follow the heart through three rounds of shuffling jars. <b>Dill says:</b> repeat a growing sequence of notes and shapes. <b>Brine catch:</b> move your basket with 1/2/3, arrow keys, or a tap; catch hearts and dodge salt (×). Each game costs 6 energy and awards 10–34 happiness on completion, including a reward for trying. Use <b>Play again</b> for another round, or <b>Esc</b> to leave. Leaving the page or opening a save pauses the arcade without losing your entry energy. Best scores stay in this browser.<br><br>Start by putting a cucumber into Classic, Garlic, or Spicy brine. After one real minute, one of six varieties hatches and you give it a name. Baby pickles become young at 1 day, adults at 3 days, and elders at 14 days. Elders discover a new look every 3 days, with 32 funny forms that cycle forever.<br><br>One daily check-in is plenty. Needs change by real elapsed time, with the app open or closed. Food loses 36 points a day, happiness 24, and hygiene 30. Energy recovers by 2 points an hour, or 30 during a nap, and a full pickle wakes automatically. Feed adds 40 food. A very low need can cause sickness; restore every meter to at least 30 to recover. An empty food, happiness, or hygiene meter must stay empty for 48 hours before your pickle passes away. Pickles never die of old age.<br><br>Progress saves automatically in this browser. Use <b>Download save</b> to keep an encrypted backup, and <b>Import save</b> to restore it on this or another device. No password or account is needed. Save files stay on your device. Optional reminders share only a push subscription and delivery schedule. Clearing browser data also clears your local progress.<br><br>little dill can be installed as an app. Use <b>Install little dill</b> where your browser offers it, or on iPhone and iPad tap Share, then Add to Home Screen. The installed app opens offline.<br><br>Your pickle grows and rests while you’re away. Notifications are optional: at most one a day, no scheduled sends from 10pm to 9am, and no repeated nudges until you return. They need an internet connection; care and games work offline. Care and games have their own 8-bit sound effects. Brine Time starts with your first tap or keypress. Music and effects have separate switches and a shared volume slider; your choices are remembered. Sound pauses when the page is hidden and the music mellows out during naps.</p></details></div>
+      <div class="below"><p class="saved" id="save-status" role="status">Your little friend is saved on this browser.</p><div class="save-actions" aria-label="Progress backups"><button class="save-button" id="download-save" type="button">Download save ↓</button><label class="save-button save-file-control" id="import-save" tabindex="-1">Import save ↑<input id="backup-file" type="file" aria-label="Import save"></label><button class="save-button" id="undo-import" type="button" hidden>Undo import ↶</button></div><p class="backup-notice" id="backup-notice" role="status"></p><div class="install-actions" id="install-actions"><button class="save-button" id="install-app" type="button" hidden>Install little dill ↓</button><p class="install-hint" id="install-hint" hidden>Add little dill to your home screen: tap Share, then <b>Add to Home Screen</b>.</p></div><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for brine, <b>Play</b> for three arcade games, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. <b>Tap your pickle</b> or press <b>P</b> for +8 happiness every 2 seconds, with no energy cost. Feeding and cleaning also bring a little joy. Use <b>Nap</b> or <b>S</b> to sleep or wake; naps restore energy.<br><br><b>Heart hunt:</b> follow the heart through three rounds of shuffling jars. <b>Dill says:</b> repeat a growing sequence of notes and shapes. <b>Brine catch:</b> move your basket with 1/2/3, arrow keys, or a tap; catch hearts and dodge salt (×). Each game costs 6 energy and awards 10–34 happiness on completion, including a reward for trying. Use <b>Play again</b> for another round, or <b>Esc</b> to leave. Leaving the page or opening a save pauses the arcade without losing your entry energy. Best scores stay in this browser.<br><br>Start by putting a cucumber into Classic, Garlic, or Spicy brine. After one real minute, one of six varieties hatches and you give it a name. Baby pickles become young at 1 day, teens at 3 days, adults at 7 days, and elders at 14 days. Teens try on a new stereotype every day. A content pickle hops, chills in sunglasses, lounges in the sun, reads, or sits by a campfire. Elders discover a new look every 3 days, with 32 funny forms that cycle forever.<br><br>One daily check-in is plenty. Needs change by real elapsed time, with the app open or closed. Food loses 36 points a day, happiness 24, and hygiene 30. Energy recovers by 2 points an hour, or 30 during a nap, and a full pickle wakes automatically. Feed adds 40 food. A very low need can cause sickness; restore every meter to at least 30 to recover. An empty food, happiness, or hygiene meter must stay empty for 48 hours before your pickle passes away. Pickles never die of old age.<br><br>Progress saves automatically in this browser. Use <b>Download save</b> to keep an encrypted backup, and <b>Import save</b> to restore it on this or another device. No password or account is needed. Save files stay on your device. Optional reminders share only a push subscription and delivery schedule. Clearing browser data also clears your local progress.<br><br>little dill can be installed as an app. Use <b>Install little dill</b> where your browser offers it, or on iPhone and iPad tap Share, then Add to Home Screen. The installed app opens offline.<br><br>Your pickle grows and rests while you’re away. Notifications are optional: at most one a day, no scheduled sends from 10pm to 9am, and no repeated nudges until you return. They need an internet connection; care and games work offline. Care and games have their own 8-bit sound effects. Brine Time starts with your first tap or keypress. Music and effects have separate switches and a shared volume slider; your choices are remembered. Sound pauses when the page is hidden and the music mellows out during naps.</p></details></div>
       <picture class="brand-banner" aria-hidden="true">
         <source type="image/webp" srcset="./assets/illustrations/banner-small.webp 768w, ./assets/illustrations/banner.webp 1536w" sizes="(max-width: 860px) calc(100vw - 48px), 805px">
         <img src="./assets/illustrations/banner.png" width="2172" height="724" alt="" loading="lazy" decoding="async">
@@ -532,6 +553,8 @@
       let feedback = { text: 'a little dill is born. hi, you!', until: Date.now() + 6500 };
       let happyUntil = 0;
       let lastAction = 0;
+      const VIBES = ['hop', 'shades', 'lounge', 'fire', 'book'];
+      let chill = { vibe: 'hop', until: 0 };
       const sound = window.LittleDillAudio?.create();
       const sfx = (name, pitch) => sound?.play(name, pitch);
       const memoryPads = [...document.querySelectorAll('.memory-pad')];
@@ -711,15 +734,17 @@
         $('pet-profile').hidden = !living; $('elder-club').hidden = !living;
         $('pet-caption').textContent = state.name;
         if (!living) return;
-        window.LittleDillArt?.render(state, room);
-        const elder = Life.elder(state);
+        const currentVibe = vibe();
+        room.dataset.vibe = currentVibe;
+        window.LittleDillArt?.render(state, room, Date.now(), currentVibe);
+        const elder = Life.elder(state), teen = Life.teen(state);
         const days = Math.floor(Life.age(state) / Life.DAY);
         $('profile-name').textContent = state.name;
-        $('profile-kind').textContent = variety.name + ' · ' + (elder ? elder.name : stage() + ' pickle') + ' · ' + days + (days === 1 ? ' day old' : ' days old');
-        $('profile-quip').textContent = state.dead ? (state.eaten ? 'A good dill. A great snack. A questionable choice.' : 'A good dill. A very good friend.') : elder ? elder.quip : { baby: 'Small pickle. Enormous feelings.', young: 'Growing into those big dill dreams.', adult: 'Thriving. Mostly thinking about snacks.' }[stage()];
+        $('profile-kind').textContent = variety.name + ' · ' + (elder ? elder.name : (teen ? teen.name.toLowerCase() : stage()) + ' pickle') + ' · ' + days + (days === 1 ? ' day old' : ' days old');
+        $('profile-quip').textContent = state.dead ? (state.eaten ? 'A good dill. A great snack. A questionable choice.' : 'A good dill. A very good friend.') : elder ? elder.quip : teen ? teen.quip : { baby: 'Small pickle. Enormous feelings.', young: 'Growing into those big dill dreams.', adult: 'Thriving. Mostly thinking about snacks.' }[stage()];
         const hours = Math.max(0, Math.round((Life.nextCareAt(state) - Date.now()) / Life.HOUR));
         $('care-outlook').textContent = state.dead ? 'You can start a new little life whenever you’re ready.' : state.sick ? 'A little care will help: bring all four meters to 30.' : 'A daily check-in is plenty. ' + (hours <= 2 ? 'A little care would be lovely now.' : 'Comfortably brined for about ' + hours + ' more hours.');
-        $('growth-outlook').textContent = elder ? 'A new elder look every 3 days. No age limit. Lap ' + elder.lap + '.' : 'Baby → young at 1 day → adult at 3 days → elder at 14 days.';
+        $('growth-outlook').textContent = elder ? 'A new elder look every 3 days. No age limit. Lap ' + elder.lap + '.' : teen ? 'A new teen phase every day. Adult at 7 days, elder at 14.' : 'Baby → young at 1 day → teen at 3 days → adult at 7 days → elder at 14 days.';
         const unlocked = elder?.unlocked || 0;
         $('elder-summary').textContent = 'The elder club · ' + unlocked + '/32 discovered';
         const key = unlocked + ':' + (elder?.id || '');
@@ -750,6 +775,15 @@
         if (state.fullness < 30 || state.energy < 20 || state.happiness < 25) return 'hungry';
         return 'idle';
       }
+      function vibe() {
+        if (mood() !== 'happy') return '';
+        if (Date.now() < happyUntil) return 'hop';
+        if (Date.now() >= chill.until) {
+          const options = VIBES.filter(option => option !== chill.vibe);
+          chill = { vibe: options[Math.floor(Math.random() * options.length)], until: Date.now() + 30000 + Math.random() * 30000 };
+        }
+        return chill.vibe;
+      }
       function defaultMessage() {
         if (state.dead) return state.eaten ? 'you ate ' + state.name + '. it was delicious. you monster.' : 'a good dill. gone, but not forgotten.';
         if (state.sleeping) return state.energy >= 100 ? 'fully rested. dreaming of you.' : 'shhh. marinating in a dream.';
@@ -758,6 +792,7 @@
         if (state.energy < 20) return 'one sleepy pickle. time for a nap.';
         if (state.hygiene < 40) return 'a little funky in here. clean up?';
         if (state.happiness < 30) return 'a little pet or play would help. ♥';
+        if (Life.teen(state)) return ['ugh. whatever. (still loves you.)', 'it’s not a phase. okay, it’s a phase.', 'do not talk to me before brine.', 'can i get a bigger jar.'][Math.floor(Life.age(state) / Life.HOUR) % 4];
         return ['just a pickle. having a day.', 'life is pretty dill-ightful.', 'small, salty, and so loved.', 'no thoughts. just brine.'][Math.floor(Life.age(state) / Life.HOUR) % 4];
       }
       function render() {

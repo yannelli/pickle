@@ -1,6 +1,6 @@
 # Test saves
 
-Generated: 2026-09-15T22:19:18.905Z
+Generated: 2026-09-16T22:46:29.545Z
 
 1. Open the app over HTTPS or localhost.
 2. Choose Import save and select a `.dill` file from this folder.
@@ -23,7 +23,8 @@ Run the command from the repository root with Node 24. It overwrites the generat
 | [naming.dill](naming.dill) | Unnamed hatchling, ready to name. |
 | [baby.dill](baby.dill) | 0 days old. |
 | [young.dill](young.dill) | 1 days old. |
-| [adult.dill](adult.dill) | 3 days old. |
+| [teen.dill](teen.dill) | 3 days old. |
+| [adult.dill](adult.dill) | 7 days old. |
 | [elder-first.dill](elder-first.dill) | Grandill, 14 days old. |
 | [elder-last.dill](elder-last.dill) | The Eternal Dill, 107 days old. |
 | [elder-second-lap.dill](elder-second-lap.dill) | Grandill, 110 days old. |
@@ -40,4 +41,4 @@ Run the command from the repository root with Node 24. It overwrites the generat
 | [eaten.dill](eaten.dill) | Adult after eating confirmation. |
 | [legacy-v1.dill](legacy-v1.dill) | Encrypted v1 save; imports as a living elder named Little Dill. |
 
-The baby, young, adult, and elder saves use Classic Dill. The variety files cover the other 5 varieties.
+The baby, young, teen, adult, and elder saves use Classic Dill. The variety files cover the other 5 varieties.
