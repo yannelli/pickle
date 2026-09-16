@@ -24,7 +24,7 @@ async function main() {
   life.advance(naming, now);
   add('naming', 'Unnamed hatchling, ready to name.', naming, { phase: 'naming' });
 
-  for (const [stage, days] of [['baby', 0], ['young', 1], ['adult', 3]]) {
+  for (const [stage, days] of [['baby', 0], ['young', 1], ['teen', 3], ['adult', 7]]) {
     add(stage, `${days} days old.`, living(days), { stage });
   }
   for (const [file, index] of [['elder-first', 0], ['elder-last', life.ELDERS.length - 1],
@@ -36,22 +36,22 @@ async function main() {
   }
   for (const variety of life.VARIETIES.filter(value => value.id !== 'dill')) {
     add(`variety-${variety.id}`, `${variety.name}, adult.`,
-      living(3, { variety: variety.id, brine: variety.brine, name: variety.name }),
+      living(7, { variety: variety.id, brine: variety.brine, name: variety.name }),
       { stage: 'adult', variety: variety.id });
   }
 
-  add('sleeping', 'Adult asleep with 10 energy.', living(3, { sleeping: true, energy: 10 }),
+  add('sleeping', 'Adult asleep with 10 energy.', living(7, { sleeping: true, energy: 10 }),
     { sleeping: true, energy: 10 });
-  add('low-energy', 'Adult awake with 0 energy; arcade entry is unavailable.', living(3, { energy: 0 }),
+  add('low-energy', 'Adult awake with 0 energy; arcade entry is unavailable.', living(7, { energy: 0 }),
     { energy: 0, dead: false });
-  add('sick', 'Adult with 5 food; feed to recover.', living(3, { fullness: 5, sick: true }),
+  add('sick', 'Adult with 5 food; feed to recover.', living(7, { fullness: 5, sick: true }),
     { sick: true, dead: false });
   add('near-death', 'Empty food; 1 hour remains before death at generation.',
-    living(3, { fullness: 0, sick: true, neglectMs: 47 * life.HOUR }),
+    living(7, { fullness: 0, sick: true, neglectMs: 47 * life.HOUR }),
     { sick: true, dead: false, neglectMs: 47 * life.HOUR });
-  const dead = living(3, { fullness: 0, sick: true, neglectMs: 48 * life.HOUR, dead: true, diedAt: now });
+  const dead = living(7, { fullness: 0, sick: true, neglectMs: 48 * life.HOUR, dead: true, diedAt: now });
   add('dead', 'Adult dead from neglect.', dead, { dead: true, sick: true });
-  add('eaten', 'Adult after eating confirmation.', living(3, { dead: true, eaten: true, diedAt: now }),
+  add('eaten', 'Adult after eating confirmation.', living(7, { dead: true, eaten: true, diedAt: now }),
     { dead: true, eaten: true });
   add('legacy-v1', 'Encrypted v1 save; imports as a living elder named Little Dill.',
     { version: 1, fullness: 70, happiness: 60, energy: 50, hygiene: 80, ageTicks: 700,
@@ -97,7 +97,7 @@ async function main() {
     '| --- | --- |',
     ...fixtures.map(({ file, description }) => `| [${file}.dill](${file}.dill) | ${description} |`),
     '',
-    'The baby, young, adult, and elder saves use Classic Dill. The variety files cover the other 5 varieties.',
+    'The baby, young, teen, adult, and elder saves use Classic Dill. The variety files cover the other 5 varieties.',
     ''
   ].join('\n');
   await fs.writeFile(path.join(directory, 'README.md'), guide);

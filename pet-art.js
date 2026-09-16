@@ -26,7 +26,14 @@
     mohawk: '<path d="m18-4 2-21 6 4 4-23 7 20 8-9 2 29Z" fill="currentColor"/>',
     vampire: '<path d="M2 19-9 4 0 62 15 73M61 19 73 4 65 62 51 73" fill="currentColor"/><path d="m13-7 19 14 17-14" fill="currentColor"/>',
     halo: '<ellipse cx="32" cy="-22" rx="27" ry="7" stroke-width="5"/><path d="M-12 40Q-28 12-18 66L-1 59M76 40Q91 12 83 66L66 59" fill="#e6ecc5"/>',
-    beret: '<ellipse cx="31" cy="-13" rx="34" ry="14" fill="currentColor"/><path d="M34-25 38-33" stroke-width="4"/>'
+    beret: '<ellipse cx="31" cy="-13" rx="34" ry="14" fill="currentColor"/><path d="M34-25 38-33" stroke-width="4"/>',
+    nerdglasses: '<circle cx="15" cy="38" r="8" fill="#dce7ac" fill-opacity=".35"/><circle cx="42" cy="38" r="8" fill="#dce7ac" fill-opacity=".35"/><path d="M23 37H34M-2 35 7 37M50 37 59 35"/><rect x="26" y="34" width="5" height="6" fill="#e6ecc5" stroke="none"/>',
+    fringe: '<path d="M0 8Q-5-26 30-27Q62-27 63 2Q56-12 40-9L54 34Q42 8 24-1Q8-1 0 8Z" fill="currentColor"/>',
+    backcap: '<path d="M8-3Q10-21 33-19Q51-17 54-3Z" fill="currentColor"/><path d="M-16-3H56" stroke-width="4"/><circle cx="33" cy="-19" r="2.5" fill="#dce7ac"/>',
+    beanie: '<path d="M6 2Q4-24 31-25Q58-24 56 2Z" fill="currentColor"/><path d="M3-1H59" stroke-width="7"/><circle cx="31" cy="-27" r="4" fill="#dce7ac"/>',
+    headset: '<path d="M-3 23V3Q30-27 65 3V23" stroke-width="5"/><rect x="-8" y="13" width="10" height="20" rx="4" fill="currentColor"/><rect x="60" y="13" width="10" height="20" rx="4" fill="currentColor"/><path d="M-3 32Q-3 48 14 50"/><circle cx="16" cy="50" r="3" fill="currentColor"/>',
+    shako: '<path d="M12-4V-34H51V-4Z" fill="currentColor"/><path d="M8-4H55" stroke-width="5"/><path d="M31-34V-44" stroke-width="4"/><circle cx="31" cy="-47" r="4" fill="#dce7ac"/><path d="M20-20H43" stroke="#dce7ac"/>',
+    collar: '<path d="M4 64 13 52 24 68ZM58 64 49 52 38 68Z" fill="#e6ecc5"/>'
   };
   const PROPS = {
     cane: '<path d="M76 100V57Q76 44 86 52" stroke-width="5"/>',
@@ -48,23 +55,38 @@
     palette: '<path d="M66 50Q98 37 102 64Q103 89 81 87L79 74Q54 73 66 50Z" fill="#dce7ac"/><g fill="currentColor"><circle cx="76" cy="54" r="3"/><circle cx="91" cy="52" r="3"/><circle cx="96" cy="66" r="3"/></g><path d="m70 99 18-36"/>',
     scepter: '<path d="M81 100V45" stroke-width="4"/><path d="m71 37 10-11 11 11-11 11Z" fill="#dce7ac"/>',
     clock: '<circle cx="82" cy="66" r="19" fill="#dce7ac"/><path d="M82 52V66L91 73M77 41H88"/>',
-    infinity: '<path d="M82 64C53 27 52 98 82 64C112 27 113 98 82 64Z" stroke-width="5"/>'
+    infinity: '<path d="M82 64C53 27 52 98 82 64C112 27 113 98 82 64Z" stroke-width="5"/>',
+    journal: '<rect x="68" y="50" width="22" height="30" rx="2" fill="currentColor"/><path d="M79 70 73 64Q70 60 74 58Q77 57 79 60Q81 57 84 58Q88 60 85 64Z" fill="#dce7ac" stroke="none"/>',
+    ball: '<circle cx="83" cy="70" r="15" fill="currentColor"/><path d="M68 70H98M83 55V85M72 60Q83 70 72 80M94 60Q83 70 94 80" stroke="#dce7ac"/>',
+    skateboard: '<rect x="74" y="30" width="12" height="62" rx="6" fill="currentColor"/><circle cx="90" cy="44" r="3.5" fill="#dce7ac"/><circle cx="90" cy="78" r="3.5" fill="#dce7ac"/>',
+    controller: '<path d="M66 60Q66 50 76 50H92Q102 50 102 60L104 74Q100 82 94 76L90 70H78L74 76Q68 82 64 74Z" fill="currentColor"/><path d="M73 60H79M76 57V63" stroke="#dce7ac"/><circle cx="91" cy="58" r="2" fill="#dce7ac"/><circle cx="96" cy="63" r="2" fill="#dce7ac"/>',
+    masks: '<path d="M64 50Q79 44 80 60Q79 76 72 76Q64 76 64 50Z" fill="#dce7ac"/><path d="M68 58h4M76 58h1M68 68q4 4 8 0"/><path d="M84 50Q99 44 100 60Q99 76 92 76Q84 76 84 50Z" fill="currentColor"/><path d="M88 58h4M96 58h1M88 70q4-4 8 0" stroke="#dce7ac"/>',
+    trumpet: '<path d="M64 62H88" stroke-width="4"/><path d="M88 54 104 48V76L88 70Z" fill="currentColor"/><path d="M70 62V56M76 62V56M82 62V56"/><circle cx="64" cy="62" r="3"/>'
   };
-  function render(pet, room, now = Date.now()) {
+  // Scenes for a content pickle: a rotating alternative to hopping.
+  const SCENES = {
+    hop: '',
+    shades: HATS.sunglasses,
+    book: '<path d="M8 52Q20 48 31 55Q42 48 54 52V72Q42 68 31 75Q20 68 8 72Z" fill="#dce7ac"/><path d="M31 55V75M14 58h10M14 63h10M38 58h10M38 63h10" stroke="#8b754a" stroke-width="1.5"/>',
+    lounge: HATS.sunglasses + '<g stroke="#c9a53a"><circle cx="-22" cy="-22" r="9" fill="#e6c95a"/><path d="M-22-38V-34M-22-10V-6M-38-22H-34M-10-22H-6M-33-33 -30-30M-14-14 -11-11M-33-11 -30-14M-14-30 -11-33"/></g><path d="M-16 92H84" stroke="#d9a066" stroke-width="7"/><path d="M-12 92H80" stroke="#e6ecc5" stroke-width="2" stroke-dasharray="6 6"/><rect x="70" y="72" width="12" height="18" fill="#dce7ac"/><path d="M76 72V58"/><path d="M64 58H88L76 50Z" fill="#c96a6a"/>',
+    fire: '<g stroke="none"><path d="M-38 92 -12 84M-38 84 -12 92" stroke="#7a5a3a" stroke-width="5" stroke-linecap="round"/><g class="flame"><path d="M-25 82Q-40 68-27 50Q-24 60-19 58Q-14 66-25 82Z" fill="#e0893a"/><path d="M-25 80Q-32 70-26 60Q-23 66-20 64Q-18 72-25 80Z" fill="#f1c85c"/></g></g><path d="M-6 66-30 54" stroke="#7a5a3a"/><rect x="-35" y="49" width="8" height="8" fill="#fffde9" stroke="#263f29" stroke-width="1.5"/>'
+  };
+  function render(pet, room, now = Date.now(), vibe = '') {
     const life = root.LittleDillLife;
     const variety = life.VARIETIES.find(item => item.id === pet.variety);
     room.dataset.shape = variety.shape;
     room.style.setProperty('--skin', variety.color); room.style.setProperty('--highlight', variety.light); room.style.setProperty('--shade', variety.dark);
-    const elder = life.elder(pet, now);
-    room.dataset.hat = elder?.hat || '';
+    const elder = life.elder(pet, now), teen = life.teen(pet, now), look = elder || teen;
+    room.dataset.hat = look?.hat || '';
+    const scene = SCENES[vibe] || '';
     const art = document.getElementById('elder-art');
-    const key = elder?.id || '';
-    art.toggleAttribute('hidden', !elder);
+    const key = (look?.id || '') + ':' + (scene ? vibe : '');
+    art.toggleAttribute('hidden', !look && !scene);
     if (art.dataset.form !== key) {
       art.dataset.form = key;
-      art.innerHTML = elder ? '<g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + HATS[elder.hat] + PROPS[elder.prop] + '</g>' : '';
+      art.innerHTML = look || scene ? '<g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">' + (look ? HATS[look.hat] + PROPS[look.prop] : '') + scene + '</g>' : '';
     }
-    if (elder) art.style.color = elder.accent;
+    art.style.color = look?.accent || '';
   }
   root.LittleDillArt = { render };
 })(globalThis);
