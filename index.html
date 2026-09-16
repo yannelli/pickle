@@ -183,6 +183,15 @@
     .room:has(.act-munch) .pickle { animation: idle 2.6s ease-in-out infinite; }
     .room:has(.act-munch) .pet-shadow { animation: shadow-idle 2.6s ease-in-out infinite; }
     .pet-actor.act-shimmy { animation: shimmy .7s ease-in-out both; }
+    .bath { display: none; position: absolute; left: 50%; bottom: -24px; width: 140px; height: 64px; transform: translateX(-50%); z-index: 3; pointer-events: none; }
+    .bath svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .act-bath .bath { display: block; }
+    .room .act-bath .pickle { animation: bath-bob .65s ease-in-out infinite; }
+    .room:has(.act-bath) .pet-shadow { animation: none; }
+    .bath-suds { transform-origin: 70px 20px; animation: bath-foam .8s ease-in-out infinite; }
+    .bath-bubble { position: absolute; bottom: 44px; left: 15px; width: 10px; height: 10px; border: 2px solid var(--pixel); border-radius: 50%; background: #f1f6d6cc; box-shadow: inset 2px 2px #fffde9; animation: bath-bubble 1.3s ease-out infinite; }
+    .bath-bubble:nth-of-type(2) { left: 114px; width: 14px; height: 14px; animation-delay: -.45s; }
+    .bath-bubble:nth-of-type(3) { left: 38px; width: 7px; height: 7px; animation-delay: -.9s; }
     .pet-actor.act-wake { animation: wake .9s ease-in-out both; }
     .pet-button:has(.act-wake) .pet-shadow { animation: shadow-hop .9s ease-in-out both; }
     .room[data-mood="scared"] .pickle { animation: tremble .16s linear infinite; }
@@ -372,6 +381,9 @@
     @keyframes munch { 0%, 100% { transform: scale(1, 1); } 10%, 30%, 50%, 70%, 90% { transform: scale(1.05, .95); } 20%, 40%, 60%, 80% { transform: scale(.98, 1.02); } }
     @keyframes chomp { 0% { height: 7px; } 100% { height: 2px; } }
     @keyframes shimmy { 0%, 100% { transform: rotate(0); } 15% { transform: rotate(-12deg) scale(1.04, .97); } 30% { transform: rotate(11deg); } 45% { transform: rotate(-9deg); } 60% { transform: rotate(7deg); } 75% { transform: rotate(-4deg); } 90% { transform: rotate(2deg); } }
+    @keyframes bath-bob { 0%, 100% { transform: translateY(2px) rotate(-3deg); } 50% { transform: translateY(5px) rotate(3deg); } }
+    @keyframes bath-foam { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.03, 1.12); } }
+    @keyframes bath-bubble { 0% { transform: translate(0, 0) scale(.65); opacity: .3; } 20% { opacity: 1; } 100% { transform: translate(8px, -52px) scale(1.1); opacity: 0; } }
     @keyframes tremble { 0%, 100% { transform: translateX(-1.5px) rotate(-2deg); } 50% { transform: translateX(1.5px) rotate(2deg); } }
     @keyframes bitten { 0% { transform: translateX(0) rotate(0); } 15% { transform: translateX(-7px) rotate(-10deg) scale(1.08, .9); } 40% { transform: translateX(5px) rotate(6deg); } 65% { transform: translateX(-3px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0); } }
     @keyframes wake { 0% { transform: scale(1.1, .9); } 30% { transform: translateY(-9px) scale(.95, 1.08); } 55% { transform: translateY(0) scale(1.08, .93); } 75% { transform: scale(.98, 1.02); } 100% { transform: scale(1, 1); } }
@@ -422,7 +434,7 @@
               </div>
               <div class="room" id="room" data-stage="seed" data-mood="idle">
                 <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
-                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
+                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i></span><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
                 <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><span class="crumbs" aria-hidden="true"></span><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
               </div>
@@ -798,7 +810,7 @@
       }
       function say(text, duration = 3500) { feedback = { text, until: Date.now() + duration }; }
       function act(name, duration) {
-        if (reduceMotion.matches) return;
+        if (reduceMotion.matches && name !== 'bath') return;
         clearTimeout(actTimer);
         actor.className = 'pet-actor';
         void actor.offsetWidth;
@@ -809,7 +821,7 @@
         clearTimeout(idleTimer);
         idleTimer = setTimeout(() => {
           const options = IDLE_ACTS[mood()];
-          if (options && !document.hidden && !game && Date.now() - lastAction > 1500) {
+          if (options && !document.hidden && !game && !actor.classList.contains('act-bath') && Date.now() - lastAction > 1500) {
             const [name, duration] = options[Math.floor(Math.random() * options.length)];
             act(name, duration);
           }
@@ -919,7 +931,7 @@
         else {
           state.hygiene = 100;
           const happy = addHappy(4);
-          say('squeaky clean. +' + happy + ' happy, too.'); effect('✧ squeaky clean ✧'); act('shimmy', 700); sfx('clean');
+          say('a sudsy little bath. +' + happy + ' happy, too.'); effect('✧ squeaky clean ✧'); act('bath', 2800); sfx('clean');
         }
         assessHealth(); recordCare(); save(); render();
       }
