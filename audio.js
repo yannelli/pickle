@@ -146,7 +146,7 @@
       if (song.kick.includes(beat) || (drop && beat === 11 && song.kick.length)) note(47, 1.7, .45, 'sine', 22);
       if (song.snare.includes(beat)) { hit(.12, .16, 1300); note(43, .7, .13, 'triangle'); }
       const level = song.hatLevel ?? 1;
-      if (song.open.includes(beat)) hit(.1, .075 * level, 5200);
+      if (song.open.includes(beat)) hit(.09, .065 * level, 6500);
       else if (beat % song.hats === 0) hit(.028, (beat % 2 ? .035 : .065) * level, 6500);
       if (song.kick.length && bar % 8 === 7 && beat >= 13) hit(.065, .09, 1900);
     }
