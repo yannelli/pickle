@@ -44,7 +44,7 @@ function environment(body = '<html></html>', options = {}, config = {}) {
 }
 
 test('game URL defaults and preserves configured paths, queries, and fragments', () => {
-  assert.equal(gameUrl(), 'https://littledill.app/');
+  assert.equal(gameUrl(), 'https://play.littledill.app/');
   assert.equal(gameUrl('https://play.example.com/game?mode=cozy#start'), 'https://play.example.com/game?mode=cozy#start');
   assert.equal(gameUrl('http://localhost:4178'), 'http://localhost:4178/');
 });
@@ -84,7 +84,7 @@ test('missing configuration uses the default game URL', async () => {
   rewrites.length = 0;
   const fixture = environment();
   await worker.fetch(new Request('https://website.example.com/'), fixture.env);
-  assert.equal(rewrites[0].value, 'https://littledill.app/');
+  assert.equal(rewrites[0].value, 'https://play.littledill.app/');
 });
 
 test('non-HTML assets and redirects pass through unchanged', async () => {
