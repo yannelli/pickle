@@ -107,7 +107,8 @@
   function assess(pet) {
     if (pet.phase !== 'living' || pet.dead) return;
     if (Math.min(pet.fullness, pet.happiness, pet.hygiene) <= 8) pet.sick = true;
-    if (STATS.every(key => pet[key] >= 30)) { pet.sick = false; pet.neglectMs = 0; }
+    if (Object.keys(RATES).every(key => pet[key] > 0)) pet.neglectMs = 0;
+    if (STATS.every(key => pet[key] >= 30)) pet.sick = false;
   }
   function advance(pet, now = Date.now()) {
     // A backward wall-clock adjustment must not count the same hours twice.
@@ -116,9 +117,12 @@
     if (pet.phase !== 'living' || pet.dead) { pet.updatedAt = now; return pet; }
     const elapsed = now - pet.updatedAt;
     const emptyAfter = Math.min(...Object.entries(RATES).map(([key, rate]) => pet[key] / rate * HOUR));
+    if (emptyAfter > 0) pet.neglectMs = 0;
     const untilDeath = emptyAfter + 48 * HOUR - pet.neglectMs;
     const duration = Math.min(elapsed, untilDeath);
     const hours = duration / HOUR;
+    const recoveryHours = Math.max(0, 30 - pet.energy) / (pet.sleeping ? 30 : 2);
+    if (recoveryHours <= hours && Object.entries(RATES).every(([key, rate]) => pet[key] - rate * recoveryHours >= 30)) pet.sick = false;
     for (const [key, rate] of Object.entries(RATES)) pet[key] = clamp(pet[key] - rate * hours);
     pet.energy = clamp(pet.energy + hours * (pet.sleeping ? 30 : 2));
     if (pet.energy >= 100) pet.sleeping = false;

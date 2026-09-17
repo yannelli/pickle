@@ -73,6 +73,30 @@ test('daily care supports indefinite life, all 32 elders, and another elder lap'
   assert.ok(life.elder(pet, NOW + 1000 * life.DAY).lap > 1);
 });
 
+test('partial care ends continuous neglect while sickness still needs full recovery', () => {
+  const pet = living({ fullness: 0, happiness: 20, energy: 5, sick: true, neglectMs: 47 * life.HOUR });
+  pet.fullness += 40;
+  life.assess(pet);
+  assert.equal(pet.neglectMs, 0);
+  assert.equal(pet.sick, true);
+  life.advance(pet, NOW + 21 * life.HOUR);
+  assert.equal(pet.dead, false);
+  assert.equal(pet.neglectMs, life.HOUR);
+});
+
+test('sickness recovery during elapsed time matches hourly updates awake and asleep', () => {
+  for (const sleeping of [false, true]) {
+    const open = living({ fullness: 80, happiness: 80, hygiene: 80, energy: 28, sick: true, sleeping });
+    const closed = structuredClone(open);
+    for (let hour = 1; hour <= 36; hour++) life.advance(open, NOW + hour * life.HOUR);
+    life.advance(closed, NOW + 36 * life.HOUR);
+    assert.equal(open.sick, false);
+    assert.equal(closed.sick, false);
+    life.advance(closed, NOW + 50 * life.HOUR);
+    assert.equal(closed.sick, true);
+  }
+});
+
 test('growth boundaries and elder forms use calendar time, including time away', () => {
   const pet = living();
   assert.equal(life.stage(pet, NOW + life.DAY - 1), 'baby');
