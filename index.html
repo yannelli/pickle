@@ -410,8 +410,79 @@
     .game-toolbar { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
     .game-settings { max-width: 805px; margin: 18px auto 28px; color: var(--ink); }
     .game-settings > summary { font-size: 13px; font-weight: 650; }
-    .page.is-expanded .playground { min-height: calc(100dvh - 76px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
-    .page.is-expanded .orbit { display: none; }
+    .page.is-expanded { max-width: none; padding: 0; }
+    .page.is-expanded .masthead { height: 72px; padding: 10px 16px; }
+    .page.is-expanded .brand { min-width: 0; }
+    .page.is-expanded .game-toolbar { flex-wrap: nowrap; flex-shrink: 0; }
+    .page.is-expanded .playground { height: calc(100dvh - 72px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); min-height: 480px; padding: 0; }
+    .page.is-expanded .orbit, .page.is-expanded .keychain, .page.is-expanded .device-wrap::after,
+    .page.is-expanded .device::before, .page.is-expanded .device-brand, .page.is-expanded .shell-footer { display: none; }
+    .page.is-expanded .device-wrap { width: 100%; height: 100%; min-height: 0; }
+    .page.is-expanded .device { display: flex; flex-direction: column; width: 100%; height: 100%; padding: 12px 16px; border-radius: 0; box-shadow: none; }
+    .page.is-expanded .bezel { display: flex; flex: 1; min-height: 0; padding: 6px; border-radius: 16px; }
+    .page.is-expanded .screen { display: flex; flex-direction: column; flex: 1; min-width: 0; height: auto; padding: 12px; overflow: auto; }
+    .page.is-expanded .screen-top, .page.is-expanded .meters, .page.is-expanded .lcd-message, .page.is-expanded .screen-hint { flex-shrink: 0; }
+    .page.is-expanded .room { flex: 1; min-height: 130px; height: auto; container-type: size; }
+    .page.is-expanded .room > * { --pet-scale: 1; }
+    @container (min-height: 250px) { .page.is-expanded .room > * { --pet-scale: 1.25; } }
+    @container (min-height: 350px) { .page.is-expanded .room > * { --pet-scale: 1.75; } }
+    @container (min-width: 360px) and (min-height: 500px) { .page.is-expanded .room > * { --pet-scale: 2.5; } }
+    .page.is-expanded .pet-button { transform: scale(var(--pet-scale)); }
+    .page.is-expanded .effect { top: calc(50% - 68px * var(--pet-scale)); font-size: calc(15px * var(--pet-scale)); }
+    .page.is-expanded .poop { left: max(8px, 50% - 114px * var(--pet-scale)); bottom: calc(50% - 84px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
+    .page.is-expanded .tombstone { transform: scale(var(--pet-scale)); }
+    .page.is-expanded .crumbs { left: calc(50% + 42px * var(--pet-scale)); bottom: calc(50% - 57px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
+    .page.is-expanded .room::after { --pet-scale: 1; bottom: calc(50% - 86px * var(--pet-scale)); }
+    @container (min-height: 250px) { .page.is-expanded .room::after { --pet-scale: 1.25; } }
+    @container (min-height: 350px) { .page.is-expanded .room::after { --pet-scale: 1.75; } }
+    @container (min-width: 360px) and (min-height: 500px) { .page.is-expanded .room::after { --pet-scale: 2.5; } }
+    .page.is-expanded .game { flex: 1; min-height: 202px; height: auto; display: flex; flex-direction: column; }
+    .page.is-expanded .game-menu, .page.is-expanded .jars, .page.is-expanded .memory-pads { flex: 1; min-height: 113px; }
+    .page.is-expanded .game-menu, .page.is-expanded .memory-pads, .page.is-expanded .jars, .page.is-expanded .catch-field { width: min(100%, 720px); align-self: center; }
+    .page.is-expanded .game-menu, .page.is-expanded .memory-pads { gap: 12px; }
+    .page.is-expanded .jars .jar { top: calc(50% - 36px); }
+    .page.is-expanded .catch-field { flex-shrink: 0; margin-block: auto; }
+    .page.is-expanded .nursery { overflow-y: auto; justify-content: safe center; }
+    .page.is-expanded .controls { margin-top: 12px; }
+    .page.is-expanded .pet-tools { flex-shrink: 0; }
+    .page.is-expanded .name-form, .page.is-expanded .hatch-progress { max-width: 360px; }
+    @media (min-width: 900px) and (min-height: 701px) {
+      .page.is-expanded .screen { padding: 20px 28px; }
+      .page.is-expanded .meters { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; padding-top: 18px; }
+      .page.is-expanded .screen-top, .page.is-expanded .stat-top, .page.is-expanded .screen-hint { font-size: 11px; }
+      .page.is-expanded .meter { height: 8px; }
+      .page.is-expanded .pet-caption, .page.is-expanded .lcd-message, .page.is-expanded .game-meta { font-size: 13px; }
+      .page.is-expanded .game-title { font-size: 16px; }
+      .page.is-expanded .game-choice { min-height: 132px; font-size: 14px; }
+      .page.is-expanded .game-choice b { font-size: 32px; }
+      .page.is-expanded .game-choice small { font-size: 11px; }
+      .page.is-expanded .game-footer button { min-height: 44px; font-size: 12px; padding: 8px 16px; }
+      .page.is-expanded .memory-pad { height: 120px; font-size: 32px; }
+    }
+    @media (max-height: 700px) {
+      .page.is-expanded .masthead { min-height: 56px; height: 56px; padding-block: 6px; }
+      .page.is-expanded .playground { height: calc(100dvh - 56px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); min-height: 0; }
+      .page.is-expanded .screen { padding: 8px; }
+      .page.is-expanded .screen:has(.game:not([hidden])) .screen-top,
+      .page.is-expanded .screen:has(.game:not([hidden])) .screen-hint { display: none; }
+      .page.is-expanded .screen:has(.game:not([hidden])) .meters { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; padding-top: 0; }
+      .page.is-expanded .game { min-height: 0; padding-top: 6px; }
+      .page.is-expanded .game-meta { height: auto; min-height: 13px; margin-top: 3px; }
+      .page.is-expanded .game-menu, .page.is-expanded .memory-pads { min-height: 98px; gap: 5px; }
+      .page.is-expanded .jars { min-height: 98px; }
+      .page.is-expanded .lcd-message { min-height: 28px; padding-block: 5px; }
+      .page.is-expanded .nursery { padding: 12px; gap: 6px; }
+      .page.is-expanded .nursery[data-phase="naming"] .brine-jar { display: none; }
+      .page.is-expanded .pet-tools { margin-top: 10px; }
+    }
+    @media (min-width: 600px) and (max-height: 600px) {
+      .page.is-expanded .device { display: grid; grid-template-columns: minmax(0, 1fr) 200px; grid-template-rows: 1fr auto 1fr; gap: 12px; padding: 8px; }
+      .page.is-expanded .bezel { grid-row: 1 / 4; }
+      .page.is-expanded .controls { grid-column: 2; grid-row: 2; gap: 8px; margin: 0; }
+      .page.is-expanded .pet-tools { grid-column: 2; grid-row: 3; align-self: start; margin: 0; }
+      .page.is-expanded .meters { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .page.is-expanded .nursery .brine-jar { display: none; }
+    }
     @media (max-width: 440px) { .masthead { gap: 8px; padding: 10px 0; height: auto; } .brand-logo { width: 100px; } .game-toolbar { gap: 4px; } .game-toolbar button { padding: 8px; font-size: 10px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .effect.pop, .sleep-z, .sweat { opacity: 1; } }
   </style>
@@ -540,8 +611,6 @@
       const fullscreenButton = $('fullscreen-toggle');
       const settings = $('game-settings');
       let expanded = false;
-      let resumeFullscreen = false;
-      let enteredFullscreen = Boolean(document.fullscreenElement);
       function setExpanded(value) {
         expanded = value;
         gamePage.classList.toggle('is-expanded', value);
@@ -549,32 +618,9 @@
         fullscreenButton.textContent = value ? 'Exit full screen' : 'Full screen';
         try { localStorage.setItem(DISPLAY_KEY, String(value)); } catch {}
       }
-      async function enterFullscreen() {
-        resumeFullscreen = false;
-        try { await document.documentElement.requestFullscreen?.(); } catch {}
-      }
       try { expanded = localStorage.getItem(DISPLAY_KEY) === 'true'; } catch {}
-      resumeFullscreen = expanded;
       setExpanded(expanded);
-      fullscreenButton.addEventListener('click', async () => {
-        resumeFullscreen = false;
-        if (expanded) {
-          if (document.fullscreenElement) {
-            try { await document.exitFullscreen(); } catch { return; }
-          }
-          setExpanded(false);
-        } else {
-          setExpanded(true);
-          await enterFullscreen();
-        }
-      });
-      document.addEventListener('fullscreenchange', () => {
-        if (document.fullscreenElement) enteredFullscreen = true;
-        else if (enteredFullscreen) { enteredFullscreen = false; setExpanded(false); }
-      });
-      gamePage.addEventListener('click', event => {
-        if (resumeFullscreen && !fullscreenButton.contains(event.target)) enterFullscreen();
-      });
+      fullscreenButton.addEventListener('click', () => { setExpanded(!expanded); if (game) positionJars(); });
       $('settings-toggle').addEventListener('click', () => {
         settings.open = !settings.open;
         if (settings.open) { settings.scrollIntoView({ block: 'start' }); settings.querySelector('summary').focus(); }
