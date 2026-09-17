@@ -54,7 +54,8 @@ function client(changes = {}, options = {}) {
     Math: Object.assign(Object.create(Math), { random: () => .1 }), navigator: { userAgent: '', platform: '' }, location: { protocol: 'http:' },
     setTimeout: (fn, delay) => schedule(fn, delay), clearTimeout: id => timers.delete(id),
     setInterval: (fn, delay) => schedule(fn, delay, delay), clearInterval: id => timers.delete(id),
-    matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound }, LittleDillSaves: options.saves };
+    matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound }, LittleDillSaves: options.saves,
+    LittleDillPhotos: options.photos };
   sandbox.window = sandbox;
   const dispatch = (name, event = {}) => { for (const cb of events.get(name) || []) cb(event); };
   document.fullscreenElement = options.alreadyFullscreen ? get('game-page') : null;
@@ -344,4 +345,31 @@ test('native exit after a fullscreen reload clears the preference', async () => 
   await app.document.exitFullscreen();
   assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'false');
   assert.equal(app.storage.get('little-dill.fullscreen.v1'), 'false');
+});
+
+test('photos pause the arcade and block care shortcuts until closed', () => {
+  let captured;
+  const app = client({}, { photos: { create: () => ({ open: state => {
+    captured = { ...state }; app.get('photo-dialog').showModal();
+  } }) } });
+  assert.equal(app.get('take-photo').hidden, false);
+  app.start('memory'); app.click('take-photo');
+  assert.equal(app.get('game').classList.contains('paused'), true);
+  assert.equal(captured.name, 'Little Dill');
+  app.key('p'); app.key('s'); app.key('1');
+  assert.equal(app.saved().sleeping, false);
+  assert.equal(app.saved().happiness, captured.happiness);
+  app.visible(false); app.visible(true);
+  assert.equal(app.get('game').classList.contains('paused'), true);
+  app.get('photo-dialog').close();
+  assert.equal(app.get('game').classList.contains('paused'), false);
+  app.until(() => !app.pads[0].disabled);
+});
+
+test('photos stay hidden for a dead pickle or an unavailable photo module', () => {
+  assert.equal(client().get('take-photo').hidden, true);
+  const app = client({ dead: true }, { photos: { create: () => ({ open() { assert.fail('dead pickle photo'); } }) } });
+  assert.equal(app.get('take-photo').hidden, true);
+  app.click('take-photo'); app.click('restart');
+  assert.equal(app.get('take-photo').hidden, true);
 });

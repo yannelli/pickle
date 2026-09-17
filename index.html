@@ -341,6 +341,19 @@
     .save-dialog .save-error { color: #993e24; font-size: 12px; }
     .save-error:empty { display: none; }
     .dialog-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .photo-dialog { width: min(520px, calc(100% - 24px)); }
+    .photo-heading { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+    .photo-heading h2 { margin-bottom: 4px; }
+    .photo-heading p { margin: 0 0 18px; color: #66764f; }
+    .photo-close { padding: 0; width: 44px; min-width: 44px; font-size: 24px; }
+    .photo-formats { display: flex; gap: 8px; margin-bottom: 16px; }
+    .photo-formats button { flex: 1; }
+    .photo-formats [aria-pressed="true"] { background: #dce5bf; border-color: #778d59; }
+    .photo-preview { display: grid; place-items: center; min-height: 180px; border-radius: 14px; background: #e6e8d9; overflow: hidden; }
+    .photo-preview img { display: block; max-width: 100%; max-height: min(48dvh, 430px); width: auto; height: auto; }
+    .photo-dialog .dialog-actions { margin-top: 12px; }
+    .photo-dialog .dialog-actions button { flex: 1; }
+    .photo-dialog .photo-status { min-height: 22px; margin: 10px 0 0; font-size: 12px; }
     .save-primary { background: #304a35; border-color: #304a35; color: #f7f5e9; }
     @media (hover: hover) { .action:hover:not(:disabled) { filter: brightness(1.04); transform: translateY(-1px); } .save-button:hover { background: #e6ebd2; } .save-primary:hover { background: #435f3d; } }
     .install-actions { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 10px; }
@@ -476,7 +489,7 @@
               <div class="control"><button class="action" id="play" aria-label="Open the dill arcade" aria-keyshortcuts="2"><svg aria-hidden="true"><use href="#icon-play"/></svg></button><span class="control-label" id="play-label">PLAY</span></div>
               <div class="control"><button class="action" id="clean" aria-label="Clean your pickle" aria-keyshortcuts="3"><svg aria-hidden="true"><use href="#icon-clean"/></svg></button><span class="control-label" id="clean-label">CLEAN</span></div>
             </div>
-            <div class="pet-tools"><button id="cuddle" type="button" aria-keyshortcuts="P">Pet +8 ♥</button><button id="sleep" type="button" aria-pressed="false" aria-keyshortcuts="S">Nap ☾</button></div>
+            <div class="pet-tools"><button id="cuddle" type="button" aria-keyshortcuts="P">Pet +8 ♥</button><button id="sleep" type="button" aria-pressed="false" aria-keyshortcuts="S">Nap ☾</button><button id="take-photo" type="button" hidden>Take photo ↗</button></div>
             <div class="shell-footer" aria-hidden="true"><span>BRINE, PLEASE.</span><span class="speaker"><i></i><i></i><i></i><i></i></span></div>
           </div>
         </div>
@@ -500,8 +513,16 @@
     <p class="save-error" id="backup-error" role="alert"></p><p id="backup-progress" role="status"></p>
     <div class="dialog-actions"><button class="save-button" type="button" id="backup-cancel">Cancel</button><label class="save-button save-file-control">Choose another file<input id="backup-file-other" type="file" aria-label="Choose another save file"></label><button class="save-button save-primary" type="button" id="backup-restore" hidden>Restore this pickle</button></div>
   </dialog>
+  <dialog class="save-dialog photo-dialog" id="photo-dialog" aria-labelledby="photo-title" aria-describedby="photo-description">
+    <div class="photo-heading"><div><h2 id="photo-title">A pretty big dill.</h2><p id="photo-description">Your pocket pickle, ready for the group chat.</p></div><button class="save-button photo-close" id="photo-close" type="button" aria-label="Close photo" autofocus>×</button></div>
+    <div class="photo-formats" role="group" aria-label="Photo size"><button class="save-button" id="photo-square" type="button" aria-pressed="true">Post · 1:1</button><button class="save-button" id="photo-story" type="button" aria-pressed="false">Story · 9:16</button></div>
+    <div class="photo-preview" id="photo-preview" aria-busy="true"><img id="photo-image" alt="" hidden></div>
+    <p class="photo-status" id="photo-status" role="status" aria-live="polite"></p>
+    <div class="dialog-actions"><button class="save-button" id="photo-download" type="button" disabled>Download PNG ↓</button><button class="save-button save-primary" id="photo-share" type="button" disabled>Share photo ↗</button></div>
+  </dialog>
   <script src="./pet-life.js"></script>
   <script src="./pet-art.js"></script>
+  <script src="./photos.js"></script>
   <script src="./reminders.js"></script>
   <script src="./save-codec.js"></script>
   <script src="./audio.js"></script>
@@ -603,6 +624,15 @@
       let selectedBrine = 'classic';
       let collectionKey = '';
       const reminders = window.LittleDillReminders?.create(() => state);
+      const photos = window.LittleDillPhotos?.create();
+      const photoDialog = $('photo-dialog');
+      $('take-photo').addEventListener('click', () => {
+        syncTime(true); render();
+        if (!photos || state.phase !== 'living' || state.dead || snack) return;
+        pauseGame();
+        photos.open(state, room);
+      });
+      photoDialog.addEventListener('close', resumeGame);
 
       function parseSaved(raw) {
         try { return Life.restore(JSON.parse(raw)); } catch { return null; }
@@ -842,6 +872,8 @@
         $('sleep').textContent = state.sleeping ? 'Wake ☀' : 'Nap ☾';
         $('sleep').setAttribute('aria-pressed', String(state.sleeping));
         $('sleep').disabled = state.phase !== 'living' || state.dead || !!game || !!snack;
+        $('take-photo').hidden = !photos || state.phase !== 'living' || state.dead;
+        $('take-photo').disabled = !!snack;
         $('cuddle').disabled = state.phase !== 'living' || state.dead || !!game || state.sleeping || !!snack;
         sound?.setResting(state.sleeping || state.dead);
         $('tombstone').hidden = !state.dead;
@@ -1018,7 +1050,7 @@
         $('game').classList.add('paused'); render();
       }
       function resumeGame() {
-        if (!game?.paused || document.hidden || backupDialog.open) return;
+        if (!game?.paused || document.hidden || backupDialog.open || photoDialog.open) return;
         game.paused = false;
         for (const timer of gameTimers) armTimer(timer);
         $('game').classList.remove('paused'); render();
@@ -1231,7 +1263,7 @@
         selectedBrine = 'classic'; $('pickle-name').value = ''; say('a fresh start. a brand-new little dill.', 5000); sfx('wake'); save(); render(); reminders?.sync(); $('brine-start').focus({ preventScroll: true });
       });
       document.addEventListener('keydown', event => {
-        if (backupDialog.open || event.altKey || event.ctrlKey || event.metaKey || event.repeat || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
+        if (backupDialog.open || photoDialog.open || event.altKey || event.ctrlKey || event.metaKey || event.repeat || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable) return;
         if (['1', '2', '3'].includes(event.key)) { event.preventDefault(); care(Number(event.key) - 1); }
         if (event.key.toLowerCase() === 'p') { event.preventDefault(); petPickle(); }
         if (event.key.toLowerCase() === 's') { event.preventDefault(); toggleSleep(); }
