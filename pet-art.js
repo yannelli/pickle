@@ -91,8 +91,8 @@
     room.style.setProperty('--skin', variety.color); room.style.setProperty('--highlight', variety.light); room.style.setProperty('--shade', variety.dark);
     const stage = life.stage(pet, now);
     const elder = life.elder(pet, now), teen = life.teen(pet, now), look = elder || teen;
-    room.dataset.hat = look?.hat || '';
     const worn = WORN[vibe] || {}, [fx, fy] = FACE_OFFSET[stage] || [0, 0], ay = ARM_OFFSET[stage] || 0;
+    room.dataset.hat = worn.face === HATS.sunglasses ? 'sunglasses' : look?.hat || '';
     const wornArt = (look ? HATS[look.hat] + PROPS[look.prop] : '') +
       (worn.face ? '<g transform="translate(' + fx + ' ' + fy + ')">' + worn.face + '</g>' : '') +
       (worn.arm ? '<g transform="translate(0 ' + ay + ')">' + worn.arm + '</g>' : '');

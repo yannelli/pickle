@@ -272,3 +272,24 @@ test('a wrong memory note stops glowing when the result is shown', () => {
   assert.equal(app.get('game-again').hidden, false);
   assert.ok(app.pads.every(pad => !pad.classList.contains('lit')));
 });
+
+test('planting a new pickle after an import retires the undo option', async () => {
+  let restored;
+  const app = client({}, { saves: { MAX_FILE_BYTES: 16384, decode: async () => restored } });
+  restored = { savedAt: app.saved().updatedAt, pet: { ...app.saved(), name: 'New Dill', dead: true, sleeping: false, diedAt: app.saved().updatedAt } };
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change');
+  app.click('backup-restore');
+  assert.equal(app.get('undo-import').hidden, false);
+  app.click('restart');
+  assert.equal(app.saved().phase, 'new');
+  assert.equal(app.get('undo-import').hidden, true);
+  app.click('undo-import');
+  assert.equal(app.saved().phase, 'new');
+});
+
+test('a legacy save left for over a minute is greeted as missed', () => {
+  const app = client({ updatedAt: 1800000000000 - 3600000 });
+  assert.match(app.get('message').textContent, /missed you/);
+});
