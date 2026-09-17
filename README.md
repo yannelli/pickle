@@ -1,4 +1,4 @@
-![A smiling little dill with a virtual-pet keychain](assets/illustrations/banner.webp)
+![A smiling little dill with a virtual-pet keychain](assets/social/og.png)
 
 # little dill.
 
