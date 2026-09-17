@@ -23,6 +23,7 @@ function client(changes = {}, options = {}) {
     addEventListener(name, callback) { if (!this.listeners.has(name)) this.listeners.set(name, []); this.listeners.get(name).push(callback); }
     click() { if (!this.disabled) this.dispatch('click'); }
     dispatch(name, event = {}) { return Promise.all((this.listeners.get(name) || []).map(callback => callback({ target: this, currentTarget: this, ...event }))); }
+    contains(element) { return element === this; }
     focus() { document.activeElement = this; }
     showModal() { this.open = true; }
     close() { this.open = false; this.dispatch('close'); }
@@ -42,7 +43,7 @@ function client(changes = {}, options = {}) {
     addEventListener: (name, cb) => { if (!events.has(name)) events.set(name, []); events.get(name).push(cb); } };
   const pet = { version: 1, fullness: 60, happiness: 20, energy: 80, hygiene: 60, ageTicks: 120, neglect: 0,
     sleeping: false, sick: false, dead: false, updatedAt: now, ...changes };
-  const storage = new Map([['little-dill.v1', JSON.stringify(pet)]]);
+  const storage = new Map([['little-dill.v1', JSON.stringify(pet)], ...Object.entries(options.storage || {})]);
   const localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => { if (options.blockStorage) throw Error('blocked'); storage.set(key, value); } };
   let preferences = { music: true, sfx: true, volume: .45 };
   const cues = [];
@@ -55,8 +56,11 @@ function client(changes = {}, options = {}) {
     setInterval: (fn, delay) => schedule(fn, delay, delay), clearInterval: id => timers.delete(id),
     matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound }, LittleDillSaves: options.saves };
   sandbox.window = sandbox;
-  vm.runInNewContext(source, sandbox);
   const dispatch = (name, event = {}) => { for (const cb of events.get(name) || []) cb(event); };
+  document.fullscreenElement = options.alreadyFullscreen ? get('game-page') : null;
+  document.documentElement = options.fullscreen || {};
+  document.exitFullscreen = async () => { document.fullscreenElement = null; dispatch('fullscreenchange'); };
+  vm.runInNewContext(source, sandbox);
   const run = duration => {
     const end = now + duration;
     while (true) {
@@ -292,4 +296,52 @@ test('planting a new pickle after an import retires the undo option', async () =
 test('a legacy save left for over a minute is greeted as missed', () => {
   const app = client({ updatedAt: 1800000000000 - 3600000 });
   assert.match(app.get('message').textContent, /missed you/);
+});
+
+
+test('fullscreen preference restores the expanded layout and persists an explicit exit', async () => {
+  const app = client({}, { storage: { 'little-dill.fullscreen.v1': 'true' } });
+  assert.equal(app.get('game-page').classList.contains('is-expanded'), true);
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'true');
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('game-page').classList.contains('is-expanded'), false);
+  assert.equal(app.storage.get('little-dill.fullscreen.v1'), 'false');
+});
+
+test('unavailable or rejected fullscreen keeps a usable expanded layout', async () => {
+  for (const fullscreen of [{}, { requestFullscreen: async () => { throw Error('denied'); } }]) {
+    const app = client({}, { fullscreen });
+    await app.get('fullscreen-toggle').dispatch('click');
+    assert.equal(app.get('game-page').classList.contains('is-expanded'), true);
+    assert.equal(app.storage.get('little-dill.fullscreen.v1'), 'true');
+    app.click('pet');
+    assert.equal(app.saved().happiness, 28);
+    await app.get('fullscreen-toggle').dispatch('click');
+    assert.equal(app.get('game-page').classList.contains('is-expanded'), false);
+  }
+});
+
+test('fullscreen remains usable when preference storage is blocked', async () => {
+  const app = client({}, { blockStorage: true });
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'true');
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'false');
+});
+
+
+test('restored fullscreen waits for a gesture and requests it once', async () => {
+  let requests = 0;
+  const app = client({}, { storage: { 'little-dill.fullscreen.v1': 'true' }, fullscreen: { requestFullscreen: async () => { requests++; } } });
+  assert.equal(requests, 0);
+  await app.get('game-page').dispatch('click', { target: app.get('pet') });
+  await app.get('game-page').dispatch('click', { target: app.get('pet') });
+  assert.equal(requests, 1);
+});
+
+test('native exit after a fullscreen reload clears the preference', async () => {
+  const app = client({}, { storage: { 'little-dill.fullscreen.v1': 'true' }, alreadyFullscreen: true });
+  await app.document.exitFullscreen();
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'false');
+  assert.equal(app.storage.get('little-dill.fullscreen.v1'), 'false');
 });
