@@ -44,30 +44,13 @@
     svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
     .icon-library { position: absolute; width: 0; height: 0; overflow: hidden; }
     .page { max-width: 1240px; margin: auto; padding: 0 46px; }
-    .masthead { height: 93px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .masthead { min-height: 72px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .brand { display: flex; gap: 10px; align-items: center; font-size: 25px; font-weight: 850; letter-spacing: -1.3px; }
     .brand-logo { display: block; width: 160px; height: auto; max-width: 100%; }
-    .brand-banner { display: block; max-width: 805px; margin: 12px auto 0; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; }
-    .brand-banner img { display: block; width: 100%; height: auto; }
-    .edition { font-size: 10px; letter-spacing: 2px; font-weight: 650; display: flex; align-items: center; gap: 10px; }
-    .edition::before { content: ''; width: 6px; height: 6px; background: #839952; border-radius: 50%; }
-    .intro { text-align: center; padding-top: 38px; }
-    .eyebrow { font-size: 10px; letter-spacing: 3.1px; font-weight: 750; margin: 0 0 11px; color: #7c8667; }
-    h1 { font-size: clamp(38px, 4.6vw, 59px); line-height: 1.12; font-weight: 750; letter-spacing: -2.9px; margin: 0; }
-    h1 em { font-family: Georgia, 'Times New Roman', serif; font-weight: 400; color: #779349; }
-    .intro > p:last-child { color: #7a816e; font-size: 14px; margin: 13px 0 0; }
     .playground { position: relative; min-height: 583px; display: grid; place-items: center; padding: 29px 0 31px; }
     .orbit { position: absolute; width: 620px; height: 450px; border: 1px dashed #daddc5; border-radius: 50%; transform: rotate(-22deg); pointer-events: none; }
     .orbit::before, .orbit::after { content: '+'; position: absolute; font-size: 27px; color: #b8c397; background: var(--paper); top: 210px; left: -9px; }
     .orbit::after { top: 213px; left: auto; right: -9px; }
-    .note { position: absolute; z-index: 1; width: 165px; font-size: 14px; line-height: 1.65; }
-    .note-left { left: calc(50% - 423px); top: 172px; transform: rotate(-7deg); }
-    .note-kicker { display: block; font-size: 10px; text-transform: uppercase; font-weight: 750; letter-spacing: 2px; color: #8b9677; margin-bottom: 7px; }
-    .note strong { font-family: Georgia, serif; font-style: italic; font-weight: 400; font-size: 23px; line-height: 1.3; }
-    .note-left svg { width: 75px; height: 54px; margin: 14px 0 0 64px; color: #9bab7c; stroke-width: 1.4; }
-    .note-right { right: calc(50% - 420px); top: 287px; transform: rotate(6deg); }
-    .note-right > svg { color: #9eae76; width: 33px; height: 33px; margin-bottom: 8px; }
-    .note-right p { font-size: 12px; color: #859074; margin: 7px 0 0; }
     .device-wrap { position: relative; z-index: 2; }
     .device-wrap::after { content: ''; position: absolute; width: 300px; height: 25px; background: #435a2421; filter: blur(13px); left: 50%; bottom: -19px; transform: translateX(-50%); border-radius: 50%; z-index: -1; }
     .keychain { position: absolute; right: 21px; top: -18px; width: 48px; height: 51px; border: 7px solid #bbbfa9; border-radius: 50%; box-shadow: inset 1px 2px 1px #8e947a, 2px 1px 0 #eaecdd; transform: rotate(31deg); z-index: -1; }
@@ -338,13 +321,6 @@
     .audio-volume { display: flex; flex-direction: column; gap: 3px; font-size: 9px; }
     .audio-volume input { width: 88px; height: 28px; accent-color: var(--pixel); margin: 0; }
     .room.is-dead .tombstone { margin-top: -19px; }
-    .care-strip { max-width: 805px; margin: 13px auto 0; display: grid; grid-template-columns: repeat(3, 1fr); padding: 24px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-    .care-tip { display: flex; justify-content: center; gap: 12px; padding: 0 15px; }
-    .care-tip + .care-tip { border-left: 1px solid var(--line); }
-    .tip-icon { border: 1px solid #d9dec5; border-radius: 50%; flex-shrink: 0; width: 36px; height: 36px; display: grid; place-items: center; }
-    .tip-icon svg { width: 18px; height: 18px; color: #6e8450; }
-    .care-tip h2 { font-size: 11px; font-weight: 750; margin: 1px 0 4px; }
-    .care-tip p { margin: 0; font-size: 10px; color: #8a8d7a; }
     .below { text-align: center; padding: 18px 0 22px; }
     .saved { margin: 0; font-size: 10px; color: #8b917e; }
     .saved::before { content: ''; width: 5px; height: 5px; border-radius: 50%; display: inline-block; background: #8b9f69; margin-right: 7px; vertical-align: 1px; }
@@ -377,9 +353,7 @@
     details { max-width: 610px; margin: 14px auto 0; font-size: 11px; color: #7d886d; line-height: 1.8; }
     summary { cursor: pointer; list-style: none; text-decoration: underline; text-underline-offset: 4px; width: fit-content; margin: auto; padding: 5px 12px; }
     summary::-webkit-details-marker { display: none; }
-    details p { text-align: left; padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; }
-    footer { display: flex; justify-content: space-between; padding: 22px 0; margin-top: 7px; font-size: 9px; letter-spacing: .5px; color: #929581; }
-    footer span:last-child { font-family: Georgia, serif; font-style: italic; font-size: 12px; }
+    .below details p { text-align: left; padding: 12px 18px; border: 1px solid var(--line); border-radius: 12px; }
     @keyframes idle { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.04, .965); } }
     @keyframes shadow-idle { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(1.06); } }
     @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 95.5%, 97.5% { transform: scaleY(.12); } }
@@ -414,12 +388,18 @@
     @keyframes bitten { 0% { transform: translateX(0) rotate(0); } 15% { transform: translateX(-7px) rotate(-10deg) scale(1.08, .9); } 40% { transform: translateX(5px) rotate(6deg); } 65% { transform: translateX(-3px) rotate(-3deg); } 100% { transform: translateX(0) rotate(0); } }
     @keyframes wake { 0% { transform: scale(1.1, .9); } 30% { transform: translateY(-9px) scale(.95, 1.08); } 55% { transform: translateY(0) scale(1.08, .93); } 75% { transform: scale(.98, 1.02); } 100% { transform: scale(1, 1); } }
     @keyframes reward { 0% { opacity: 0; transform: translate(-50%, 12px); } 20%, 60% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
-    @media (min-width: 1500px) and (min-height: 950px) { .intro { padding-top: 55px; } .playground { padding-top: 43px; padding-bottom: 45px; min-height: 620px; } }
-    @media (max-width: 960px) { .note-left { left: calc(50% - 350px); width: 130px; } .note-right { right: calc(50% - 347px); width: 125px; } .note strong { font-size: 20px; } .orbit { width: 580px; } }
-    @media (max-width: 760px) { .page { padding: 0 24px; } .masthead { height: 64px; } .brand-logo { width: 132px; } .brand { font-size: 23px; } .edition { font-size: 8px; letter-spacing: 1.2px; } .note { display: none; } .orbit { width: 430px; height: 370px; max-width: calc(100vw - 48px); transform: none; } .intro { padding-top: 16px; } .eyebrow { display: none; } h1 { font-size: 32px; letter-spacing: -1.6px; } .intro > p:last-child { font-size: 12px; margin-top: 6px; } .playground { min-height: 0; padding: 32px 0 26px; } .care-tip { gap: 9px; padding: 0 10px; } .tip-icon { display: none; } }
-    @media (max-width: 440px) { .page { padding: 0 17px; } .edition { font-size: 7px; letter-spacing: .8px; gap: 6px; } .device { width: 340px; padding: 27px 24px 21px; border-radius: 92px 92px 101px 101px / 78px 78px 106px 106px; } .device-brand { font-size: 12px; margin-bottom: 13px; } .screen { padding: 11px 11px 0; height: 365px; } .bezel { padding: 8px; } .meters { column-gap: 13px; } .playground { padding: 34px 0 26px; } .care-strip { margin-top: 3px; padding: 20px 0; } .care-tip { padding: 0 5px; text-align: center; } .care-tip h2 { font-size: 10px; } .care-tip p { font-size: 8px; } footer { font-size: 8px; gap: 12px; } footer span:last-child { font-size: 11px; } }
-    @media (display-mode: standalone) { .intro, .edition, .brand-banner { display: none; } .masthead { height: 60px; } .playground { min-height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 8px 0 16px; } .install-actions { display: none; } }
-    @media (max-width: 370px) { .page { padding: 0 12px; } .device { width: 294px; padding: 26px 17px 22px; border-radius: 85px 85px 96px 96px / 72px 72px 96px 96px; } .bezel { padding: 7px; } .screen { padding-left: 9px; padding-right: 9px; } .controls { gap: 19px; } .action { width: 55px; height: 52px; } .edition { max-width: 120px; line-height: 1.6; } h1 { font-size: 35px; } .intro > p:last-child { font-size: 11px; } }
+    @media (min-width: 1500px) and (min-height: 950px) { .playground { padding-top: 43px; padding-bottom: 45px; min-height: 620px; } }
+    @media (max-width: 960px) { .orbit { width: 580px; } }
+    @media (max-width: 760px) { .page { padding: 0 24px; } .masthead { height: 64px; } .brand-logo { width: 132px; } .brand { font-size: 23px; } .orbit { width: 430px; height: 370px; max-width: calc(100vw - 48px); transform: none; } .playground { min-height: 0; padding: 32px 0 26px; } }
+    @media (max-width: 440px) { .page { padding: 0 17px; } .device { width: 340px; padding: 27px 24px 21px; border-radius: 92px 92px 101px 101px / 78px 78px 106px 106px; } .device-brand { font-size: 12px; margin-bottom: 13px; } .screen { padding: 11px 11px 0; height: 365px; } .bezel { padding: 8px; } .meters { column-gap: 13px; } .playground { padding: 34px 0 26px; } }
+    @media (display-mode: standalone) { .masthead { min-height: 60px; } .playground { min-height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 8px 0 16px; } .install-actions { display: none; } }
+    @media (max-width: 370px) { .page { padding: 0 12px; } .device { width: 294px; padding: 26px 17px 22px; border-radius: 85px 85px 96px 96px / 72px 72px 96px 96px; } .bezel { padding: 7px; } .screen { padding-left: 9px; padding-right: 9px; } .controls { gap: 19px; } .action { width: 55px; height: 52px; } }
+    .game-toolbar { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .game-settings { max-width: 805px; margin: 18px auto 28px; color: var(--ink); }
+    .game-settings > summary { font-size: 13px; font-weight: 650; }
+    .page.is-expanded .playground { min-height: calc(100dvh - 76px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+    .page.is-expanded .orbit { display: none; }
+    @media (max-width: 440px) { .masthead { gap: 8px; padding: 10px 0; height: auto; } .brand-logo { width: 100px; } .game-toolbar { gap: 4px; } .game-toolbar button { padding: 8px; font-size: 10px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .effect.pop, .sleep-z, .sweat { opacity: 1; } }
   </style>
 </head>
@@ -431,13 +411,14 @@
     <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.5 4.5a5 5 0 0 0-7 0L12 6l-1.5-1.5a5 5 0 0 0-7 7L12 20l8.5-8.5a5 5 0 0 0 0-7Z"/></symbol>
     <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5Z"/><path d="M17 3v4m-2-2h4"/></symbol>
   </defs></svg>
-  <div class="page">
-    <header class="masthead"><div class="brand"><img class="brand-logo" src="./assets/brand/logo.svg" width="466" height="128" alt="little dill."></div><div class="edition">THE ORIGINAL POCKET PICKLE</div></header>
+  <div class="page" id="game-page">
+    <header class="masthead">
+      <a class="brand" href="https://littledill.app/" aria-label="About little dill"><img class="brand-logo" src="./assets/brand/logo.svg" width="466" height="128" alt="little dill."></a>
+      <nav class="game-toolbar" aria-label="Game options"><button class="save-button" id="settings-toggle" type="button" aria-controls="game-settings" aria-expanded="false">Settings &amp; saves</button><button class="save-button" id="fullscreen-toggle" type="button" aria-pressed="false">Full screen</button></nav>
+    </header>
     <main>
-      <section class="intro" aria-labelledby="title"><p class="eyebrow">SMALL PET. BIG FEELINGS.</p><h1>Kind of a big <em>dill.</em></h1><p>A little brine. A little love. A tiny friend to look after.</p></section>
       <section class="playground" aria-label="Your pickle pet">
         <div class="orbit" aria-hidden="true"></div>
-        <aside class="note note-left" aria-hidden="true"><span class="note-kicker">Meet your new dependent</span><strong>100% pickle.<br>100% your problem.</strong><svg viewBox="0 0 80 55"><path d="M3 8c10 26 40 35 64 21m-13-4 16 3-9 13"/></svg></aside>
         <div class="device-wrap"><div class="keychain" aria-hidden="true"></div>
           <div class="device">
             <div class="device-brand" aria-hidden="true"><span>✳</span> PICKLE <span>✳</span></div>
@@ -499,24 +480,15 @@
             <div class="shell-footer" aria-hidden="true"><span>BRINE, PLEASE.</span><span class="speaker"><i></i><i></i><i></i><i></i></span></div>
           </div>
         </div>
-        <aside class="note note-right" aria-hidden="true"><svg><use href="#icon-heart"/></svg><br><strong>A little attention<br>goes a long way.</strong><p>Feed. Play. Clean. Repeat.<br>You're doing great, probably.</p></aside>
       </section>
       <section class="pet-profile" id="pet-profile" aria-labelledby="profile-name" hidden><h2 id="profile-name"></h2><p id="profile-kind"></p><p class="pet-quip" id="profile-quip"></p><p id="care-outlook"></p><p id="growth-outlook"></p></section>
       <details class="elder-club" id="elder-club" hidden><summary id="elder-summary">The elder club · 32 excellent ways to get weird</summary><div class="elder-grid" id="elder-grid"></div></details>
-      <section class="reminder-card" aria-labelledby="reminder-title"><div><h2 id="reminder-title">A gentle nudge. Never a nag.</h2><p>Optional care reminders. At most one a day, quiet from 10pm to 9am. No repeat nudges if you’re away.</p><p id="reminder-status" role="status">Your pickle is happy with a daily check-in.</p></div><div class="reminder-actions"><button class="save-button" id="reminder-toggle" type="button">Enable reminders</button><button class="save-button" id="reminder-test" type="button" hidden>Send a test</button></div></section>
+      <details class="game-settings" id="game-settings"><summary>Settings &amp; saves</summary>
+      <section class="reminder-card" aria-labelledby="reminder-title"><div><h2 id="reminder-title">Care reminders</h2><p>Optional care reminders. At most one a day, quiet from 10pm to 9am. No repeat nudges if you’re away.</p><p id="reminder-status" role="status">Your pickle is happy with a daily check-in.</p></div><div class="reminder-actions"><button class="save-button" id="reminder-toggle" type="button">Enable reminders</button><button class="save-button" id="reminder-test" type="button" hidden>Send a test</button></div></section>
       <section class="jukebox" aria-label="Sound controls"><p class="track-title">♫ PICKLE RADIO<span>Four original 8-bit tracks</span></p><div class="audio-controls"><select id="music-track" aria-label="Music track"><option value="0">Brine Time · 132 BPM</option><option value="1">Dill Disco · 120 BPM</option><option value="2">Moonlight Marinade · 88 BPM</option><option value="3">Spicy Sprint · 156 BPM</option></select><button id="music-toggle" type="button" aria-pressed="true">Music on</button><button id="sfx-toggle" type="button" aria-pressed="true">SFX on</button><label class="audio-volume">Volume<input id="volume" type="range" min="0" max="100" value="45" aria-label="Audio volume"></label></div></section>
-      <section class="care-strip" aria-label="Quick care guide">
-        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-jar"/></svg></span><div><h2>Keep it in good brine.</h2><p>Full belly, happy pickle.</p></div></div>
-        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-heart"/></svg></span><div><h2>Make a little time.</h2><p>Even pickles need to play.</p></div></div>
-        <div class="care-tip"><span class="tip-icon"><svg aria-hidden="true"><use href="#icon-moon"/></svg></span><div><h2>Let your dill chill.</h2><p>Use Nap to rest. Pet for happy.</p></div></div>
-      </section>
       <div class="below"><p class="saved" id="save-status" role="status">Your little friend is saved on this browser.</p><div class="save-actions" aria-label="Progress backups"><button class="save-button" id="download-save" type="button">Download save ↓</button><label class="save-button save-file-control" id="import-save" tabindex="-1">Import save ↑<input id="backup-file" type="file" aria-label="Import save"></label><button class="save-button" id="undo-import" type="button" hidden>Undo import ↶</button></div><p class="backup-notice" id="backup-notice" role="status"></p><div class="install-actions" id="install-actions"><button class="save-button" id="install-app" type="button" hidden>Install little dill ↓</button><p class="install-hint" id="install-hint" hidden>Add little dill to your home screen: tap Share, then <b>Add to Home Screen</b>.</p></div><details><summary>A tiny care manual ↗</summary><p>Use <b>Feed</b> for brine, <b>Play</b> for three arcade games, and <b>Clean</b> to tidy up. The <b>1, 2, 3 keys</b> work, too. <b>Tap your pickle</b> or press <b>P</b> for +8 happiness every 2 seconds, with no energy cost. Feeding and cleaning also bring a little joy. Use <b>Nap</b> or <b>S</b> to sleep or wake; naps restore energy.<br><br><b>Heart hunt:</b> follow the heart through three rounds of shuffling jars. <b>Dill says:</b> repeat a growing sequence of notes and shapes. <b>Brine catch:</b> move your basket with 1/2/3, arrow keys, or a tap; catch hearts and dodge salt (×). Each game costs 6 energy and awards 10–34 happiness on completion, including a reward for trying. Use <b>Play again</b> for another round, or <b>Esc</b> to leave. Leaving the page or opening a save pauses the arcade without losing your entry energy. Best scores stay in this browser.<br><br>Start by putting a cucumber into Classic, Garlic, or Spicy brine. After one real minute, one of six varieties hatches and you give it a name. Baby pickles become young at 1 day, teens at 3 days, adults at 7 days, and elders at 14 days. Teens try on a new stereotype every day. A content pickle hops, chills in sunglasses, lounges in the sun, reads, or sits by a campfire. Elders discover a new look every 3 days, with 32 funny forms that cycle forever.<br><br>One daily check-in is plenty. Needs change by real elapsed time, with the app open or closed. Food loses 36 points a day, happiness 24, and hygiene 30. Energy recovers by 2 points an hour, or 30 during a nap, and a full pickle wakes automatically. Feed adds 40 food. A very low need can cause sickness; restore every meter to at least 30 to recover. An empty food, happiness, or hygiene meter must stay empty for 48 hours before your pickle passes away. Pickles never die of old age.<br><br>Progress saves automatically in this browser. Use <b>Download save</b> to keep an encrypted backup, and <b>Import save</b> to restore it on this or another device. No password or account is needed. Save files stay on your device. Optional reminders share only a push subscription and delivery schedule. Clearing browser data also clears your local progress.<br><br>little dill can be installed as an app. Use <b>Install little dill</b> where your browser offers it, or on iPhone and iPad tap Share, then Add to Home Screen. The installed app opens offline.<br><br>Your pickle grows and rests while you’re away. Notifications are optional: at most one a day, no scheduled sends from 10pm to 9am, and no repeated nudges until you return. They need an internet connection; care and games work offline. Care and games have their own 8-bit sound effects. Brine Time starts with your first tap or keypress. Music and effects have separate switches and a shared volume slider; your choices are remembered. Sound pauses when the page is hidden and the music mellows out during naps.</p></details></div>
-      <picture class="brand-banner" aria-hidden="true">
-        <source type="image/webp" srcset="./assets/illustrations/banner-small.webp 768w, ./assets/illustrations/banner.webp 1536w" sizes="(max-width: 860px) calc(100vw - 48px), 805px">
-        <img src="./assets/illustrations/banner.png" width="2172" height="724" alt="" loading="lazy" decoding="async">
-      </picture>
+      </details>
     </main>
-    <footer><span>A POCKET-SIZED LABOR OF LOVE.</span><span>Stay a little salty.</span></footer>
   </div>
   <dialog class="save-dialog" id="save-dialog" aria-labelledby="backup-title" aria-describedby="backup-description">
     <h2 id="backup-title">Welcome back, little dill.</h2>
@@ -542,6 +514,51 @@
       const Life = window.LittleDillLife;
       const STATS = ['fullness', 'happiness', 'energy', 'hygiene'];
       const $ = (id) => document.getElementById(id);
+      const DISPLAY_KEY = 'little-dill.fullscreen.v1';
+      const gamePage = $('game-page');
+      const fullscreenButton = $('fullscreen-toggle');
+      const settings = $('game-settings');
+      let expanded = false;
+      let resumeFullscreen = false;
+      let enteredFullscreen = Boolean(document.fullscreenElement);
+      function setExpanded(value) {
+        expanded = value;
+        gamePage.classList.toggle('is-expanded', value);
+        fullscreenButton.setAttribute('aria-pressed', String(value));
+        fullscreenButton.textContent = value ? 'Exit full screen' : 'Full screen';
+        try { localStorage.setItem(DISPLAY_KEY, String(value)); } catch {}
+      }
+      async function enterFullscreen() {
+        resumeFullscreen = false;
+        try { await document.documentElement.requestFullscreen?.(); } catch {}
+      }
+      try { expanded = localStorage.getItem(DISPLAY_KEY) === 'true'; } catch {}
+      resumeFullscreen = expanded;
+      setExpanded(expanded);
+      fullscreenButton.addEventListener('click', async () => {
+        resumeFullscreen = false;
+        if (expanded) {
+          if (document.fullscreenElement) {
+            try { await document.exitFullscreen(); } catch { return; }
+          }
+          setExpanded(false);
+        } else {
+          setExpanded(true);
+          await enterFullscreen();
+        }
+      });
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) enteredFullscreen = true;
+        else if (enteredFullscreen) { enteredFullscreen = false; setExpanded(false); }
+      });
+      gamePage.addEventListener('click', event => {
+        if (resumeFullscreen && !fullscreenButton.contains(event.target)) enterFullscreen();
+      });
+      $('settings-toggle').addEventListener('click', () => {
+        settings.open = !settings.open;
+        if (settings.open) { settings.scrollIntoView({ block: 'start' }); settings.querySelector('summary').focus(); }
+      });
+      settings.addEventListener('toggle', () => $('settings-toggle').setAttribute('aria-expanded', String(settings.open)));
       const clamp = (number, min = 0, max = 100) => Math.min(max, Math.max(min, number));
       const freshPet = () => Life.fresh();
       const room = $('room');

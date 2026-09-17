@@ -1,5 +1,5 @@
 /* Bump CACHE_VERSION with every deploy so installed apps pick up new files. */
-const CACHE_VERSION = 'little-dill-v8';
+const CACHE_VERSION = 'little-dill-v9';
 const PRECACHE = [
   './',
   './save-codec.js',
@@ -12,8 +12,6 @@ const PRECACHE = [
   './favicon.ico',
   './apple-touch-icon.png',
   './assets/brand/logo.svg',
-  './assets/illustrations/banner-small.webp',
-  './assets/illustrations/banner.webp',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
   './assets/icons/maskable-512.png'
