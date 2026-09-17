@@ -190,6 +190,60 @@
   .final-card > img { position: absolute; right: 28px; bottom: -29px; transform: rotate(-18deg); }
   .final-sparkle { position: absolute; width: 34px; height: 34px; color: #8aa15d; left: 8%; top: 33%; }
   .final-card .hero-note { font-size: 10px; }
+  .status-dot { animation: ping 2.4s ease-in-out infinite; }
+  .feeling svg path { stroke-dasharray: 400; stroke-dashoffset: 400; animation: draw 1.1s ease-out .45s forwards; }
+  .feeling svg path:last-child { animation-delay: .75s; }
+  .button:hover svg, .text-link:hover svg { animation: nudge .7s ease-in-out infinite; }
+  .orbit::after { animation: spin 70s linear infinite; }
+  .deco { animation: twinkle 2.8s ease-in-out infinite; }
+  .star-two { animation-delay: -1.3s; }
+  .sticker { animation: sticker-rock 4.5s ease-in-out infinite; }
+  .pet-button { animation: float 3.2s ease-in-out infinite; }
+  .pet-shadow { animation: shadow-breathe 3.2s ease-in-out infinite; }
+  .device[data-sleeping="true"] .pet-button, .device[data-sleeping="true"] .pet-shadow { animation-duration: 5.5s; }
+  .love-strip svg { animation: twinkle 2.6s ease-in-out infinite; }
+  .love-strip svg:nth-of-type(2) { animation-delay: -.9s; }
+  .love-strip svg:nth-of-type(3) { animation-delay: -1.8s; }
+  .step:hover .jar i { animation-duration: 1.4s; }
+  .jar i { animation: sway 3s ease-in-out infinite; }
+  .jar:nth-child(2) i { animation-delay: -1s; }
+  .jar:nth-child(3) i { animation-delay: -2s; }
+  .care-illustration > img { animation: float 3.4s ease-in-out infinite; }
+  .care-illustration > span:first-child { animation: heart-float 2.6s ease-in-out infinite; }
+  .care-illustration > span:last-child { animation: twinkle 2.2s ease-in-out infinite; }
+  .growth-illustration > span { animation: nudge 1.6s ease-in-out infinite; }
+  .growth-illustration > span:last-of-type { animation-delay: -.8s; }
+  .growth-illustration svg { transition: transform .25s; }
+  .step:hover .growth-illustration svg { transform: translateY(-5px); }
+  .pal { animation: float 3.6s ease-in-out infinite; }
+  .pal:nth-child(2) { animation-delay: -.6s; }
+  .pal:nth-child(3) { animation-delay: -1.2s; }
+  .pal:nth-child(4) { animation-delay: -1.8s; }
+  .pal:nth-child(5) { animation-delay: -2.4s; }
+  .pal:nth-child(6) { animation-delay: -3s; }
+  .pal:hover .pal-art { animation: wiggle .7s ease; }
+  .record { animation: spin 7s linear infinite; }
+  .game-list article { transition: transform .25s; }
+  .game-list article:hover { transform: translateX(6px); }
+  .game-list article:hover .game-icon { animation: wiggle .7s ease; }
+  .faq-mascot { animation: sway-mascot 4s ease-in-out infinite; }
+  .final-card > img { animation: peek 3.8s ease-in-out infinite; }
+  .final-sparkle { animation: twinkle 3s ease-in-out infinite; }
+  [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.2, .7, .3, 1); }
+  [data-reveal="in"] { opacity: 1; transform: none; }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  @keyframes shadow-breathe { 0%, 100% { transform: translateX(-50%) scaleX(1); opacity: 1; } 50% { transform: translateX(-50%) scaleX(.82); opacity: .7; } }
+  @keyframes twinkle { 0%, 100% { transform: scale(1) rotate(10deg); opacity: 1; } 50% { transform: scale(.55) rotate(30deg); opacity: .45; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes ping { 0%, 100% { box-shadow: 0 0 0 4px #e7edd8; } 50% { box-shadow: 0 0 0 8px #e0e8cc; } }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+  @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+  @keyframes sticker-rock { 0%, 100% { transform: rotate(11deg); } 50% { transform: rotate(16deg) translateY(-3px); } }
+  @keyframes sway { 0%, 100% { transform: rotate(16deg); } 50% { transform: rotate(29deg) translateY(-3px); } }
+  @keyframes heart-float { 0%, 100% { transform: rotate(-15deg) translateY(0); } 50% { transform: rotate(-8deg) translateY(-9px); } }
+  @keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } 75% { transform: rotate(-3deg); } }
+  @keyframes sway-mascot { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(-4deg) translateY(-5px); } }
+  @keyframes peek { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(-11deg) translateY(-6px); } }
   @keyframes hop { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-18px) rotate(-8deg); } 65% { transform: translateY(-8px) rotate(7deg); } }
   @keyframes love { 0% { opacity: 0; transform: translateY(10px) rotate(12deg); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-25px) rotate(12deg); } }
 }
@@ -335,5 +389,7 @@
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .device[data-action="love"] .pet-effect, .device[data-action="feed"] .pet-effect { opacity: 1; }
+    .feeling svg path { stroke-dashoffset: 0; }
+    [data-reveal] { opacity: 1; transform: none; }
   }
 }
