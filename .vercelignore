@@ -12,3 +12,4 @@ assets/PROMPTS.md
 .gitignore
 .vercelignore
 server/
+website/
