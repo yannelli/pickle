@@ -1,4 +1,4 @@
-const DEFAULT_GAME_URL = 'https://littledill.app';
+const DEFAULT_GAME_URL = 'https://play.littledill.app';
 
 export function gameUrl(value = DEFAULT_GAME_URL) {
   try {

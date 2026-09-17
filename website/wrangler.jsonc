@@ -10,6 +10,6 @@
     "not_found_handling": "404-page"
   },
   "vars": {
-    "GAME_URL": "https://littledill.app"
+    "GAME_URL": "https://play.littledill.app"
   }
 }

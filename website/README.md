@@ -18,7 +18,7 @@ For Cloudflare Git integration, set the root directory to `website`, leave the b
 
 ## Game address
 
-Play buttons use `GAME_URL`. The default is `https://littledill.app`. Change `vars.GAME_URL` in `wrangler.jsonc`, or supply it when deploying:
+Play buttons use `GAME_URL`. The default is `https://play.littledill.app`. Change `vars.GAME_URL` in `wrangler.jsonc`, or supply it when deploying:
 
 ```sh
 npx wrangler deploy --var GAME_URL:https://play.example.com
