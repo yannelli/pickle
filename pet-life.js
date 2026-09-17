@@ -72,6 +72,7 @@
       !['brinedAt', 'hatchAt', 'bornAt', 'lastCareAt', 'updatedAt', 'diedAt'].every(key => timestamp(value[key])) ||
       !Number.isFinite(value.neglectMs) || value.neglectMs < 0 || value.neglectMs > 48 * HOUR ||
       !['sleeping', 'sick', 'dead'].every(key => typeof value[key] === 'boolean') || (value.dead && value.sleeping) ||
+      (value.phase !== 'living' && (value.dead || value.sleeping || value.sick)) || (value.dead && value.diedAt < value.bornAt) ||
       (value.phase !== 'new' && value.hatchAt < value.brinedAt) || (value.phase === 'living' && value.bornAt > value.updatedAt) ||
       (value.eaten !== undefined && (typeof value.eaten !== 'boolean' || (value.eaten && !value.dead)))) {
       throw new Error('This file contains invalid pickle progress.');

@@ -145,9 +145,11 @@ test('names and v2 saves reject malformed values while preserving harmless Unico
   assert.equal(life.name(pet, 'hello\u200b'), false);
   assert.equal(life.name(pet, 'Díll 🥒', NOW), true);
   assert.equal(life.validate(pet).name, 'Díll 🥒');
-  for (const changes of [{ name: 'x'.repeat(25) }, { phase: 'unknown' }, { variety: 'made up' }, { fullness: NaN }, { neglectMs: Infinity }, { bornAt: NOW + 1 }]) {
+  for (const changes of [{ name: 'x'.repeat(25) }, { phase: 'unknown' }, { variety: 'made up' }, { fullness: NaN }, { neglectMs: Infinity }, { bornAt: NOW + 1 },
+    { dead: true, diedAt: NOW - 1 }, { phase: 'new', dead: true, diedAt: NOW }, { phase: 'brining', sleeping: true }, { phase: 'naming', sick: true }]) {
     assert.throws(() => life.validate({ ...pet, ...changes }));
   }
+  assert.equal(life.validate({ ...pet, dead: true, diedAt: NOW }).dead, true);
 });
 
 test('all elder accessories are visible SVGs and every form has distinct artwork', () => {
@@ -188,4 +190,10 @@ test('all elder accessories are visible SVGs and every form has distinct artwork
   assert.ok(art.innerHTML.includes('translate(-7 -19)'), 'baby-worn items shift to the baby face');
   sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, 'hop');
   assert.equal(attrs.has('hidden'), true); assert.equal(sceneAttrs.has('hidden'), true);
+  sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY, 'shades');
+  assert.equal(room.dataset.hat, 'sunglasses', 'worn shades hide the built-in elder glasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY, 'lounge');
+  assert.equal(room.dataset.hat, 'sunglasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY);
+  assert.equal(room.dataset.hat, life.ELDERS[0].hat);
 });

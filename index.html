@@ -954,7 +954,7 @@
         state.sleeping = sleeping; happyUntil = 0;
         say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
         act(state.sleeping ? 'yawn' : 'wake', state.sleeping ? 1200 : 900);
-        sfx(state.sleeping ? 'sleep' : 'wake'); save(); render(); recordCare();
+        sfx(state.sleeping ? 'sleep' : 'wake'); recordCare(); save(); render();
       }
       function care(action) {
         syncTime();
@@ -1210,6 +1210,7 @@
       $('restart').addEventListener('click', () => {
         if (!state.dead) return;
         endGame(false); state = freshPet(); happyUntil = 0; lastAction = 0; lastPet = -Infinity;
+        previousPet = null; $('undo-import').hidden = true;
         selectedBrine = 'classic'; $('pickle-name').value = ''; say('a fresh start. a brand-new little dill.', 5000); sfx('wake'); save(); render(); reminders?.sync(); $('brine-start').focus({ preventScroll: true });
       });
       document.addEventListener('keydown', event => {
@@ -1241,8 +1242,8 @@
         const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
         const restored = parseSaved(raw);
         if (restored) {
+          const elapsed = Date.now() - (Number(JSON.parse(raw).updatedAt) || Date.now());
           state = restored;
-          const elapsed = Date.now() - state.updatedAt;
           syncTime(true);
           say(elapsed > 60000 ? 'you’re back! your little dill missed you.' : 'welcome back to your little pickle.', 4500);
         } else if (raw !== null) {
