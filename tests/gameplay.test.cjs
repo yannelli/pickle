@@ -22,7 +22,7 @@ function client(changes = {}, options = {}) {
     setAttribute(name, value) { this.attributes[name] = String(value); }
     addEventListener(name, callback) { if (!this.listeners.has(name)) this.listeners.set(name, []); this.listeners.get(name).push(callback); }
     click() { if (!this.disabled) this.dispatch('click'); }
-    dispatch(name, event = {}) { for (const callback of this.listeners.get(name) || []) callback({ target: this, currentTarget: this, ...event }); }
+    dispatch(name, event = {}) { return Promise.all((this.listeners.get(name) || []).map(callback => callback({ target: this, currentTarget: this, ...event }))); }
     focus() { document.activeElement = this; }
     showModal() { this.open = true; }
     close() { this.open = false; this.dispatch('close'); }
@@ -37,6 +37,7 @@ function client(changes = {}, options = {}) {
   const choices = ['hunt', 'memory', 'catch'].map(game => Object.assign(new Element(), { dataset: { game } }));
   const groups = { '.jar': jars, '.memory-pad': pads, '.catch-lane': lanes, '.game-choice': choices };
   const document = { hidden: false, activeElement: null, getElementById: get,
+    createElement: () => new Element(),
     querySelector: selector => groups[selector]?.[0] || get(selector), querySelectorAll: selector => groups[selector] || [],
     addEventListener: (name, cb) => { if (!events.has(name)) events.set(name, []); events.get(name).push(cb); } };
   const pet = { version: 1, fullness: 60, happiness: 20, energy: 80, hygiene: 60, ageTicks: 120, neglect: 0,
@@ -52,7 +53,7 @@ function client(changes = {}, options = {}) {
     Math: Object.assign(Object.create(Math), { random: () => .1 }), navigator: { userAgent: '', platform: '' }, location: { protocol: 'http:' },
     setTimeout: (fn, delay) => schedule(fn, delay), clearTimeout: id => timers.delete(id),
     setInterval: (fn, delay) => schedule(fn, delay, delay), clearInterval: id => timers.delete(id),
-    matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound } };
+    matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound }, LittleDillSaves: options.saves };
   sandbox.window = sandbox;
   vm.runInNewContext(source, sandbox);
   const dispatch = (name, event = {}) => { for (const cb of events.get(name) || []) cb(event); };
@@ -235,4 +236,39 @@ test('migrated saves use a new key so an older tab cannot overwrite the new life
   assert.equal(app.storage.get('little-dill.v1'), legacy);
   app.storage.set('little-dill.v1', JSON.stringify({ ...JSON.parse(legacy), happiness: 0 }));
   assert.equal(app.saved().happiness, 28);
+});
+
+test('restoring a backup clears the previous pickle eating prompt', async () => {
+  let restored;
+  const app = client({}, { saves: { MAX_FILE_BYTES: 16384, decode: async () => restored } });
+  restored = { savedAt: app.saved().updatedAt, pet: { ...app.saved(), name: 'New Dill' } };
+  for (const key of ['e', 'a', 't', '3', '3']) app.key(key);
+  assert.equal(app.get('room').dataset.bites, '2');
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change');
+  app.click('backup-restore');
+  assert.equal(app.saved().name, 'New Dill');
+  assert.equal(app.get('room').dataset.bites, '0');
+  app.key('3');
+  assert.equal(app.saved().dead, false);
+  assert.equal(app.saved().hygiene, 100);
+});
+
+test('Wake stays awake when the pickle reaches full energy between render and click', () => {
+  const app = client({ sleeping: true, energy: 99.995 });
+  app.run(1000);
+  assert.equal(app.get('sleep').textContent, 'Wake ☀');
+  app.click('sleep');
+  assert.equal(app.saved().energy, 100);
+  assert.equal(app.saved().sleeping, false);
+  assert.equal(app.get('sleep').textContent, 'Nap ☾');
+});
+
+test('a wrong memory note stops glowing when the result is shown', () => {
+  const app = client(); app.start('memory');
+  app.until(() => !app.pads[0].disabled);
+  app.key('2');
+  assert.equal(app.get('game-again').hidden, false);
+  assert.ok(app.pads.every(pad => !pad.classList.contains('lit')));
 });

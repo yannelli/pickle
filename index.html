@@ -614,6 +614,7 @@
         return false;
       }
       function replacePet(pet) {
+        cancelSnack(false); clearTimeout(holdTimer); suppressPetClick = false; typed = '';
         endGame(false); clearTimeout(effectTimer);
         $('effect').textContent = ''; $('effect').classList.remove('pop');
         state = Life.restore(pet);
@@ -947,9 +948,10 @@
         assessHealth(); recordCare(); save(); render();
       }
       function toggleSleep() {
+        const sleeping = !state.sleeping;
         syncTime();
         if (state.phase !== 'living' || state.dead || game || snack) return;
-        state.sleeping = !state.sleeping; happyUntil = 0;
+        state.sleeping = sleeping; happyUntil = 0;
         say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
         act(state.sleeping ? 'yawn' : 'wake', state.sleeping ? 1200 : 900);
         sfx(state.sleeping ? 'sleep' : 'wake'); save(); render(); recordCare();
@@ -1047,7 +1049,7 @@
         records[game.type] = Math.max(Number(records[game.type]) || 0, game.score);
         try { localStorage.setItem('little-dill.arcade.v1', JSON.stringify(records)); } catch { /* Scores are optional. */ }
         $('game-again').hidden = false; $('game-menu-button').hidden = false;
-        memoryPads.forEach(button => { button.disabled = true; });
+        memoryPads.forEach(button => { button.disabled = true; button.classList.remove('lit'); });
         jarButtons.forEach(button => { button.disabled = true; });
         catchLanes.forEach(button => { button.disabled = true; });
         $('catch-drop').hidden = true;
