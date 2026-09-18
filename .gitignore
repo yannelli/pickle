@@ -3,3 +3,6 @@
 .wrangler/
 .vercel/
 node_modules/
+ios/build/
+ios/*.xcresult/
+ios/**/xcuserdata/

@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "little-dill-arena",
+  "account_id": "d16cb1cae3f9e3483ffb7a5f014cd8f9",
+  "main": "server/arena-worker.mjs",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": true,
+  "routes": [{ "pattern": "arena.littledill.app", "custom_domain": true }],
+  "assets": {
+    "directory": "./arena-web",
+    "binding": "ASSETS",
+    "not_found_handling": "none",
+    "run_worker_first": ["/arena", "/health", "/.well-known/apple-app-site-association"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "ARENAS", "class_name": "ArenaRoom" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ArenaRoom"] }]
+}

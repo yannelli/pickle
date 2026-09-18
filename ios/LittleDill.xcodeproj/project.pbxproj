@@ -1,0 +1,559 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AB56478D42F0459AD96023 /* LittleDillApp.swift */; };
+		13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365E6C0F663ED79DF2D480C4 /* FriendsView.swift */; };
+		1BC693056355D165FD855B57 /* CareScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B0F6D2E819F561B210A39D /* CareScene.swift */; };
+		20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2FE43078A3B5B5644D9E83 /* GameViews.swift */; };
+		307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */; };
+		3631E4611129DA11F1250217 /* ArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A331BC7F61DEE3A77445FB4E /* ArenaView.swift */; };
+		517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6AE199A809890C135FF5CF /* DillTests.swift */; };
+		79AC77633956986EFD962D70 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */; };
+		87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 442704C35098D0258234BA9A /* Assets.xcassets */; };
+		8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94597CBADE2648796879E08 /* CollectionViews.swift */; };
+		BF8CC73229925DEFF629656C /* DillModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */; };
+		D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07138856D58D603AA5147715 /* LittleDillUITests.swift */; };
+		DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84E43162441E79C5E7EE976 /* ArenaClient.swift */; };
+		FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDA33CEC165E433E0EB5022 /* Design.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		828A3769695B29632C751FCE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DF3B4F3157F9A40233E77073 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 161CC4524A9CBFFF9874C835;
+			remoteInfo = LittleDill;
+		};
+		872A354B46CDA3BFB14BD919 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DF3B4F3157F9A40233E77073 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 161CC4524A9CBFFF9874C835;
+			remoteInfo = LittleDill;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		07138856D58D603AA5147715 /* LittleDillUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillUITests.swift; sourceTree = "<group>"; };
+		0C2FE43078A3B5B5644D9E83 /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
+		365E6C0F663ED79DF2D480C4 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		442704C35098D0258234BA9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4BD8988210523CD0527594C2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4E6AE199A809890C135FF5CF /* DillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillTests.swift; sourceTree = "<group>"; };
+		6556B1CFDD693A8FCB63B70D /* LittleDill.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LittleDill.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7FDA33CEC165E433E0EB5022 /* Design.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Design.swift; sourceTree = "<group>"; };
+		9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillAudio.swift; sourceTree = "<group>"; };
+		A331BC7F61DEE3A77445FB4E /* ArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaView.swift; sourceTree = "<group>"; };
+		A6B0F6D2E819F561B210A39D /* CareScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareScene.swift; sourceTree = "<group>"; };
+		B94597CBADE2648796879E08 /* CollectionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViews.swift; sourceTree = "<group>"; };
+		D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillModel.swift; sourceTree = "<group>"; };
+		EA2A451EFE0DF93D5DBFA2DE /* LittleDillUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1998A860FA7B5DB186AB6F1 /* LittleDillTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F2AB56478D42F0459AD96023 /* LittleDillApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillApp.swift; sourceTree = "<group>"; };
+		F3A5C327E3985E9856200209 /* LittleDill.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LittleDill.entitlements; sourceTree = "<group>"; };
+		F84E43162441E79C5E7EE976 /* ArenaClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaClient.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		353026AD950176F9CB36E8BF /* LittleDill */ = {
+			isa = PBXGroup;
+			children = (
+				F84E43162441E79C5E7EE976 /* ArenaClient.swift */,
+				A331BC7F61DEE3A77445FB4E /* ArenaView.swift */,
+				442704C35098D0258234BA9A /* Assets.xcassets */,
+				A6B0F6D2E819F561B210A39D /* CareScene.swift */,
+				B94597CBADE2648796879E08 /* CollectionViews.swift */,
+				7FDA33CEC165E433E0EB5022 /* Design.swift */,
+				9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */,
+				D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */,
+				365E6C0F663ED79DF2D480C4 /* FriendsView.swift */,
+				0C2FE43078A3B5B5644D9E83 /* GameViews.swift */,
+				4BD8988210523CD0527594C2 /* Info.plist */,
+				F3A5C327E3985E9856200209 /* LittleDill.entitlements */,
+				F2AB56478D42F0459AD96023 /* LittleDillApp.swift */,
+				D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */,
+			);
+			path = LittleDill;
+			sourceTree = "<group>";
+		};
+		473B30417340CCD68313A6EB /* LittleDillTests */ = {
+			isa = PBXGroup;
+			children = (
+				4E6AE199A809890C135FF5CF /* DillTests.swift */,
+			);
+			path = LittleDillTests;
+			sourceTree = "<group>";
+		};
+		7E0C56A139D30F83F22FF856 /* LittleDillUITests */ = {
+			isa = PBXGroup;
+			children = (
+				07138856D58D603AA5147715 /* LittleDillUITests.swift */,
+			);
+			path = LittleDillUITests;
+			sourceTree = "<group>";
+		};
+		98EA77C112BABD16240E9D71 = {
+			isa = PBXGroup;
+			children = (
+				353026AD950176F9CB36E8BF /* LittleDill */,
+				473B30417340CCD68313A6EB /* LittleDillTests */,
+				7E0C56A139D30F83F22FF856 /* LittleDillUITests */,
+				DEE6AC0B3295862C34C5C136 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DEE6AC0B3295862C34C5C136 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6556B1CFDD693A8FCB63B70D /* LittleDill.app */,
+				F1998A860FA7B5DB186AB6F1 /* LittleDillTests.xctest */,
+				EA2A451EFE0DF93D5DBFA2DE /* LittleDillUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		161CC4524A9CBFFF9874C835 /* LittleDill */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07BFFA02E4562400C1AC2316 /* Build configuration list for PBXNativeTarget "LittleDill" */;
+			buildPhases = (
+				186254901141EED9637F713D /* Sources */,
+				A708B74FDF13C1183F7D1013 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LittleDill;
+			packageProductDependencies = (
+			);
+			productName = LittleDill;
+			productReference = 6556B1CFDD693A8FCB63B70D /* LittleDill.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3274DD825315DBEB6AB6377F /* LittleDillTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BEA38C98EA4369EFE2E42572 /* Build configuration list for PBXNativeTarget "LittleDillTests" */;
+			buildPhases = (
+				CA87F8FCFBD759064D4B06CD /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				84031D8719D9E8E1584874BC /* PBXTargetDependency */,
+			);
+			name = LittleDillTests;
+			packageProductDependencies = (
+			);
+			productName = LittleDillTests;
+			productReference = F1998A860FA7B5DB186AB6F1 /* LittleDillTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		690C4A9860AAC986BAAF263F /* LittleDillUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B287917FDDF9E2F446A04614 /* Build configuration list for PBXNativeTarget "LittleDillUITests" */;
+			buildPhases = (
+				6BE346612B008EC9F1F2D525 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D58CE2495C0906C8AD89056A /* PBXTargetDependency */,
+			);
+			name = LittleDillUITests;
+			packageProductDependencies = (
+			);
+			productName = LittleDillUITests;
+			productReference = EA2A451EFE0DF93D5DBFA2DE /* LittleDillUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DF3B4F3157F9A40233E77073 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					161CC4524A9CBFFF9874C835 = {
+						ProvisioningStyle = Automatic;
+					};
+					3274DD825315DBEB6AB6377F = {
+						ProvisioningStyle = Automatic;
+					};
+					690C4A9860AAC986BAAF263F = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = 161CC4524A9CBFFF9874C835;
+					};
+				};
+			};
+			buildConfigurationList = C85B510CD127F09EF6B0D762 /* Build configuration list for PBXProject "LittleDill" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 98EA77C112BABD16240E9D71;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 54;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				161CC4524A9CBFFF9874C835 /* LittleDill */,
+				3274DD825315DBEB6AB6377F /* LittleDillTests */,
+				690C4A9860AAC986BAAF263F /* LittleDillUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A708B74FDF13C1183F7D1013 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */,
+				79AC77633956986EFD962D70 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		186254901141EED9637F713D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */,
+				3631E4611129DA11F1250217 /* ArenaView.swift in Sources */,
+				1BC693056355D165FD855B57 /* CareScene.swift in Sources */,
+				8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */,
+				FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */,
+				307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */,
+				BF8CC73229925DEFF629656C /* DillModel.swift in Sources */,
+				13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */,
+				20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */,
+				09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6BE346612B008EC9F1F2D525 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CA87F8FCFBD759064D4B06CD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		84031D8719D9E8E1584874BC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 161CC4524A9CBFFF9874C835 /* LittleDill */;
+			targetProxy = 872A354B46CDA3BFB14BD919 /* PBXContainerItemProxy */;
+		};
+		D58CE2495C0906C8AD89056A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 161CC4524A9CBFFF9874C835 /* LittleDill */;
+			targetProxy = 828A3769695B29632C751FCE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		8868E1486CF593C7E568B51B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LittleDill/LittleDill.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = LittleDill/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.littledill.ios;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		9DF2EB17697B6D59D87DC4B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D8071BDAA37D8572F27066B2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.littledill.LittleDillUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LittleDill;
+			};
+			name = Debug;
+		};
+		D8EBD674E06F78723D1CEA4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.littledill.LittleDillUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LittleDill;
+			};
+			name = Release;
+		};
+		DA1F9AFFAC43B3F07CD98B2B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.littledill.LittleDillTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LittleDill.app/LittleDill";
+			};
+			name = Release;
+		};
+		DDECFCEE0305CBA93ABB64AD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.littledill.LittleDillTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LittleDill.app/LittleDill";
+			};
+			name = Debug;
+		};
+		FC97DABAB165395A2007F5C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = LittleDill/LittleDill.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = LittleDill/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.littledill.ios;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FFE2143ED588914C3C9ED0CF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		07BFFA02E4562400C1AC2316 /* Build configuration list for PBXNativeTarget "LittleDill" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FC97DABAB165395A2007F5C2 /* Debug */,
+				8868E1486CF593C7E568B51B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B287917FDDF9E2F446A04614 /* Build configuration list for PBXNativeTarget "LittleDillUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D8071BDAA37D8572F27066B2 /* Debug */,
+				D8EBD674E06F78723D1CEA4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BEA38C98EA4369EFE2E42572 /* Build configuration list for PBXNativeTarget "LittleDillTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DDECFCEE0305CBA93ABB64AD /* Debug */,
+				DA1F9AFFAC43B3F07CD98B2B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C85B510CD127F09EF6B0D762 /* Build configuration list for PBXProject "LittleDill" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FFE2143ED588914C3C9ED0CF /* Debug */,
+				9DF2EB17697B6D59D87DC4B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DF3B4F3157F9A40233E77073 /* Project object */;
+}

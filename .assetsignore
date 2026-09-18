@@ -15,3 +15,8 @@ README.md
 assets/README.md
 assets/PROMPTS.md
 server/
+ios/
+
+wrangler.arena.jsonc
+wrangler.arena-legacy.jsonc
+arena-web/
