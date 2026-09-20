@@ -55,7 +55,7 @@
     ['gamer', 'Gamer', 'One more round. Six more rounds.', 'headset', 'controller'],
     ['theater', 'Theater Kid', 'The whole jar is a stage.', 'beret', 'masks'],
     ['band', 'Band Kid', 'This one time, at brine camp...', 'shako', 'trumpet'],
-    ['prep', 'Prep', 'Popped collar. Pickled attitude.', 'collar', 'phone']
+    ['prep', 'Prep', 'Early decision. Extra brine.', 'mortarboard', 'phone']
   ].map(([id, name, quip, hat, prop], index) => ({ id, name, quip, hat, prop, accent: ['#5b6f8a', '#3d3d47', '#8a5b5b', '#6f7f4a'][index % 4] }));
   const clamp = value => Math.max(0, Math.min(100, value));
   const timestamp = value => Number.isSafeInteger(value) && value >= 0 && value <= 8640000000000000;

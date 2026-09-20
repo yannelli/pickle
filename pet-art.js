@@ -49,8 +49,7 @@
     backcap: '<path d="M18 4q21 0 18 8-8 5-18-2z" fill="currentColor"/><path d="M-22 9q0-26 22-26t22 26q-22 7-44 0z" fill="currentColor"/><path d="M-14 7h28" stroke="' + LIGHT + '" stroke-width="4"/>',
     beanie: '<path d="M-22 6q0-25 22-25t22 25z" fill="currentColor"/><path d="M-24 5H24V12q-24 8-48 0z" fill="currentColor"/><path d="M-21 9q21 6 42 0" stroke="' + LIGHT + '"/><circle cx="0" cy="-22" r="5" fill="' + LIGHT + '"/>',
     headset: HEADPHONES + '<path d="M-27 25q-5 14 8 19"/><circle cx="-16" cy="45" r="3.5" fill="currentColor"/>',
-    shako: '<path d="M-14-24H14V4H-14Z" fill="currentColor"/><path d="M-9-13h18" stroke="' + LIGHT + '" stroke-width="5"/><ellipse cx="0" cy="5" rx="19" ry="4.5" fill="currentColor"/><path d="M0-24v-6" stroke-width="3"/><circle cx="0" cy="-34" r="5" fill="' + LIGHT + '"/>',
-    collar: '<path d="M-22 56-1 64 1 64 22 56" stroke-width="3"/><path d="m-22 56-4-15 14 11z" fill="' + LIGHT + '"/><path d="m22 56 4-15-14 11z" fill="' + LIGHT + '"/><path d="M0 64v8"/>'
+    shako: '<path d="M-14-24H14V4H-14Z" fill="currentColor"/><path d="M-9-13h18" stroke="' + LIGHT + '" stroke-width="5"/><ellipse cx="0" cy="5" rx="19" ry="4.5" fill="currentColor"/><path d="M0-24v-6" stroke-width="3"/><circle cx="0" cy="-34" r="5" fill="' + LIGHT + '"/>'
   };
   const FACES = {
     sunglasses: '<path d="M-20 1H-4q0 11-8 11t-8-11z" fill="currentColor"/><path d="M20 1H4q0 11 8 11t8-11z" fill="currentColor"/><path d="M-4 3h8M-20 2-27 0M20 2 27 0"/>',
