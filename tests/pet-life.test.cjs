@@ -152,6 +152,8 @@ test('names and v2 saves reject malformed values while preserving harmless Unico
   assert.equal(life.validate({ ...pet, dead: true, diedAt: NOW }).dead, true);
 });
 
+const READERS = '<ellipse cx="-12" cy="4"';
+
 test('all elder accessories are visible SVGs and every form has distinct artwork', () => {
   const vm = require('node:vm'), fs = require('node:fs');
   const attrs = new Set(['hidden']);
@@ -165,7 +167,7 @@ test('all elder accessories are visible SVGs and every form has distinct artwork
   for (let i = 0; i < 32; i++) {
     sandbox.LittleDillArt.render(living(), room, NOW + (14 + i * 3) * life.DAY);
     assert.equal(attrs.has('hidden'), false);
-    assert.ok(!art.innerHTML.includes('undefined')); seen.add(art.innerHTML);
+    assert.ok(!/undefined|null|NaN/.test(art.innerHTML)); seen.add(art.innerHTML);
   }
   assert.equal(seen.size, 32);
   sandbox.LittleDillArt.render(living(), room, NOW);
@@ -176,24 +178,38 @@ test('all elder accessories are visible SVGs and every form has distinct artwork
   }
   for (let day = 3; day < 7; day++) {
     sandbox.LittleDillArt.render(living(), room, NOW + day * life.DAY);
-    assert.equal(attrs.has('hidden'), false); assert.ok(!art.innerHTML.includes('undefined')); teens.add(art.innerHTML);
+    assert.equal(attrs.has('hidden'), false); assert.ok(!/undefined|null|NaN/.test(art.innerHTML)); teens.add(art.innerHTML);
   }
   assert.equal(teens.size, 4);
   for (const vibe of ['shades', 'lounge', 'fire', 'book']) {
     sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, vibe);
-    assert.equal(attrs.has('hidden'), false); assert.ok(!art.innerHTML.includes('undefined')); teens.add(art.innerHTML + scene.innerHTML);
+    assert.equal(attrs.has('hidden'), false); assert.ok(!/undefined|null|NaN/.test(art.innerHTML)); teens.add(art.innerHTML + scene.innerHTML);
     assert.equal(sceneAttrs.has('hidden'), !['lounge', 'fire'].includes(vibe), vibe);
     assert.ok(!scene.innerHTML.includes('undefined'));
   }
   assert.equal(teens.size, 8);
+  // Worn items land on the face of whichever body is on screen: the baby face box starts at
+  // (5, 15) in a 42-wide body and the adult one at (12, 34) in a 56-wide body, so the art
+  // module centres them on 21,15 and 28,34 respectively.
   sandbox.LittleDillArt.render(living(), room, NOW, 'book');
-  assert.ok(art.innerHTML.includes('translate(-7 -19)'), 'baby-worn items shift to the baby face');
+  assert.ok(art.innerHTML.includes('translate(21 15)'), 'worn items sit on the baby face');
+  sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, 'book');
+  assert.ok(art.innerHTML.includes('translate(28 34)'), 'worn items sit on the adult face');
   sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, 'hop');
   assert.equal(attrs.has('hidden'), true); assert.equal(sceneAttrs.has('hidden'), true);
   sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY, 'shades');
-  assert.equal(room.dataset.hat, 'sunglasses', 'worn shades hide the built-in elder glasses');
+  assert.equal(room.dataset.hat, 'sunglasses', 'worn shades replace the elder reading glasses');
+  const shaded = art.innerHTML;
   sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY, 'lounge');
   assert.equal(room.dataset.hat, 'sunglasses');
   sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY);
   assert.equal(room.dataset.hat, life.ELDERS[0].hat);
+  // Reading glasses come with elderhood, are dropped when shades cover them, and never reach a teen.
+  assert.ok(art.innerHTML.includes(READERS), 'elders wear reading glasses');
+  assert.ok(!shaded.includes(READERS), 'shades replace the reading glasses');
+  const influencer = life.ELDERS.findIndex(form => form.hat === 'sunglasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + (14 + influencer * 3) * life.DAY);
+  assert.ok(!art.innerHTML.includes(READERS), 'an elder in sunglasses skips the reading glasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + 4 * life.DAY);
+  assert.ok(!art.innerHTML.includes(READERS), 'teens do not wear reading glasses');
 });

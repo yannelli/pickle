@@ -124,8 +124,7 @@
     .room[data-stage="teen"] .arm { top: 48px; }
     .room[data-stage="teen"] .pickle::after { top: 17px; box-shadow: 26px -6px var(--shade), 30px 27px var(--shade), 2px 40px var(--shade), 19px 47px var(--shade); }
     .room[data-stage="elder"] .pickle { width: 66px; height: 88px; }
-    .room[data-stage="elder"] .face::after { content: ''; position: absolute; width: 38px; height: 12px; border: 2px solid var(--pixel); top: -3px; left: -3px; border-radius: 4px; background: linear-gradient(90deg, transparent 46%, var(--pixel) 46% 53%, transparent 53%); }
-    .room[data-hat="sunglasses"] .face::after, .room[data-hat="nerdglasses"] .face::after { display: none; }
+    .room[data-stage="elder"] .face { left: 14px; }
     .elder-art { position: absolute; left: -40px; top: -40px; width: 150px; height: 160px; z-index: 2; overflow: visible; pointer-events: none; }
     .act-bath .elder-art, .screen.asleep .elder-art { display: none; }
     .pet-caption { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 10px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
@@ -140,7 +139,6 @@
     .room[data-vibe="lounge"] .pickle { animation: lounge 3.4s ease-in-out infinite; }
     .room[data-vibe="shades"] .pet-shadow, .room[data-vibe="book"] .pet-shadow, .room[data-vibe="fire"] .pet-shadow { animation: shadow-idle 2.6s ease-in-out infinite; }
     .room[data-vibe="lounge"] .pet-shadow { animation: none; transform: translateX(-8px) scaleX(1.15); }
-    .room[data-vibe="shades"] .face::after, .room[data-vibe="lounge"] .face::after { display: none; }
     .room[data-vibe="shades"] .arm.left, .room[data-vibe="fire"] .arm.right { animation: arm-left 2.6s ease-in-out infinite; }
     .room[data-vibe="shades"] .arm.right { animation: arm-right 2.6s ease-in-out infinite; }
     .room[data-vibe="lounge"] .arm.left { animation: none; transform: rotate(-40deg); }
