@@ -126,11 +126,14 @@
     const worn = WORN[vibe] || {}, at = anchors(stage);
     room.dataset.hat = worn.face === FACES.sunglasses ? 'sunglasses' : look?.hat || '';
     const readers = elder && HATS[look.hat] && worn.face !== FACES.sunglasses ? FACES.readers : '';
-    const wornArt = (look ? place(HATS[look.hat] ? at.hat : at.face, HATS[look.hat] || FACES[look.hat]) + place(at.prop, PROPS[look.prop]) : '') +
+    const wornArt = (look ? place(HATS[look.hat] ? at.hat : at.face, HATS[look.hat] || FACES[look.hat]) : '') +
       place(at.face, readers + (worn.face || '')) + place(at.held, worn.held) + place(at.hand, worn.hand);
     const art = document.getElementById('elder-art');
     paint(art, (look?.id || '') + ':' + stage + ':' + (worn.face || worn.held || worn.hand ? vibe : ''), wornArt);
     art.style.color = look?.accent || '';
+    const prop = document.getElementById('prop-art');
+    paint(prop, (look?.id || '') + ':' + stage, look ? place(at.prop, PROPS[look.prop]) : '');
+    prop.style.color = look?.accent || '';
     paint(document.getElementById('scene-art'), SCENES[vibe] ? vibe : '', SCENES[vibe] || '');
   }
   root.LittleDillArt = { render };
