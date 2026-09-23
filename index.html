@@ -75,27 +75,28 @@
     .meter-fill { background: var(--pixel); display: block; height: 100%; transition: width .3s; }
     .stat.low .stat-top::before { content: '!'; margin-right: 3px; }
     .stat.low .stat-top { text-decoration: underline; text-underline-offset: 2px; }
-    .room { height: 202px; position: relative; display: grid; place-items: center; }
+    .room { height: 202px; position: relative; display: grid; place-items: end center; }
     .room::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 15px; height: 1px; background: #748a4c55; }
     .room-decoration { position: absolute; font-size: 15px; opacity: .4; pointer-events: none; }
     .spark-one { top: 28px; left: 23px; }
     .spark-two { top: 15px; right: 40px; font-size: 10px; }
     .grass { bottom: 18px; right: 29px; font-size: 13px; }
-    .pet-button { border: 0; padding: 0; width: 132px; height: 130px; background: transparent; position: relative; display: grid; place-items: center; z-index: 1; }
+    .pet-button { border: 0; padding: 0 0 18px; width: 132px; height: 130px; background: transparent; position: relative; display: grid; place-items: end center; z-index: 1; }
     .pet-button:focus-visible { outline-offset: -5px; border-radius: 16px; }
-    .pet-shadow { position: absolute; height: 9px; width: 64px; bottom: 12px; left: calc(50% - 32px); background: #68804430; border-radius: 50%; animation: shadow-idle 2.6s ease-in-out infinite; }
+    .pet-shadow { position: absolute; height: 9px; width: 64px; bottom: 11px; left: calc(50% - 32px); background: #68804430; border-radius: 50%; animation: shadow-idle 2.6s ease-in-out infinite; }
     .pet-size { display: block; position: relative; transition: transform .7s; transform-origin: 50% 100%; }
     .scene-art { position: absolute; left: -37px; bottom: -26px; width: 150px; height: 160px; overflow: visible; pointer-events: none; }
     .pet-actor { display: block; position: relative; transform-origin: 50% 100%; transition: transform .12s; }
+    .pet-body { display: block; position: relative; transform-origin: 50% 100%; animation: idle 2.6s ease-in-out infinite; }
     .pet-button:active .pet-actor { transform: scale(1.12, .88); }
-    .pickle { display: block; position: relative; width: 62px; height: 92px; background: var(--skin, #78954b); border: 3px solid var(--pixel); border-radius: 31px 28px 28px 25px; box-shadow: inset 5px 1px var(--highlight, #a1b56b), inset -5px -2px var(--shade, #5f7f40); transform-origin: 50% 100%; animation: idle 2.6s ease-in-out infinite; transition: background .5s, box-shadow .5s; }
+    .pickle { display: block; position: relative; width: 62px; height: 92px; background: var(--skin, #78954b); border: 3px solid var(--pixel); border-radius: 31px 28px 28px 25px; transition: background .5s, box-shadow .5s; }
     .pickle::before { content: ''; position: absolute; width: 11px; height: 9px; left: 20px; top: -9px; border-top: 3px solid var(--pixel); border-left: 3px solid var(--pixel); transform: rotate(20deg); }
     .pickle::after { content: ''; position: absolute; width: 6px; height: 5px; background: var(--shade, #527637); border-radius: 2px; top: 20px; left: 9px; box-shadow: 28px -7px var(--shade, #527637), 32px 30px var(--shade, #527637), 2px 43px var(--shade, #527637), 20px 52px var(--shade, #527637); }
     .face { position: absolute; top: 34px; left: 12px; width: 32px; height: 27px; z-index: 1; }
-    .eye { position: absolute; top: 0; width: 5px; height: 7px; background: #263f29; box-shadow: 0 1px #bed190; transform-origin: 50% 60%; animation: blink 4.4s linear infinite; }
+    .eye { position: absolute; top: 0; width: 5px; height: 7px; background: #263f29; border-radius: 50%; box-shadow: 0 1px #bed190; transform-origin: 50% 60%; animation: blink 4.4s linear infinite; }
     .eye.left { left: 1px; }
     .eye.right { right: 1px; }
-    .cheek { position: absolute; top: 9px; width: 7px; height: 3px; background: var(--highlight, #a1b56b); transition: width .3s, height .3s, background .3s; }
+    .cheek { position: absolute; top: 9px; width: 7px; height: 3px; background: #dcad86; border-radius: 3px; transition: width .3s, height .3s, background .3s; }
     .cheek.left { left: -4px; }
     .cheek.right { right: -4px; }
     .mouth { position: absolute; width: 12px; height: 7px; border-bottom: 3px solid #263f29; border-left: 2px solid #263f29; border-right: 2px solid #263f29; top: 10px; left: 10px; border-radius: 0 0 7px 7px; }
@@ -105,7 +106,7 @@
     .foot { position: absolute; bottom: -6px; width: 14px; height: 5px; background: var(--pixel); }
     .foot.left { left: 6px; } .foot.right { right: 6px; }
     .sweat { display: none; position: absolute; top: 12px; right: -8px; width: 6px; height: 8px; background: #dfe9b6; border: 2px solid var(--pixel); border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%; opacity: 0; }
-    .room[data-shape="round"] .pet-size { transform: scaleX(1.1); }
+    .room[data-shape="round"] .pet-size { scale: 1.18 .87; }
     .room[data-shape="round"] .pickle { border-radius: 48% 46% 43% 45%; }
     .room[data-shape="crooked"] .pickle { border-radius: 48px 18px 42px 20px; }
     .room[data-stage="baby"] .pickle { width: 48px; height: 57px; border-radius: 45% 45% 40% 40%; }
@@ -113,7 +114,8 @@
     .room[data-stage="baby"] .eye { width: 6px; height: 9px; }
     .room[data-stage="baby"] .arm { top: 29px; width: 10px; }
     .room[data-stage="baby"] .pickle::after { top: 8px; left: 9px; box-shadow: 21px 1px var(--shade), 15px 29px var(--shade); }
-    .room[data-stage="baby"] .face::after { content: ''; position: absolute; width: 12px; height: 7px; border: 2px solid var(--pixel); border-radius: 50%; background: var(--highlight); left: 10px; top: 13px; }
+    .room[data-stage="baby"] .face::after { content: ''; position: absolute; width: 12px; height: 7px; border: 2px solid var(--pixel); border-radius: 50%; background: var(--highlight); left: 8px; top: 13px; }
+    .room[data-stage="baby"] .mouth { visibility: hidden; }
     .room[data-stage="young"] .pickle { width: 54px; height: 76px; border-radius: 27px 25px 18px 20px; }
     .room[data-stage="young"] .face { top: 25px; left: 8px; }
     .room[data-stage="young"] .arm { top: 42px; }
@@ -125,18 +127,18 @@
     .room[data-stage="teen"] .pickle::after { top: 17px; box-shadow: 26px -6px var(--shade), 30px 27px var(--shade), 2px 40px var(--shade), 19px 47px var(--shade); }
     .room[data-stage="elder"] .pickle { width: 66px; height: 88px; }
     .room[data-stage="elder"] .face { left: 14px; }
-    .elder-art { position: absolute; left: -40px; top: -40px; width: 150px; height: 160px; z-index: 2; overflow: visible; pointer-events: none; }
-    .act-bath .elder-art, .screen.asleep .elder-art { display: none; }
+    .elder-art, .prop-art { position: absolute; left: -40px; top: -40px; width: 150px; height: 160px; z-index: 2; overflow: visible; pointer-events: none; }
+    .act-bath .elder-art, .act-bath .prop-art, .screen.asleep .elder-art, .screen.asleep .prop-art { display: none; }
     .pet-caption { position: absolute; left: 0; right: 0; top: 8px; text-align: center; font-size: 10px; font-weight: bold; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-    .room[data-mood="happy"] .pickle { animation: happy .72s ease-in-out infinite; }
+    .room[data-mood="happy"] .pet-body { animation: happy .72s ease-in-out infinite; }
     .room[data-mood="happy"] .pet-shadow { animation: shadow-hop .72s ease-in-out infinite; }
     .room[data-mood="happy"] .eye { height: 5px; background: transparent; border-top: 3px solid #263f29; border-radius: 50% 50% 0 0; animation: none; }
-    .room[data-mood="happy"] .cheek { width: 9px; height: 4px; background: var(--highlight, #a1b56b); }
+    .room[data-mood="happy"] .cheek { width: 9px; height: 4px; }
     .room[data-mood="happy"] .mouth { width: 14px; height: 9px; left: 9px; top: 9px; }
     .room[data-mood="happy"] .arm.left { animation: wave-left .72s ease-in-out infinite; }
     .room[data-mood="happy"] .arm.right { animation: wave-right .72s ease-in-out infinite; }
-    .room[data-vibe="shades"] .pickle, .room[data-vibe="book"] .pickle, .room[data-vibe="fire"] .pickle { animation: idle 2.6s ease-in-out infinite; }
-    .room[data-vibe="lounge"] .pickle { animation: lounge 3.4s ease-in-out infinite; }
+    .room[data-vibe="shades"] .pet-body, .room[data-vibe="book"] .pet-body, .room[data-vibe="fire"] .pet-body { animation: idle 2.6s ease-in-out infinite; }
+    .room[data-vibe="lounge"] .pet-body { animation: lounge 3.4s ease-in-out infinite; }
     .room[data-vibe="shades"] .pet-shadow, .room[data-vibe="book"] .pet-shadow, .room[data-vibe="fire"] .pet-shadow { animation: shadow-idle 2.6s ease-in-out infinite; }
     .room[data-vibe="lounge"] .pet-shadow { animation: none; transform: translateX(-8px) scaleX(1.15); }
     .room[data-vibe="shades"] .arm.left, .room[data-vibe="fire"] .arm.right { animation: arm-left 2.6s ease-in-out infinite; }
@@ -148,12 +150,13 @@
     .room[data-vibe="book"] .eye { height: 5px; top: 3px; background: #263f29; border: 0; border-radius: 0; animation: blink 4.4s linear infinite; }
     .room[data-vibe="fire"] .arm.left { animation: none; transform: rotate(20deg); }
     .scene-art .flame { transform-origin: -25px 90px; animation: flicker .45s ease-in-out infinite alternate; }
-    .room[data-mood="hungry"] .pickle { animation: hungry 3.2s ease-in-out infinite; }
+    .room[data-mood="hungry"] .pet-body { animation: hungry 3.2s ease-in-out infinite; }
     .room[data-mood="hungry"] .eye { height: 4px; top: 2px; animation-duration: 6s; }
     .room[data-mood="hungry"] .arm.left { animation: none; transform: rotate(-38deg); }
     .room[data-mood="hungry"] .arm.right { animation: none; transform: rotate(38deg); }
     .room[data-mood="hungry"] .mouth, .room[data-mood="sick"] .mouth { border-top: 3px solid #263f29; border-bottom: 0; border-radius: 7px 7px 0 0; height: 5px; }
-    .room[data-mood="sick"] .pickle { animation: sick 1.6s ease-in-out infinite; background: #8ba46a; }
+    .room[data-mood="sick"] .pet-body { animation: sick 1.6s ease-in-out infinite; }
+    .room[data-mood="sick"] .pickle { background: #8ba46a; }
     .room[data-mood="sick"] .pet-shadow { animation: shadow-sick 1.6s ease-in-out infinite; }
     .room[data-mood="sick"] .sweat { display: block; animation: sweat 1.6s ease-in infinite; }
     .room[data-mood="sick"] .arm.left { animation: none; transform: rotate(-70deg); }
@@ -161,7 +164,7 @@
     .room[data-mood="sick"] .eye.right { background: transparent; width: 8px; height: 8px; box-shadow: none; animation: none; }
     .room[data-mood="sick"] .eye.right::before, .room[data-mood="sick"] .eye.right::after { content: ''; position: absolute; width: 9px; height: 3px; top: 2px; background: #263f29; transform: rotate(45deg); }
     .room[data-mood="sick"] .eye.right::after { transform: rotate(-45deg); }
-    .room[data-mood="sleeping"] .pickle { animation: sleep 3.4s ease-in-out infinite; }
+    .room[data-mood="sleeping"] .pet-body { animation: sleep 3.4s ease-in-out infinite; }
     .room[data-mood="sleeping"] .pet-shadow { animation: none; transform: scaleX(1.08); }
     .room[data-mood="sleeping"] .eye { height: 2px; top: 5px; width: 7px; animation: none; }
     .room[data-mood="sleeping"] .mouth { border: 2px solid #263f29; border-radius: 50%; width: 5px; height: 5px; left: 14px; }
@@ -185,13 +188,13 @@
     .pet-actor.act-munch { animation: munch 1.1s ease-in-out both; }
     .pet-actor.act-munch .mouth { animation: chomp .22s steps(2, jump-none) 5; }
     .pet-actor.act-munch .cheek { width: 9px; height: 5px; top: 8px; }
-    .room:has(.act-munch) .pickle { animation: idle 2.6s ease-in-out infinite; }
+    .room:has(.act-munch) .pet-body { animation: idle 2.6s ease-in-out infinite; }
     .room:has(.act-munch) .pet-shadow { animation: shadow-idle 2.6s ease-in-out infinite; }
     .pet-actor.act-shimmy { animation: shimmy .7s ease-in-out both; }
     .bath { display: none; position: absolute; left: 50%; bottom: -24px; width: 140px; height: 64px; transform: translateX(-50%); z-index: 3; pointer-events: none; }
     .bath svg { display: block; width: 100%; height: 100%; overflow: visible; }
     .act-bath .bath { display: block; }
-    .room .act-bath .pickle { animation: bath-bob .65s ease-in-out infinite; }
+    .room .act-bath .pet-body { animation: bath-bob .65s ease-in-out infinite; }
     .room:has(.act-bath) .pet-shadow { animation: none; }
     .bath-suds { transform-origin: 70px 20px; animation: bath-foam .8s ease-in-out infinite; }
     .bath-bubble { position: absolute; bottom: 44px; left: 15px; width: 10px; height: 10px; border: 2px solid var(--pixel); border-radius: 50%; background: #f1f6d6cc; box-shadow: inset 2px 2px #fffde9; animation: bath-bubble 1.3s ease-out infinite; }
@@ -199,18 +202,18 @@
     .bath-bubble:nth-of-type(3) { left: 38px; width: 7px; height: 7px; animation-delay: -.9s; }
     .pet-actor.act-wake { animation: wake .9s ease-in-out both; }
     .pet-button:has(.act-wake) .pet-shadow { animation: shadow-hop .9s ease-in-out both; }
-    .room[data-mood="scared"] .pickle { animation: tremble .16s linear infinite; }
+    .room[data-mood="scared"] .pet-body { animation: tremble .16s linear infinite; }
     .room[data-mood="scared"] .pet-shadow { animation: none; }
     .room[data-mood="scared"] .eye { width: 7px; height: 9px; top: -2px; animation: none; }
     .room[data-mood="scared"] .mouth { border: 2px solid #263f29; border-radius: 50%; width: 8px; height: 9px; left: 12px; top: 9px; }
     .room[data-mood="scared"] .cheek { width: 4px; height: 2px; }
-    .room[data-mood="scared"] .arm.left { animation: none; transform: rotate(85deg); }
-    .room[data-mood="scared"] .arm.right { animation: none; transform: rotate(-85deg); }
+    .room[data-mood="scared"] .arm.left { animation: none; transform: rotate(-62deg); }
+    .room[data-mood="scared"] .arm.right { animation: none; transform: rotate(62deg); }
     .room[data-mood="scared"] .sweat { display: block; animation: sweat .9s ease-in infinite; }
     .room[data-bites="1"] .pickle { clip-path: polygon(-60% -30%, 160% -30%, 160% 16%, 100% 16%, 90% 17%, 84% 22%, 79% 27%, 80% 33%, 85% 38%, 92% 41%, 100% 44%, 160% 44%, 160% 130%, -60% 130%); }
-    .room[data-bites="2"] .pickle { clip-path: polygon(-60% -30%, 160% -30%, 160% 16%, 100% 16%, 90% 17%, 84% 22%, 79% 27%, 80% 33%, 85% 38%, 92% 41%, 100% 44%, 160% 44%, 160% 130%, -60% 130%, -60% 74%, 0 74%, 12% 72%, 19% 67%, 22% 60%, 18% 53%, 10% 48%, 0 50%, -60% 50%); }
+    .room[data-bites="2"] .pickle { clip-path: polygon(-60% -30%, 160% -30%, 160% 16%, 100% 16%, 90% 17%, 84% 22%, 79% 27%, 80% 33%, 85% 38%, 92% 41%, 100% 44%, 160% 44%, 160% 130%, -60% 130%, -60% 97%, 0 97%, 11% 95%, 18% 90%, 21% 85%, 18% 80%, 11% 76%, 0 75%, -60% 75%); }
     .pet-actor.act-bitten { animation: bitten .5s ease-out both; }
-    .crumbs { display: none; position: absolute; bottom: 44px; left: calc(50% + 42px); width: 36px; height: 8px; background: radial-gradient(circle, var(--pixel) 1.5px, transparent 2px) 0 0 / 9px 8px, radial-gradient(circle, var(--pixel) 1px, transparent 1.5px) 4px 4px / 9px 8px; }
+    .crumbs { display: none; position: absolute; bottom: 16px; left: calc(50% + 42px); width: 36px; height: 8px; background: radial-gradient(circle, var(--pixel) 1.5px, transparent 2px) 0 0 / 9px 8px, radial-gradient(circle, var(--pixel) 1px, transparent 1.5px) 4px 4px / 9px 8px; }
     .room.is-eaten .crumbs { display: block; }
     .screen.asleep { background: #b7c590; }
     .poop { position: absolute; left: 36px; bottom: 17px; width: 22px; height: 8px; border-radius: 5px; background: var(--pixel); }
@@ -218,7 +221,8 @@
     .poop::after { width: 8px; top: -10px; left: 7px; }
     .effect { position: absolute; z-index: 3; left: 50%; top: 33px; transform: translateX(-50%); font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none; }
     .effect.pop { animation: reward 1.6s ease-out both; }
-    .tombstone { width: 73px; height: 79px; padding-top: 20px; background: #9bad78; border: 3px solid var(--pixel); border-radius: 33px 33px 3px 3px; text-align: center; font-size: 12px; line-height: 1.6; font-weight: bold; position: relative; }
+    .room.is-dead .effect { top: 66px; }
+    .tombstone { width: 73px; height: 79px; margin-bottom: 15px; padding-top: 15px; background: #9bad78; border: 3px solid var(--pixel); border-radius: 33px 33px 3px 3px; text-align: center; font-size: 11px; line-height: 1.45; font-weight: bold; position: relative; }
     .tombstone::before { content: ''; position: absolute; left: 35px; top: -14px; height: 12px; width: 9px; border-left: 3px solid var(--pixel); border-top: 3px solid var(--pixel); transform: rotate(20deg); }
     .lcd-message { min-height: 41px; border-top: 1px solid #71864966; padding: 7px 0 6px; text-align: center; font-size: 10px; line-height: 1.4; font-weight: 700; letter-spacing: -.1px; }
     .screen-hint { text-align: center; font-size: 9px; letter-spacing: .6px; margin: 0; opacity: .7; }
@@ -246,13 +250,13 @@
     .jar:disabled { opacity: 1; }
     .game-close, .restart { font-family: inherit; font-size: 9px; font-weight: bold; background: transparent; border: 1px solid #667d48; border-radius: 3px; padding: 5px 10px; min-height: 28px; }
     .game-close { min-height: 30px; margin-top: 2px; }
-    .restart { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: var(--lcd); z-index: 2; }
+    .restart { position: absolute; top: 28px; left: 50%; transform: translateX(-50%); background: var(--lcd); z-index: 2; }
     .nursery { position: absolute; inset: 0; z-index: 8; padding: 18px 14px; text-align: center; background: var(--lcd); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
     .nursery h2 { font-size: 15px; margin: 0; letter-spacing: -.4px; }
     .nursery p { font-size: 10px; line-height: 1.5; margin: 0; }
     .nursery .nursery-kicker { font-size: 8px; letter-spacing: 2px; }
     .brine-jar { position: relative; width: 85px; height: 96px; flex-shrink: 0; border: 3px solid var(--pixel); border-radius: 9px 9px 22px 22px; background: linear-gradient(0deg, #8fa96699 70%, transparent 70%); margin: 3px auto; }
-    .brine-jar::before { content: ''; position: absolute; width: 81px; height: 10px; top: -7px; left: -1px; background: var(--pixel); border-radius: 3px; }
+    .brine-jar::before { content: ''; position: absolute; z-index: 1; width: 81px; height: 10px; top: -7px; left: -1px; background: var(--pixel); border-radius: 3px; }
     .brine-jar::after { content: '· ° ·'; position: absolute; font-size: 22px; bottom: 7px; left: 6px; right: 6px; animation: brine-bubbles 2s ease-in-out infinite; }
     .jar-baby { position: absolute; width: 35px; height: 56px; border: 2px solid var(--pixel); border-radius: 45%; background: var(--skin, #78954b); left: 22px; top: 22px; transform: rotate(-12deg); transition: top .5s, transform .5s; }
     .jar-baby::after { content: '•ᴗ•'; position: absolute; left: 2px; top: 15px; font-size: 12px; }
@@ -318,7 +322,6 @@
     .audio-controls button[aria-pressed="true"] { background: #dce5bf; }
     .audio-volume { display: flex; flex-direction: column; gap: 3px; font-size: 9px; }
     .audio-volume input { width: 88px; height: 28px; accent-color: var(--pixel); margin: 0; }
-    .room.is-dead .tombstone { margin-top: -19px; }
     .below { text-align: center; padding: 18px 0 22px; }
     .saved { margin: 0; font-size: 10px; color: #8b917e; }
     .saved::before { content: ''; width: 5px; height: 5px; border-radius: 50%; display: inline-block; background: #8b9f69; margin-right: 7px; vertical-align: 1px; }
@@ -401,7 +404,7 @@
     @keyframes reward { 0% { opacity: 0; transform: translate(-50%, 12px); } 20%, 60% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
     @media (min-width: 1500px) and (min-height: 950px) { .playground { padding-top: 43px; padding-bottom: 45px; min-height: 620px; } }
     @media (max-width: 960px) { .orbit { width: 580px; } }
-    @media (max-width: 760px) { .page { padding: 0 24px; } .masthead { height: 64px; } .brand-logo { width: 132px; } .brand { font-size: 23px; } .orbit { width: 430px; height: 370px; max-width: calc(100vw - 48px); transform: none; } .playground { min-height: 0; padding: 32px 0 26px; } }
+    @media (max-width: 760px) { .page { padding: 0 24px; } .masthead { height: 64px; } .brand-logo { width: 132px; } .orbit::before, .orbit::after { display: none; } .brand { font-size: 23px; } .orbit { width: 430px; height: 370px; max-width: calc(100vw - 48px); transform: none; } .playground { min-height: 0; padding: 32px 0 26px; } }
     @media (max-width: 440px) { .page { padding: 0 17px; } .device { width: 340px; padding: 27px 24px 21px; border-radius: 92px 92px 101px 101px / 78px 78px 106px 106px; } .device-brand { font-size: 12px; margin-bottom: 13px; } .screen { padding: 11px 11px 0; height: 365px; } .bezel { padding: 8px; } .meters { column-gap: 13px; } .playground { padding: 34px 0 26px; } }
     @media (display-mode: standalone) { .masthead { min-height: 60px; } .playground { min-height: calc(100dvh - 60px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); padding: 8px 0 16px; } .install-actions { display: none; } }
     @media (max-width: 370px) { .page { padding: 0 12px; } .device { width: 294px; padding: 26px 17px 22px; border-radius: 85px 85px 96px 96px / 72px 72px 96px 96px; } .bezel { padding: 7px; } .screen { padding-left: 9px; padding-right: 9px; } .controls { gap: 19px; } .action { width: 55px; height: 52px; } }
@@ -420,17 +423,19 @@
     .page.is-expanded .bezel { display: flex; flex: 1; min-height: 0; padding: 6px; border-radius: 16px; }
     .page.is-expanded .screen { display: flex; flex-direction: column; flex: 1; min-width: 0; height: auto; padding: 12px; overflow: auto; }
     .page.is-expanded .screen-top, .page.is-expanded .meters, .page.is-expanded .lcd-message, .page.is-expanded .screen-hint { flex-shrink: 0; }
-    .page.is-expanded .room { flex: 1; min-height: 130px; height: auto; container-type: size; }
+    .page.is-expanded .room { flex: 1; min-height: 130px; height: auto; container-type: size; place-items: center; }
     .page.is-expanded .room > * { --pet-scale: 1; }
     @container (min-height: 250px) { .page.is-expanded .room > * { --pet-scale: 1.25; } }
     @container (min-height: 350px) { .page.is-expanded .room > * { --pet-scale: 1.75; } }
     @container (min-width: 360px) and (min-height: 500px) { .page.is-expanded .room > * { --pet-scale: 2.5; } }
     .page.is-expanded .pet-button { transform: scale(var(--pet-scale)); }
     .page.is-expanded .effect { top: calc(50% - 68px * var(--pet-scale)); font-size: calc(15px * var(--pet-scale)); }
-    .page.is-expanded .poop { left: max(8px, 50% - 114px * var(--pet-scale)); bottom: calc(50% - 84px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
-    .page.is-expanded .tombstone { transform: scale(var(--pet-scale)); }
-    .page.is-expanded .crumbs { left: calc(50% + 42px * var(--pet-scale)); bottom: calc(50% - 57px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
-    .page.is-expanded .room::after { --pet-scale: 1; bottom: calc(50% - 86px * var(--pet-scale)); }
+    .page.is-expanded .poop { left: max(8px, 50% - 114px * var(--pet-scale)); bottom: calc(50% - 50px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
+    .page.is-expanded .tombstone { margin: -19px 0 0; top: calc(16px * var(--pet-scale)); transform: scale(var(--pet-scale)); }
+    .page.is-expanded .restart { top: auto; bottom: calc(50% + 45px * var(--pet-scale)); }
+    .page.is-expanded .room.is-dead .effect { top: calc(50% - 44px * var(--pet-scale)); }
+    .page.is-expanded .crumbs { left: calc(50% + 42px * var(--pet-scale)); bottom: calc(50% - 50px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
+    .page.is-expanded .room::after { --pet-scale: 1; bottom: calc(50% - 50px * var(--pet-scale)); }
     @container (min-height: 250px) { .page.is-expanded .room::after { --pet-scale: 1.25; } }
     @container (min-height: 350px) { .page.is-expanded .room::after { --pet-scale: 1.75; } }
     @container (min-width: 360px) and (min-height: 500px) { .page.is-expanded .room::after { --pet-scale: 2.5; } }
@@ -523,7 +528,7 @@
               </div>
               <div class="room" id="room" data-stage="seed" data-mood="idle">
                 <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
-                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><svg class="scene-art" id="scene-art" viewBox="-40 -40 150 160" hidden></svg><span class="pet-actor" id="actor"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
+                <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><svg class="scene-art" id="scene-art" viewBox="-40 -40 150 160" hidden></svg><span class="pet-actor" id="actor"><span class="pet-body"><span class="pickle"><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span><svg class="prop-art" id="prop-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
                 <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><span class="crumbs" aria-hidden="true"></span><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
               </div>
