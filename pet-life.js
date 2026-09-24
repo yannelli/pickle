@@ -46,6 +46,17 @@
     ['cosmic', 'Cosmic Cucumber', 'Knows the universe is mostly snack space.', 'antenna', 'wand'],
     ['eternal', 'The Eternal Dill', 'Best before: absolutely never.', 'halo', 'infinity']
   ].map(([id, name, quip, hat, prop], index) => ({ id, name, quip, hat, prop, accent: ['#718449', '#8b754a', '#65785f', '#8e8460'][index % 4] }));
+  // Teens pick a new stereotype every day between day 3 and day 7, starting from a per-pickle offset.
+  const TEENS = [
+    ['nerd', 'Nerd', 'Actually, it’s a cucurbit.', 'nerdglasses', 'book'],
+    ['emo', 'Emo', 'Nobody understands brine like I do.', 'fringe', 'journal'],
+    ['jock', 'Jock', 'Do you even lift, jar?', 'backcap', 'ball'],
+    ['skater', 'Skater', 'Kickflip. Wipeout. Repeat.', 'beanie', 'skateboard'],
+    ['gamer', 'Gamer', 'One more round. Six more rounds.', 'headset', 'controller'],
+    ['theater', 'Theater Kid', 'The whole jar is a stage.', 'beret', 'masks'],
+    ['band', 'Band Kid', 'This one time, at brine camp...', 'shako', 'trumpet'],
+    ['prep', 'Prep', 'Early decision. Extra brine.', 'mortarboard', 'phone']
+  ].map(([id, name, quip, hat, prop], index) => ({ id, name, quip, hat, prop, accent: ['#5b6f8a', '#3d3d47', '#8a5b5b', '#6f7f4a'][index % 4] }));
   const clamp = value => Math.max(0, Math.min(100, value));
   const timestamp = value => Number.isSafeInteger(value) && value >= 0 && value <= 8640000000000000;
   function fresh(now = Date.now()) {
@@ -61,6 +72,7 @@
       !['brinedAt', 'hatchAt', 'bornAt', 'lastCareAt', 'updatedAt', 'diedAt'].every(key => timestamp(value[key])) ||
       !Number.isFinite(value.neglectMs) || value.neglectMs < 0 || value.neglectMs > 48 * HOUR ||
       !['sleeping', 'sick', 'dead'].every(key => typeof value[key] === 'boolean') || (value.dead && value.sleeping) ||
+      (value.phase !== 'living' && (value.dead || value.sleeping || value.sick)) || (value.dead && value.diedAt < value.bornAt) ||
       (value.phase !== 'new' && value.hatchAt < value.brinedAt) || (value.phase === 'living' && value.bornAt > value.updatedAt) ||
       (value.eaten !== undefined && (typeof value.eaten !== 'boolean' || (value.eaten && !value.dead)))) {
       throw new Error('This file contains invalid pickle progress.');
@@ -75,7 +87,7 @@
       !['ageTicks', 'neglect', 'updatedAt'].every(key => Number.isFinite(value[key]) && value[key] >= 0) ||
       !['sleeping', 'sick', 'dead'].every(key => typeof value[key] === 'boolean')) throw new Error('Unreadable pickle save.');
     // Keep existing growth and stats, and give old rapid-decay saves a fresh grace period.
-    const age = value.ageTicks >= 600 ? 14 * DAY : value.ageTicks >= 100 ? 3 * DAY : value.ageTicks >= 10 ? DAY : 0;
+    const age = value.ageTicks >= 600 ? 14 * DAY : value.ageTicks >= 100 ? 7 * DAY : value.ageTicks >= 10 ? DAY : 0;
     return { ...fresh(now), ...Object.fromEntries(STATS.map(key => [key, value[key]])), phase: 'living', name: 'Little Dill',
       bornAt: Math.max(0, now - age), brinedAt: Math.max(0, now - age - HATCH_MS), hatchAt: Math.max(0, now - age),
       sleeping: value.sleeping && !value.dead, sick: value.sick, dead: value.dead, diedAt: value.dead ? now : 0 };
@@ -96,7 +108,8 @@
   function assess(pet) {
     if (pet.phase !== 'living' || pet.dead) return;
     if (Math.min(pet.fullness, pet.happiness, pet.hygiene) <= 8) pet.sick = true;
-    if (STATS.every(key => pet[key] >= 30)) { pet.sick = false; pet.neglectMs = 0; }
+    if (Object.keys(RATES).every(key => pet[key] > 0)) pet.neglectMs = 0;
+    if (STATS.every(key => pet[key] >= 30)) pet.sick = false;
   }
   function advance(pet, now = Date.now()) {
     // A backward wall-clock adjustment must not count the same hours twice.
@@ -105,9 +118,12 @@
     if (pet.phase !== 'living' || pet.dead) { pet.updatedAt = now; return pet; }
     const elapsed = now - pet.updatedAt;
     const emptyAfter = Math.min(...Object.entries(RATES).map(([key, rate]) => pet[key] / rate * HOUR));
+    if (emptyAfter > 0) pet.neglectMs = 0;
     const untilDeath = emptyAfter + 48 * HOUR - pet.neglectMs;
     const duration = Math.min(elapsed, untilDeath);
     const hours = duration / HOUR;
+    const recoveryHours = Math.max(0, 30 - pet.energy) / (pet.sleeping ? 30 : 2);
+    if (recoveryHours <= hours && Object.entries(RATES).every(([key, rate]) => pet[key] - rate * recoveryHours >= 30)) pet.sick = false;
     for (const [key, rate] of Object.entries(RATES)) pet[key] = clamp(pet[key] - rate * hours);
     pet.energy = clamp(pet.energy + hours * (pet.sleeping ? 30 : 2));
     if (pet.energy >= 100) pet.sleeping = false;
@@ -121,7 +137,13 @@
   function stage(pet, now = Date.now()) {
     if (pet.phase !== 'living') return pet.phase;
     const days = age(pet, now) / DAY;
-    return days < 1 ? 'baby' : days < 3 ? 'young' : days < 14 ? 'adult' : 'elder';
+    return days < 1 ? 'baby' : days < 3 ? 'young' : days < 7 ? 'teen' : days < 14 ? 'adult' : 'elder';
+  }
+  function teen(pet, now = Date.now()) {
+    if (stage(pet, now) !== 'teen') return null;
+    const day = Math.floor((age(pet, now) - 3 * DAY) / DAY);
+    const offset = Math.floor(pet.bornAt / 1000) % TEENS.length;
+    return { ...TEENS[(offset + day) % TEENS.length], day };
   }
   function elder(pet, now = Date.now()) {
     if (stage(pet, now) !== 'elder') return null;
@@ -132,7 +154,7 @@
     const hours = Math.min(...Object.entries(RATES).map(([key, rate]) => Math.max(0, pet[key] - 55) / rate));
     return now + Math.max(2, hours) * HOUR;
   }
-  const api = Object.freeze({ HOUR, DAY, HATCH_MS, STATS, RATES, VARIETIES, ELDERS, fresh, validate, restore, brine, name, assess, advance, age, stage, elder, nextCareAt });
+  const api = Object.freeze({ HOUR, DAY, HATCH_MS, STATS, RATES, VARIETIES, ELDERS, TEENS, fresh, validate, restore, brine, name, assess, advance, age, stage, teen, elder, nextCareAt });
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LittleDillLife = api;
 })(globalThis);

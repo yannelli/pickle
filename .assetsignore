@@ -20,3 +20,4 @@ ios/
 wrangler.arena.jsonc
 wrangler.arena-legacy.jsonc
 arena-web/
+website/

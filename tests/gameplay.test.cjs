@@ -22,7 +22,8 @@ function client(changes = {}, options = {}) {
     setAttribute(name, value) { this.attributes[name] = String(value); }
     addEventListener(name, callback) { if (!this.listeners.has(name)) this.listeners.set(name, []); this.listeners.get(name).push(callback); }
     click() { if (!this.disabled) this.dispatch('click'); }
-    dispatch(name, event = {}) { for (const callback of this.listeners.get(name) || []) callback({ target: this, currentTarget: this, ...event }); }
+    dispatch(name, event = {}) { return Promise.all((this.listeners.get(name) || []).map(callback => callback({ target: this, currentTarget: this, ...event }))); }
+    contains(element) { return element === this; }
     focus() { document.activeElement = this; }
     showModal() { this.open = true; }
     close() { this.open = false; this.dispatch('close'); }
@@ -37,11 +38,12 @@ function client(changes = {}, options = {}) {
   const choices = ['hunt', 'memory', 'catch'].map(game => Object.assign(new Element(), { dataset: { game } }));
   const groups = { '.jar': jars, '.memory-pad': pads, '.catch-lane': lanes, '.game-choice': choices };
   const document = { hidden: false, activeElement: null, getElementById: get,
+    createElement: () => new Element(),
     querySelector: selector => groups[selector]?.[0] || get(selector), querySelectorAll: selector => groups[selector] || [],
     addEventListener: (name, cb) => { if (!events.has(name)) events.set(name, []); events.get(name).push(cb); } };
   const pet = { version: 1, fullness: 60, happiness: 20, energy: 80, hygiene: 60, ageTicks: 120, neglect: 0,
     sleeping: false, sick: false, dead: false, updatedAt: now, ...changes };
-  const storage = new Map([['little-dill.v1', JSON.stringify(pet)]]);
+  const storage = new Map([['little-dill.v1', JSON.stringify(pet)], ...Object.entries(options.storage || {})]);
   const localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => { if (options.blockStorage) throw Error('blocked'); storage.set(key, value); } };
   let preferences = { music: true, sfx: true, volume: .45 };
   const cues = [];
@@ -52,10 +54,12 @@ function client(changes = {}, options = {}) {
     Math: Object.assign(Object.create(Math), { random: () => .1 }), navigator: { userAgent: '', platform: '' }, location: { protocol: 'http:' },
     setTimeout: (fn, delay) => schedule(fn, delay), clearTimeout: id => timers.delete(id),
     setInterval: (fn, delay) => schedule(fn, delay, delay), clearInterval: id => timers.delete(id),
-    matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound } };
+    matchMedia: () => ({ matches: false }), addEventListener() {}, LittleDillAudio: { create: () => sound }, LittleDillSaves: options.saves,
+    LittleDillPhotos: options.photos };
   sandbox.window = sandbox;
-  vm.runInNewContext(source, sandbox);
   const dispatch = (name, event = {}) => { for (const cb of events.get(name) || []) cb(event); };
+  document.documentElement = options.fullscreen || {};
+  vm.runInNewContext(source, sandbox);
   const run = duration => {
     const end = now + duration;
     while (true) {
@@ -235,4 +239,119 @@ test('migrated saves use a new key so an older tab cannot overwrite the new life
   assert.equal(app.storage.get('little-dill.v1'), legacy);
   app.storage.set('little-dill.v1', JSON.stringify({ ...JSON.parse(legacy), happiness: 0 }));
   assert.equal(app.saved().happiness, 28);
+});
+
+test('restoring a backup clears the previous pickle eating prompt', async () => {
+  let restored;
+  const app = client({}, { saves: { MAX_FILE_BYTES: 16384, decode: async () => restored } });
+  restored = { savedAt: app.saved().updatedAt, pet: { ...app.saved(), name: 'New Dill' } };
+  for (const key of ['e', 'a', 't', '3', '3']) app.key(key);
+  assert.equal(app.get('room').dataset.bites, '2');
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change');
+  app.click('backup-restore');
+  assert.equal(app.saved().name, 'New Dill');
+  assert.equal(app.get('room').dataset.bites, '0');
+  app.key('3');
+  assert.equal(app.saved().dead, false);
+  assert.equal(app.saved().hygiene, 100);
+});
+
+test('Wake stays awake when the pickle reaches full energy between render and click', () => {
+  const app = client({ sleeping: true, energy: 99.995 });
+  app.run(1000);
+  assert.equal(app.get('sleep').textContent, 'Wake ☀');
+  app.click('sleep');
+  assert.equal(app.saved().energy, 100);
+  assert.equal(app.saved().sleeping, false);
+  assert.equal(app.get('sleep').textContent, 'Nap ☾');
+});
+
+test('a wrong memory note stops glowing when the result is shown', () => {
+  const app = client(); app.start('memory');
+  app.until(() => !app.pads[0].disabled);
+  app.key('2');
+  assert.equal(app.get('game-again').hidden, false);
+  assert.ok(app.pads.every(pad => !pad.classList.contains('lit')));
+});
+
+test('planting a new pickle after an import retires the undo option', async () => {
+  let restored;
+  const app = client({}, { saves: { MAX_FILE_BYTES: 16384, decode: async () => restored } });
+  restored = { savedAt: app.saved().updatedAt, pet: { ...app.saved(), name: 'New Dill', dead: true, sleeping: false, diedAt: app.saved().updatedAt } };
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change');
+  app.click('backup-restore');
+  assert.equal(app.get('undo-import').hidden, false);
+  app.click('restart');
+  assert.equal(app.saved().phase, 'new');
+  assert.equal(app.get('undo-import').hidden, true);
+  app.click('undo-import');
+  assert.equal(app.saved().phase, 'new');
+});
+
+test('a legacy save left for over a minute is greeted as missed', () => {
+  const app = client({ updatedAt: 1800000000000 - 3600000 });
+  assert.match(app.get('message').textContent, /missed you/);
+});
+
+
+test('fullscreen preference restores the expanded layout and persists an explicit exit', async () => {
+  const app = client({}, { storage: { 'little-dill.fullscreen.v1': 'true' } });
+  assert.equal(app.get('game-page').classList.contains('is-expanded'), true);
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'true');
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('game-page').classList.contains('is-expanded'), false);
+  assert.equal(app.storage.get('little-dill.fullscreen.v1'), 'false');
+});
+
+test('fullscreen remains usable when preference storage is blocked', async () => {
+  const app = client({}, { blockStorage: true });
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'true');
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('fullscreen-toggle').attributes['aria-pressed'], 'false');
+});
+
+
+test('expanded layout restores without requesting browser fullscreen', async () => {
+  let requests = 0;
+  const app = client({}, { storage: { 'little-dill.fullscreen.v1': 'true' }, fullscreen: { requestFullscreen: async () => { requests++; } } });
+  assert.equal(app.get('game-page').classList.contains('is-expanded'), true);
+  await app.get('game-page').dispatch('click', { target: app.get('pet') });
+  app.click('pet');
+  assert.equal(app.saved().happiness, 28);
+  await app.get('fullscreen-toggle').dispatch('click');
+  await app.get('fullscreen-toggle').dispatch('click');
+  assert.equal(app.get('game-page').classList.contains('is-expanded'), true);
+  assert.equal(requests, 0);
+});
+
+test('photos pause the arcade and block care shortcuts until closed', () => {
+  let captured;
+  const app = client({}, { photos: { create: () => ({ open: state => {
+    captured = { ...state }; app.get('photo-dialog').showModal();
+  } }) } });
+  assert.equal(app.get('take-photo').hidden, false);
+  app.start('memory'); app.click('take-photo');
+  assert.equal(app.get('game').classList.contains('paused'), true);
+  assert.equal(captured.name, 'Little Dill');
+  app.key('p'); app.key('s'); app.key('1');
+  assert.equal(app.saved().sleeping, false);
+  assert.equal(app.saved().happiness, captured.happiness);
+  app.visible(false); app.visible(true);
+  assert.equal(app.get('game').classList.contains('paused'), true);
+  app.get('photo-dialog').close();
+  assert.equal(app.get('game').classList.contains('paused'), false);
+  app.until(() => !app.pads[0].disabled);
+});
+
+test('photos stay hidden for a dead pickle or an unavailable photo module', () => {
+  assert.equal(client().get('take-photo').hidden, true);
+  const app = client({ dead: true }, { photos: { create: () => ({ open() { assert.fail('dead pickle photo'); } }) } });
+  assert.equal(app.get('take-photo').hidden, true);
+  app.click('take-photo'); app.click('restart');
+  assert.equal(app.get('take-photo').hidden, true);
 });

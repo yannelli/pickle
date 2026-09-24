@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7ee">
+  <title>little dill. | Small pickle. Big feelings.</title>
+  <meta name="description" content="Meet your new little pickle pet. Choose a brine, raise your dill, play tiny games, and grow together. Free to play in your browser, with no account needed.">
+  <link rel="canonical" data-canonical href="/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="little dill. | Small pickle. Big feelings.">
+  <meta property="og:description" content="A tiny virtual pet with a whole lot of personality. Hatch a pickle. Give it a name. Get a little attached.">
+  <meta property="og:url" content="/">
+  <meta property="og:image" content="/assets/og.png">
+  <meta property="og:image:alt" content="A smiling little dill with a virtual-pet keychain">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="heart" viewBox="0 0 24 24"><path d="M12 20S3 14.5 3 8.5C3 3 10 2 12 7c2-5 9-4 9 1.5C21 14.5 12 20 12 20Z"/></symbol>
+    <symbol id="sparkle" viewBox="0 0 24 24"><path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/></symbol>
+    <symbol id="arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="pickle" viewBox="0 0 128 128">
+      <g stroke="#304a35" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M61 22c-4-6-2-11 4-13M37 76c-9 0-13-5-13-11M92 72c9 0 12-7 11-13M50 107l-3 8h-7M77 107l4 8h7" fill="none"/>
+        <path d="M67 20c18 0 28 14 28 33l-4 31c-2 17-12 26-28 26-18 0-29-12-28-30l3-31c2-18 12-29 29-29Z" fill="var(--pickle-color, #829f52)"/>
+        <path d="M51 41c3-7 7-10 14-10" stroke="var(--pickle-light, #c0d38e)" stroke-width="6" fill="none"/>
+        <path d="m47 77 1 1m32-31 1 1M48 91l1 1m34-19 1 1" stroke="#304a35" stroke-opacity=".25" stroke-width="5"/>
+        <path d="M55 61v3m19-3v3" stroke-width="5"/>
+        <path d="M59 74c3 5 8 5 11 0" stroke-width="3.5" fill="none"/>
+        <path d="M47 71h5m25 0h5" stroke="#dcad86" stroke-width="4"/>
+      </g>
+    </symbol>
+  </svg>
+  <header class="site-header wrap">
+    <a class="brand" href="/" aria-label="little dill home"><img src="/assets/logo.svg" width="160" height="44" alt="little dill."></a>
+    <nav aria-label="Main navigation">
+      <a href="#how-it-works">How to play</a>
+      <a href="#pickle-pals">Meet the pickles</a>
+      <a class="button button-small" data-game-link href="https://play.littledill.app">Let’s play <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+    </nav>
+  </header>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="status-dot"></span> A tiny pet. A daily dose of happy.</p>
+        <h1 id="hero-title">Small pickle.<br>Big <span class="feeling">feelings<svg viewBox="0 0 360 18" aria-hidden="true"><path d="M3 11Q167-7 355 8M25 16Q170 4 312 14"/></svg></span>.</h1>
+        <p class="hero-description">A little friend to feed, play with, and grow old with. Hatch your very own pickle and make a little room for joy.</p>
+        <a class="button" data-game-link href="https://play.littledill.app">Meet your little dill <svg aria-hidden="true"><use href="#arrow"/></svg></a>
+        <p class="hero-note">Free to play <span>·</span> No account <span>·</span> Just add love</p>
+      </div>
+      <div class="hero-art">
+        <div class="orbit" aria-hidden="true"></div>
+        <svg class="deco star-one" aria-hidden="true"><use href="#sparkle"/></svg>
+        <svg class="deco star-two" aria-hidden="true"><use href="#sparkle"/></svg>
+        <div class="sticker" aria-hidden="true">100%<br><span>friend material</span></div>
+        <div class="device">
+          <div class="device-top"><span>little dill.</span><span class="device-speaker" aria-hidden="true">▥</span></div>
+          <div class="device-screen">
+            <div class="screen-top"><span>YOUR NEW BEST BUD</span><svg aria-hidden="true"><use href="#heart"/></svg></div>
+            <p class="demo-name">Hi, I’m Dill.</p>
+            <div class="pet-stage">
+              <span class="pet-effect" id="pet-effect" aria-hidden="true">♡</span>
+              <button class="pet-button" id="pet-button" aria-label="Pet Dill" disabled><img id="demo-pickle" src="/assets/mark.svg" width="190" height="190" alt="A smiling green pickle waving hello"></button>
+              <span class="pet-shadow" aria-hidden="true"></span>
+            </div>
+            <p class="demo-message" id="demo-message" role="status" aria-live="polite">A little love goes a long way.</p>
+            <div class="happiness"><span>HAPPINESS</span><span class="happiness-track" aria-hidden="true"><span id="happiness-fill"></span></span><svg aria-hidden="true"><use href="#heart"/></svg></div>
+          </div>
+          <div class="demo-controls" role="group" aria-label="Try caring for Dill">
+            <button data-care="feed" disabled><span aria-hidden="true">◒</span>Feed</button>
+            <button data-care="love" disabled><span aria-hidden="true">♡</span>Love</button>
+            <button data-care="nap" disabled><span aria-hidden="true">☾</span><span id="nap-label">Nap</span></button>
+          </div>
+          <span class="device-bottom">A LITTLE BRINE. A LOT OF LOVE.</span>
+        </div>
+        <p class="handwritten demo-caption">a tiny taste of pickle parenthood <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M6 5h13v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></p>
+        <noscript><p class="noscript-note">Open the game to meet your own pickle.</p></noscript>
+      </div>
+    </section>
+    <div class="love-strip" role="group" aria-label="Game highlights"><div class="wrap">
+      <span>Small daily rituals</span><svg aria-hidden="true"><use href="#sparkle"/></svg>
+      <span>Big pickle energy</span><svg aria-hidden="true"><use href="#sparkle"/></svg>
+      <span>Made for your browser</span><svg aria-hidden="true"><use href="#sparkle"/></svg>
+      <span>Ridiculously lovable</span>
+    </div></div>
+    <section class="section wrap" id="how-it-works" aria-labelledby="how-title">
+      <div class="section-heading"><div><p class="eyebrow">A FRIEND, FRESHLY BRINED</p><h2 id="how-title">Love at first <em>pickle.</em></h2></div><p>A virtual pet with a soft spot for you.<br>A few little moments each day are all it takes.</p></div>
+      <div class="steps">
+        <article class="step"><span class="step-number">01 / THE MEET-CUTE</span><div class="step-illustration brine-jars" aria-hidden="true"><span class="jar"><i></i></span><span class="jar"><i></i></span><span class="jar"><i></i></span></div><h3>Pick your brine.</h3><p>Classic, Garlic, or Spicy? Pop in a cucumber, wait one minute, and see who hatches. Then give your new pal a name.</p></article>
+        <article class="step"><span class="step-number">02 / YOUR LITTLE ROUTINE</span><div class="step-illustration care-illustration" aria-hidden="true"><span>♡</span><img src="/assets/mark.svg" width="120" height="120" alt=""><span>✦</span></div><h3>A little care. Every day.</h3><p>Feed them, clean them, play a game, and sneak in a few pets. Your pickle grows and rests while you’re away.</p></article>
+        <article class="step"><span class="step-number">03 / GROW TOGETHER</span><div class="step-illustration growth-illustration" aria-hidden="true"><svg><use href="#pickle"/></svg><span>→</span><svg><use href="#pickle"/></svg><span>→</span><svg><use href="#pickle"/></svg></div><h3>Oh, the phases they’ll have.</h3><p>From tiny baby to dramatic teen to distinguished elder. New looks, new quirks, same little pickle you love.</p></article>
+      </div>
+    </section>
+    <section class="pals-section" id="pickle-pals" aria-labelledby="pals-title"><div class="wrap">
+      <div class="center-heading"><p class="eyebrow">SIX VARIETIES. SIX LITTLE PERSONALITIES.</p><h2 id="pals-title">Who’s your <em>dill?</em></h2><p>Your brine decides the pair. The hatch is a surprise.</p></div>
+      <div class="pals">
+        <article class="pal"><div class="pal-art"><svg aria-hidden="true"><use href="#pickle"/></svg></div><h3>Classic Dill</h3><p>The original sweetheart.</p><span class="brine-label">CLASSIC BRINE</span></article>
+        <article class="pal gherkin"><div class="pal-art"><svg aria-hidden="true"><use href="#pickle"/></svg></div><h3>Tiny Gherkin</h3><p>Little guy. Huge heart.</p><span class="brine-label">CLASSIC BRINE</span></article>
+        <article class="pal garlic"><div class="pal-art"><svg aria-hidden="true"><use href="#pickle"/></svg></div><h3>Garlic Goblin</h3><p>A lovable little oddball.</p><span class="brine-label">GARLIC BRINE</span></article>
+        <article class="pal butter"><div class="pal-art"><svg aria-hidden="true"><use href="#pickle"/></svg></div><h3>Butter Bean</h3><p>Soft, sweet, slightly salty.</p><span class="brine-label">GARLIC BRINE</span></article>
+        <article class="pal chili"><div class="pal-art"><svg aria-hidden="true"><use href="#pickle"/></svg></div><h3>Chili Dill</h3><p>A little extra zest.</p><span class="brine-label">SPICY BRINE</span></article>
+        <article class="pal pepper"><div class="pal-art"><svg aria-hidden="true"><use href="#pickle"/></svg></div><h3>Pepper Punk</h3><p>Big attitude. Secret softie.</p><span class="brine-label">SPICY BRINE</span></article>
+      </div>
+    </div></section>
+    <section class="section wrap play-section" aria-labelledby="play-title">
+      <div class="play-copy"><p class="eyebrow">A POCKET-SIZED HAPPY PLACE</p><h2 id="play-title">Make time for<br>a little <em>play.</em></h2><p>Three tiny arcade games to brighten your pickle’s day. Chase a high score or just enjoy a round together.</p><a class="text-link" data-game-link href="https://play.littledill.app">To the pickle arcade <svg aria-hidden="true"><use href="#arrow"/></svg></a><div class="radio-note"><span class="record" aria-hidden="true"></span><p><strong>Good tunes. Good brines.</strong><br>Four original 8-bit tracks on Pickle Radio.</p></div></div>
+      <div class="game-list">
+        <article><div class="game-icon heart-game" aria-hidden="true">♡</div><div><span class="eyebrow">KEEP YOUR EYES PEELED</span><h3>Heart hunt</h3><p>Follow the heart through a shuffle of jars.</p></div><span class="game-number" aria-hidden="true">01</span></article>
+        <article><div class="game-icon says-game" aria-hidden="true"><span>●</span><span>◆</span><span>▲</span><span>■</span></div><div><span class="eyebrow">A LITTLE BRAIN BRINE</span><h3>Dill says</h3><p>Remember the shapes. Repeat the beat.</p></div><span class="game-number" aria-hidden="true">02</span></article>
+        <article><div class="game-icon catch-game" aria-hidden="true">♡<span>⌴</span></div><div><span class="eyebrow">CATCH FEELINGS</span><h3>Brine catch</h3><p>Scoop up hearts, dodge salt, build a streak.</p></div><span class="game-number" aria-hidden="true">03</span></article>
+      </div>
+    </section>
+    <section class="life-section"><div class="wrap life-inner"><div><p class="eyebrow">A LITTLE FRIEND FOR THE LONG RUN</p><h2>They grow up.<br><em>You grow attached.</em></h2><p>Baby cheeks. Teenage phases. Elder hats.<br>There’s a lot of life in this little pickle.</p></div><div class="life-facts"><div><strong>5</strong><span>stages of life</span></div><div><strong>32</strong><span>elder looks to discover</span></div><div class="forever"><svg aria-hidden="true"><use href="#heart"/></svg><span>No old-age goodbyes.<br>Keep caring. Keep growing.</span></div></div></div></section>
+    <section class="section wrap faq-section" id="faq" aria-labelledby="faq-title">
+      <div><p class="eyebrow">A FEW LITTLE ANSWERS</p><h2 id="faq-title">Curious<br>about your <em>cuke?</em></h2><img class="faq-mascot" src="/assets/mascot.svg" width="155" height="155" alt="" loading="lazy"></div>
+      <div class="questions">
+        <details><summary>What exactly is little dill?<span aria-hidden="true">+</span></summary><p>It’s a free virtual pet game you play in your browser. Hatch a pickle, name it, keep it fed and happy, and watch it grow. There are three mini-games, six varieties, and a whole collection of elder looks to discover.</p></details>
+        <details><summary>Do I need an account or an app?<span aria-hidden="true">+</span></summary><p>No account or download is needed. Open the game in your browser and play. You can also add it to your Home Screen for an app-like experience. On iPhone or iPad, use Safari’s Share menu, then Add to Home Screen.</p></details>
+        <details><summary>How much care does my pickle need?<span aria-hidden="true">+</span></summary><p>A daily feed, clean, game, and pet is enough. A healthy pickle can handle a weekend away. Time passes while you’re gone, so come back for a visit. Long neglect can make your pickle sick, and an empty food, happiness, or hygiene meter for 48 hours can lead to a goodbye. Pickles don’t die of old age.</p></details>
+        <details><summary>Will my progress be saved?<span aria-hidden="true">+</span></summary><p>Your progress saves automatically in the browser you play in. Use Download save in the game to keep a .dill backup or move your pickle to another browser or device with Import save. Clearing your browser data removes the local save, so keep a backup of your little friend.</p></details>
+        <details><summary>Can I play offline?<span aria-hidden="true">+</span></summary><p>Yes. Once the game is installed and cached, it opens offline, including care and mini-games. Optional care reminders need an internet connection and a supported browser. This website introduces the game; open the game to install it.</p></details>
+        <details><summary>Does my pickle send me notifications?<span aria-hidden="true">+</span></summary><p>Only if you enable reminders in the game. They’re limited to one per day, with quiet hours from 10pm to 9am in your device’s time zone. An ignored reminder won’t trigger more until your next care visit.</p></details>
+      </div>
+    </section>
+    <section class="final-section wrap" aria-labelledby="final-title"><div class="final-card"><svg class="final-sparkle" aria-hidden="true"><use href="#sparkle"/></svg><p class="eyebrow">SOMEONE SMALL IS WAITING FOR YOU</p><h2 id="final-title">Your new best friend<br>is kind of a <em>big dill.</em></h2><a class="button" data-game-link href="https://play.littledill.app">Let’s meet your pickle <svg aria-hidden="true"><use href="#arrow"/></svg></a><p class="hero-note">One minute to hatch. Plenty of time to get attached.</p><img src="/assets/mascot.svg" width="160" height="160" alt="" loading="lazy"></div></section>
+  </main>
+  <footer class="site-footer wrap"><a class="brand" href="/" aria-label="little dill home"><img src="/assets/logo.svg" width="142" height="39" alt="little dill."></a><p>A little brine. A lot of love.</p><a href="#faq">Questions?</a><a href="#main">Back to top ↑</a></footer>
+</body>
+</html>

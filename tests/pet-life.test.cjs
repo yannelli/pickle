@@ -73,11 +73,36 @@ test('daily care supports indefinite life, all 32 elders, and another elder lap'
   assert.ok(life.elder(pet, NOW + 1000 * life.DAY).lap > 1);
 });
 
+test('partial care ends continuous neglect while sickness still needs full recovery', () => {
+  const pet = living({ fullness: 0, happiness: 20, energy: 5, sick: true, neglectMs: 47 * life.HOUR });
+  pet.fullness += 40;
+  life.assess(pet);
+  assert.equal(pet.neglectMs, 0);
+  assert.equal(pet.sick, true);
+  life.advance(pet, NOW + 21 * life.HOUR);
+  assert.equal(pet.dead, false);
+  assert.equal(pet.neglectMs, life.HOUR);
+});
+
+test('sickness recovery during elapsed time matches hourly updates awake and asleep', () => {
+  for (const sleeping of [false, true]) {
+    const open = living({ fullness: 80, happiness: 80, hygiene: 80, energy: 28, sick: true, sleeping });
+    const closed = structuredClone(open);
+    for (let hour = 1; hour <= 36; hour++) life.advance(open, NOW + hour * life.HOUR);
+    life.advance(closed, NOW + 36 * life.HOUR);
+    assert.equal(open.sick, false);
+    assert.equal(closed.sick, false);
+    life.advance(closed, NOW + 50 * life.HOUR);
+    assert.equal(closed.sick, true);
+  }
+});
+
 test('growth boundaries and elder forms use calendar time, including time away', () => {
   const pet = living();
   assert.equal(life.stage(pet, NOW + life.DAY - 1), 'baby');
   assert.equal(life.stage(pet, NOW + life.DAY), 'young');
-  assert.equal(life.stage(pet, NOW + 3 * life.DAY), 'adult');
+  assert.equal(life.stage(pet, NOW + 3 * life.DAY), 'teen');
+  assert.equal(life.stage(pet, NOW + 7 * life.DAY), 'adult');
   assert.equal(life.stage(pet, NOW + 14 * life.DAY), 'elder');
   for (let i = 0; i < 32; i++) assert.equal(life.elder(pet, NOW + (14 + i * 3) * life.DAY).id, life.ELDERS[i].id);
 });
@@ -88,6 +113,20 @@ test('energy recovers while closed, naps auto-wake, and backward clocks cannot d
   const copy = structuredClone(pet);
   life.advance(pet, NOW + life.HOUR); assert.deepEqual(pet, copy);
   const awake = living({ energy: 4 }); life.advance(awake, NOW + 4 * life.HOUR); assert.equal(awake.energy, 12);
+});
+
+test('teens wear a different stereotype each day, seeded per pickle, and only between days 3 and 7', () => {
+  const pet = living();
+  assert.equal(life.TEENS.length, 8);
+  assert.equal(new Set(life.TEENS.map(form => form.hat + ':' + form.prop)).size, 8);
+  assert.equal(life.teen(pet, NOW + 2 * life.DAY), null);
+  assert.equal(life.teen(pet, NOW + 7 * life.DAY), null);
+  const days = [3, 4, 5, 6].map(day => life.teen(pet, NOW + day * life.DAY));
+  assert.deepEqual(days.map(form => form.day), [0, 1, 2, 3]);
+  assert.equal(new Set(days.map(form => form.id)).size, 4);
+  assert.equal(life.teen(pet, NOW + 3 * life.DAY + life.DAY - 1).id, days[0].id);
+  const other = living({ bornAt: NOW + 1000 });
+  assert.notEqual(life.teen(other, NOW + 1000 + 3 * life.DAY).id, days[0].id);
 });
 
 test('old saves keep growth and stats without applying the old rapid decay on upgrade', () => {
@@ -106,25 +145,75 @@ test('names and v2 saves reject malformed values while preserving harmless Unico
   assert.equal(life.name(pet, 'hello\u200b'), false);
   assert.equal(life.name(pet, 'Díll 🥒', NOW), true);
   assert.equal(life.validate(pet).name, 'Díll 🥒');
-  for (const changes of [{ name: 'x'.repeat(25) }, { phase: 'unknown' }, { variety: 'made up' }, { fullness: NaN }, { neglectMs: Infinity }, { bornAt: NOW + 1 }]) {
+  for (const changes of [{ name: 'x'.repeat(25) }, { phase: 'unknown' }, { variety: 'made up' }, { fullness: NaN }, { neglectMs: Infinity }, { bornAt: NOW + 1 },
+    { dead: true, diedAt: NOW - 1 }, { phase: 'new', dead: true, diedAt: NOW }, { phase: 'brining', sleeping: true }, { phase: 'naming', sick: true }]) {
     assert.throws(() => life.validate({ ...pet, ...changes }));
   }
+  assert.equal(life.validate({ ...pet, dead: true, diedAt: NOW }).dead, true);
 });
+
+const READERS = '<ellipse cx="-12" cy="4"';
 
 test('all elder accessories are visible SVGs and every form has distinct artwork', () => {
   const vm = require('node:vm'), fs = require('node:fs');
   const attrs = new Set(['hidden']);
   const art = { dataset: {}, style: {}, innerHTML: '', toggleAttribute: (name, on) => on ? attrs.add(name) : attrs.delete(name) };
+  const propAttrs = new Set(['hidden']);
+  const prop = { dataset: {}, style: {}, innerHTML: '', toggleAttribute: (name, on) => on ? propAttrs.add(name) : propAttrs.delete(name) };
+  const sceneAttrs = new Set(['hidden']);
+  const scene = { dataset: {}, style: {}, innerHTML: '', toggleAttribute: (name, on) => on ? sceneAttrs.add(name) : sceneAttrs.delete(name) };
   const room = { dataset: {}, style: { setProperty() {} } };
-  const sandbox = { LittleDillLife: life, document: { getElementById: () => art } };
+  const sandbox = { LittleDillLife: life, document: { getElementById: id => ({ 'scene-art': scene, 'prop-art': prop, 'elder-art': art })[id] } };
   vm.runInNewContext(fs.readFileSync(require.resolve('../pet-art.js'), 'utf8'), sandbox);
   const seen = new Set();
   for (let i = 0; i < 32; i++) {
     sandbox.LittleDillArt.render(living(), room, NOW + (14 + i * 3) * life.DAY);
     assert.equal(attrs.has('hidden'), false);
-    assert.ok(!art.innerHTML.includes('undefined')); seen.add(art.innerHTML);
+    assert.equal(propAttrs.has('hidden'), false);
+    assert.ok(!/undefined|null|NaN/.test(art.innerHTML + prop.innerHTML)); seen.add(art.innerHTML + prop.innerHTML);
   }
   assert.equal(seen.size, 32);
   sandbox.LittleDillArt.render(living(), room, NOW);
   assert.equal(attrs.has('hidden'), true);
+  assert.equal(propAttrs.has('hidden'), true);
+  const teens = new Set();
+  for (let day = 0; day < 8; day++) {
+    sandbox.LittleDillArt.render(living({ bornAt: NOW - day * life.DAY * 8 }), room, NOW + 3 * life.DAY + day * life.DAY);
+  }
+  for (let day = 3; day < 7; day++) {
+    sandbox.LittleDillArt.render(living(), room, NOW + day * life.DAY);
+    assert.equal(attrs.has('hidden'), false); assert.ok(!/undefined|null|NaN/.test(art.innerHTML)); teens.add(art.innerHTML);
+  }
+  assert.equal(teens.size, 4);
+  for (const vibe of ['shades', 'lounge', 'fire', 'book']) {
+    sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, vibe);
+    assert.equal(attrs.has('hidden'), false); assert.ok(!/undefined|null|NaN/.test(art.innerHTML)); teens.add(art.innerHTML + scene.innerHTML);
+    assert.equal(sceneAttrs.has('hidden'), !['lounge', 'fire'].includes(vibe), vibe);
+    assert.ok(!scene.innerHTML.includes('undefined'));
+  }
+  assert.equal(teens.size, 8);
+  // Worn items land on the face of whichever body is on screen: the baby face box starts at
+  // (5, 15) in a 42-wide body and the adult one at (12, 34) in a 56-wide body, so the art
+  // module centres them on 21,15 and 28,34 respectively.
+  sandbox.LittleDillArt.render(living(), room, NOW, 'book');
+  assert.ok(art.innerHTML.includes('translate(21 15)'), 'worn items sit on the baby face');
+  sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, 'book');
+  assert.ok(art.innerHTML.includes('translate(28 34)'), 'worn items sit on the adult face');
+  sandbox.LittleDillArt.render(living(), room, NOW + 8 * life.DAY, 'hop');
+  assert.equal(attrs.has('hidden'), true); assert.equal(sceneAttrs.has('hidden'), true);
+  sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY, 'shades');
+  assert.equal(room.dataset.hat, 'sunglasses', 'worn shades replace the elder reading glasses');
+  const shaded = art.innerHTML;
+  sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY, 'lounge');
+  assert.equal(room.dataset.hat, 'sunglasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + 14 * life.DAY);
+  assert.equal(room.dataset.hat, life.ELDERS[0].hat);
+  // Reading glasses come with elderhood, are dropped when shades cover them, and never reach a teen.
+  assert.ok(art.innerHTML.includes(READERS), 'elders wear reading glasses');
+  assert.ok(!shaded.includes(READERS), 'shades replace the reading glasses');
+  const influencer = life.ELDERS.findIndex(form => form.hat === 'sunglasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + (14 + influencer * 3) * life.DAY);
+  assert.ok(!art.innerHTML.includes(READERS), 'an elder in sunglasses skips the reading glasses');
+  sandbox.LittleDillArt.render(living(), room, NOW + 4 * life.DAY);
+  assert.ok(!art.innerHTML.includes(READERS), 'teens do not wear reading glasses');
 });

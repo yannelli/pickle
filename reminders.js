@@ -9,7 +9,7 @@
     function render() {
       $('reminder-toggle').textContent = enabled ? 'Turn reminders off' : 'Enable reminders';
       $('reminder-toggle').disabled = busy || (!enabled && (!available || getPet().phase !== 'living' || getPet().dead));
-      $('reminder-test').hidden = !enabled;
+      $('reminder-test').hidden = !enabled || getPet().phase !== 'living' || getPet().dead;
       $('reminder-test').disabled = busy || !available;
       $('reminder-status').textContent = status || (getPet().phase !== 'living' ? 'Once your pickle hatches, you can choose a gentle reminder.' : 'Your pickle is happy with a daily check-in.');
     }
@@ -67,7 +67,7 @@
       try {
         if (enabled) {
           clearTimeout(pending);
-          const currentRegistration = registration || await navigator.serviceWorker.getRegistration();
+          const currentRegistration = registration || await navigator.serviceWorker?.getRegistration();
           const subscription = await currentRegistration?.pushManager.getSubscription();
           if (subscription) {
             // Unsubscribe locally first, including when the API is offline.
