@@ -4,7 +4,7 @@ final class LittleDillUITests: XCTestCase {
     var app: XCUIApplication!
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app = XCUIApplication(); app.launchArguments = ["--ui-testing","--reset"]; app.launch()
+        app = XCUIApplication(); app.launchArguments = ["--ui-testing","--reset","--fast-hatch"]; app.launch()
     }
     private func tap(_ id:String,file:StaticString = #filePath,line:UInt = #line) {
         let button = app.buttons[id]
@@ -21,7 +21,13 @@ final class LittleDillUITests: XCTestCase {
         XCTAssertTrue(button.isHittable,"Button remains offscreen: \(id)",file:file,line:line)
         button.tap()
     }
-    private func adopt() {tap("adopt"); XCTAssertTrue(app.buttons["tab.Nest"].waitForExistence(timeout:5))}
+    private func adopt(brine:String = "classic",name:String = "Dilly") {
+        tap("brine.\(brine)"); tap("brineStart")
+        let field = app.textFields["petName"]
+        XCTAssertTrue(field.waitForExistence(timeout:10),"The brine never hatched")
+        field.tap(); field.typeText(name + "\n")
+        XCTAssertTrue(app.buttons["tab.Nest"].waitForExistence(timeout:5))
+    }
     private func screenshot(_ name:String) {
         let attachment = XCTAttachment(screenshot:app.screenshot()); attachment.name = name; attachment.lifetime = .keepAlways; add(attachment)
     }
@@ -36,7 +42,7 @@ final class LittleDillUITests: XCTestCase {
         tap("tab.Closet"); screenshot("03-closet"); tap("outfit.bow")
         app.alerts.buttons["Unlock for 30 coins"].tap()
         XCTAssertTrue(app.buttons["outfit.bow"].label.contains("wearing"))
-        app.terminate(); app.launchArguments = ["--ui-testing"]; app.launch()
+        app.terminate(); app.launchArguments = ["--ui-testing","--fast-hatch"]; app.launch()
         tap("tab.Closet")
         XCTAssertTrue(app.buttons["outfit.bow"].label.contains("wearing"))
         tap("tab.Friends"); screenshot("04-friends"); tap("Share your pickle")
@@ -90,7 +96,9 @@ final class LittleDillUITests: XCTestCase {
             XCTAssertTrue(app.otherElements["careScene.\(action)"].waitForExistence(timeout:2))
             screenshot("care-\(action)")
         }
-        XCTAssertTrue(app.otherElements["careScene.idle"].waitForExistence(timeout:8))
+        XCTAssertTrue(app.otherElements["careScene.sleeping"].waitForExistence(timeout:8))
+        tap("care.nap")
+        XCTAssertTrue(app.otherElements["careScene.idle"].waitForExistence(timeout:3))
         tap("Settings")
         let sound = app.switches["soundEffects"]
         XCTAssertTrue(sound.waitForExistence(timeout:5))
@@ -101,7 +109,32 @@ final class LittleDillUITests: XCTestCase {
         XCTAssertEqual(XCTWaiter.wait(for:[muted],timeout:3),.completed)
         screenshot("sound-setting")
         tap("Done")
-        app.terminate(); app.launchArguments = ["--ui-testing"]; app.launch()
+        app.terminate(); app.launchArguments = ["--ui-testing","--fast-hatch"]; app.launch()
         tap("Settings"); XCTAssertTrue(sound.waitForExistence(timeout:5)); XCTAssertEqual(sound.value as? String,"0")
+    }
+    func testBriningSurvivesRelaunch() {
+        app.terminate(); app.launchArguments = ["--ui-testing","--reset"]; app.launch()
+        tap("brine.spicy"); tap("brineStart")
+        XCTAssertTrue(app.progressIndicators["hatchProgress"].waitForExistence(timeout:5))
+        screenshot("01b-brining")
+        app.terminate(); app.launchArguments = ["--ui-testing"]; app.launch()
+        XCTAssertTrue(app.progressIndicators["hatchProgress"].waitForExistence(timeout:5),"Brining restarted after relaunch")
+        XCTAssertFalse(app.buttons["brineStart"].exists)
+    }
+    func testEatThePickleAndRestart() {
+        adopt()
+        let pickle = app.otherElements["careScene.idle"]
+        XCTAssertTrue(pickle.waitForExistence(timeout:5))
+        pickle.press(forDuration:1.2)
+        XCTAssertTrue(app.otherElements["careScene.scared"].waitForExistence(timeout:3))
+        XCTAssertEqual(app.buttons["care.wash"].label,"Take a bite")
+        tap("care.wash"); tap("care.wash")
+        screenshot("12-bitten")
+        tap("care.wash")
+        XCTAssertTrue(app.buttons["restart"].waitForExistence(timeout:3))
+        XCTAssertTrue(app.otherElements["careScene.dead"].exists)
+        screenshot("13-eaten")
+        tap("restart")
+        XCTAssertTrue(app.buttons["brineStart"].waitForExistence(timeout:5))
     }
 }

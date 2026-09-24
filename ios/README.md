@@ -68,7 +68,10 @@ The server accepts bounded direction inputs and monotonic sequence numbers rathe
 
 ## The rest of your pickle's world
 
-- Adopt and name a Classic, Garlic, or Spicy pickle; feed, pet, wash, and rest it. Daily care awards 5 coins per action once each day. Needs stop decaying at 10%, so your pet never dies while you're away.
+- Pet care follows the browser rules in `../pet-life.js`. Put a cucumber in Classic, Garlic, or Spicy brine; one of 6 varieties hatches after 1 real minute, even with the app closed, and you name it. Pickles grow from baby (under 1 day) to young, teen (a new stereotype each day from day 3), adult (day 7), and elder (day 14, a new one of 32 forms every 3 days).
+- Feed adds 40 food, Pet adds 8 happiness every 2 seconds, Clean restores hygiene, and Nap/Wake controls sleep. Needs drain by real elapsed time; a food, happiness, or hygiene meter left empty for 48 more hours ends the pickle's life. Daily care awards 5 coins per action once each day.
+- The Nest mirrors the web moods (happy, hungry, sick, sleeping, scared), idle acts (hop, look, stretch, wiggle, turn), content vibes (shades, lounge, book, campfire), the mess pile, a profile card, and the elder club collection. Hold the pickle to find the eat-your-pickle secret; Restart starts a new egg and keeps coins and outfits.
+- Play opens the pet arcade: Heart hunt, Dill says, and Brine catch. Entry costs 6 energy; completed games award 10 to 34 happiness.
 - Care has distinct layered cartoon scenes: chewing and crumbs, stroking and hearts, shower/foam/bubbles, and a moonlit blanket with breathing. Controls remain beside the visible scene after tapping, including on compact phones. Repeat actions restart cleanly.
 - Original synthesized PCM sound effects accompany care, dash, eating/respawns, and challenge results. Ordinary food pickups are quiet and have no burst effects. Settings → Sound effects persists across launches; native sounds honor Silent Mode and mix with music. Old saves default to sounds enabled without losing progress.
 - Play **Daily Crunch**, three six-second precision rounds with a shared UTC-date seed. Earn up to 300 points and 25 coins for the first completion that day. Replay to improve your personal best.
@@ -78,11 +81,13 @@ The server accepts bounded direction inputs and monotonic sequence numbers rathe
 
 ## Data and privacy
 
-Pet progress, outfits, daily scores, and arena personal best are stored in this app's UserDefaults container under `little-dill.native.v1`. Browser progress remains separate. There is no browser-save migration or cloud sync. Invalid saves are preserved under a recovery key. Erasing progress requires confirmation.
+Pet progress, outfits, daily scores, arcade bests, and arena personal best are stored in this app's UserDefaults container under `little-dill.native.v1`. Version 1 native saves migrate to the browser pet format on launch. There is no cloud sync.
+
+Settings → Backups exports and imports the browser's encrypted `.dill` files (AES-256-GCM, same format key as `../save-codec.js`). A browser backup opens in the app and an app backup opens in the browser. App backups carry coins, outfits, scores, and settings in an extra `native` field that the browser ignores. Import shows the saved age, condition, and stats before **Restore this pickle**; **Undo import** restores the previous pickle during the same session. Opening a `.dill` file from Files, Mail, or AirDrop shows the same preview. Invalid saves are preserved under a recovery key. Erasing progress requires confirmation.
 
 Online arenas send the chosen pet name, appearance, and movement intent to the server. Other people in the same room see names, positions, appearance, mass, and scores. The server uses source IPs in memory to limit concurrent connections. Live world/session data is temporary and is not written to a database; the room clears when its last human leaves. Hosting-provider operational metadata is governed by the hosting account's configuration. There is no chat, contact upload, tracking, or analytics SDK.
 
-`PrivacyInfo.xcprivacy` declares app-local UserDefaults and monotonic time for precision rounds. The app does not request camera, microphone, contacts, location, push, or photo-library permission. Sharing uses system-provided destinations. Reduced Motion disables decorative bobbing; essential arena/game motion remains functional. VoiceOver labels and directional actions are available for the arena thumbstick.
+`PrivacyInfo.xcprivacy` declares app-local UserDefaults and monotonic time for precision rounds. The app does not request camera, microphone, contacts, location, push, or photo-library permission. Sharing uses system-provided destinations. Reduced Motion keeps blinking and fades and drops the pet's loops and acts; essential arena/game motion remains functional. VoiceOver labels and directional actions are available for the arena thumbstick.
 
 ## Verification
 
@@ -109,11 +114,20 @@ Online UI tests require the configured server to be available. Debug-only `--ui-
 
 | File | Responsibility |
 | --- | --- |
-| `DillModel.swift` | Local pet rules, economy, saves, daily course, links |
+| `PetLife.swift` | Swift port of the browser pet rules (`pet-life.js`) |
+| `DillBackup.swift` | `.dill` backup codec shared with the browser |
+| `DillModel.swift` | Native save, care actions, economy, daily course, links |
+| `DillStore.swift` | Persistence, ticking, backups, and undo |
+| `NurseryView.swift` | Brine choice, hatching, naming |
+| `NestView.swift`, `NestProfile.swift`, `NestText.swift` | Meters, care controls, messages, profile, elder club |
+| `PetLooks.swift`, `PetArtData.swift`, `PetArtShapes.swift` | Varieties, stages, teen and elder hats and props |
+| `PetMotion.swift`, `PetStage.swift` | Moods, idle acts, vibes, animation clock |
+| `ArcadeGames.swift`, `ArcadeViews.swift` | Heart hunt, Dill says, Brine catch |
+| `BackupViews.swift` | Backup export, import, preview, and opening `.dill` files |
 | `Design.swift` | Palette, components, vector character, animated garden |
 | `CareScene.swift` | Action-specific cartoon props, expressions, and animation timing |
 | `DillAudio.swift` | Original PCM effects and silent-mode-aware native playback |
-| `LittleDillApp.swift` | Adoption, navigation, care, deep links |
+| `LittleDillApp.swift` | Navigation, ticking, deep links |
 | `GameViews.swift` | Daily challenge, pass-and-play, timing, results |
 | `CollectionViews.swift` | Wardrobe, settings, image sharing |
 | `ArenaClient.swift` | Secure WebSocket session, input loop, state decoding |

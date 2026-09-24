@@ -18,6 +18,21 @@
 		87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 442704C35098D0258234BA9A /* Assets.xcassets */; };
 		8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94597CBADE2648796879E08 /* CollectionViews.swift */; };
 		BF8CC73229925DEFF629656C /* DillModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */; };
+		3347EC2DB863D9F1DC99FFCC /* PetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26586EB4E1B8A98719B2EBEB /* PetLife.swift */; };
+		7A30C897D7D0BAA726E466B9 /* ArcadeGames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */; };
+		59E9AA9DD2794FA0372FFFC5 /* ArcadeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */; };
+		7C04635C8340D2B8A574E17D /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA44CCB9F1679B8E2838FD /* BackupViews.swift */; };
+		291846AEE3171313D1991B81 /* NestProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFD0F07127F679663DE27AE /* NestProfile.swift */; };
+		D3C317596E37E45A1883E767 /* NestText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F10BAA6EF20557B9732032 /* NestText.swift */; };
+		E2056B072E56C7BB2D58E945 /* NestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9741297B2CB7FF393D6CC42A /* NestView.swift */; };
+		95C0AA1055AA1A89790AEDD0 /* NurseryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */; };
+		EC0B8BC0A029EFC27BDA1AB1 /* PetArtData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */; };
+		786CC2CD22A9FD57F05D3567 /* PetArtShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55BEAA057A7F02E412B55408 /* PetArtShapes.swift */; };
+		528260CE3C2B3475614D5634 /* PetLooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9FBE5E55408045CF326297 /* PetLooks.swift */; };
+		353D0CA937C5CA51BAD879BA /* PetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB4E775B4F50B7029739446 /* PetMotion.swift */; };
+		FF9266163B7A196EEFA4843F /* PetStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A705C96686571A04E0670A3 /* PetStage.swift */; };
+		5E65D9FFF9E7018C7613B49C /* DillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FE6682233A62A0141AA1D2 /* DillStore.swift */; };
+		3FF55AB1A55A7BD1B47F31DB /* DillBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */; };
 		D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07138856D58D603AA5147715 /* LittleDillUITests.swift */; };
 		DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84E43162441E79C5E7EE976 /* ArenaClient.swift */; };
 		FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDA33CEC165E433E0EB5022 /* Design.swift */; };
@@ -55,6 +70,21 @@
 		B94597CBADE2648796879E08 /* CollectionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViews.swift; sourceTree = "<group>"; };
 		D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillModel.swift; sourceTree = "<group>"; };
+		26586EB4E1B8A98719B2EBEB /* PetLife.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLife.swift; sourceTree = "<group>"; };
+		5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeGames.swift; sourceTree = "<group>"; };
+		A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeViews.swift; sourceTree = "<group>"; };
+		84EA44CCB9F1679B8E2838FD /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
+		3EFD0F07127F679663DE27AE /* NestProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestProfile.swift; sourceTree = "<group>"; };
+		53F10BAA6EF20557B9732032 /* NestText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestText.swift; sourceTree = "<group>"; };
+		9741297B2CB7FF393D6CC42A /* NestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestView.swift; sourceTree = "<group>"; };
+		E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurseryView.swift; sourceTree = "<group>"; };
+		A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtData.swift; sourceTree = "<group>"; };
+		55BEAA057A7F02E412B55408 /* PetArtShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtShapes.swift; sourceTree = "<group>"; };
+		4B9FBE5E55408045CF326297 /* PetLooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLooks.swift; sourceTree = "<group>"; };
+		5EB4E775B4F50B7029739446 /* PetMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMotion.swift; sourceTree = "<group>"; };
+		5A705C96686571A04E0670A3 /* PetStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetStage.swift; sourceTree = "<group>"; };
+		11FE6682233A62A0141AA1D2 /* DillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillStore.swift; sourceTree = "<group>"; };
+		B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillBackup.swift; sourceTree = "<group>"; };
 		EA2A451EFE0DF93D5DBFA2DE /* LittleDillUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1998A860FA7B5DB186AB6F1 /* LittleDillTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2AB56478D42F0459AD96023 /* LittleDillApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillApp.swift; sourceTree = "<group>"; };
@@ -74,6 +104,21 @@
 				7FDA33CEC165E433E0EB5022 /* Design.swift */,
 				9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */,
 				D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */,
+				26586EB4E1B8A98719B2EBEB /* PetLife.swift */,
+				5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */,
+				A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */,
+				84EA44CCB9F1679B8E2838FD /* BackupViews.swift */,
+				3EFD0F07127F679663DE27AE /* NestProfile.swift */,
+				53F10BAA6EF20557B9732032 /* NestText.swift */,
+				9741297B2CB7FF393D6CC42A /* NestView.swift */,
+				E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */,
+				A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */,
+				55BEAA057A7F02E412B55408 /* PetArtShapes.swift */,
+				4B9FBE5E55408045CF326297 /* PetLooks.swift */,
+				5EB4E775B4F50B7029739446 /* PetMotion.swift */,
+				5A705C96686571A04E0670A3 /* PetStage.swift */,
+				11FE6682233A62A0141AA1D2 /* DillStore.swift */,
+				B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */,
 				365E6C0F663ED79DF2D480C4 /* FriendsView.swift */,
 				0C2FE43078A3B5B5644D9E83 /* GameViews.swift */,
 				4BD8988210523CD0527594C2 /* Info.plist */,
@@ -243,6 +288,21 @@
 				FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */,
 				307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */,
 				BF8CC73229925DEFF629656C /* DillModel.swift in Sources */,
+				3347EC2DB863D9F1DC99FFCC /* PetLife.swift in Sources */,
+				7A30C897D7D0BAA726E466B9 /* ArcadeGames.swift in Sources */,
+				59E9AA9DD2794FA0372FFFC5 /* ArcadeViews.swift in Sources */,
+				7C04635C8340D2B8A574E17D /* BackupViews.swift in Sources */,
+				291846AEE3171313D1991B81 /* NestProfile.swift in Sources */,
+				D3C317596E37E45A1883E767 /* NestText.swift in Sources */,
+				E2056B072E56C7BB2D58E945 /* NestView.swift in Sources */,
+				95C0AA1055AA1A89790AEDD0 /* NurseryView.swift in Sources */,
+				EC0B8BC0A029EFC27BDA1AB1 /* PetArtData.swift in Sources */,
+				786CC2CD22A9FD57F05D3567 /* PetArtShapes.swift in Sources */,
+				528260CE3C2B3475614D5634 /* PetLooks.swift in Sources */,
+				353D0CA937C5CA51BAD879BA /* PetMotion.swift in Sources */,
+				FF9266163B7A196EEFA4843F /* PetStage.swift in Sources */,
+				5E65D9FFF9E7018C7613B49C /* DillStore.swift in Sources */,
+				3FF55AB1A55A7BD1B47F31DB /* DillBackup.swift in Sources */,
 				13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */,
 				20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */,
 				09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */,

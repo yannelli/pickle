@@ -31,7 +31,7 @@ struct PlayView: View {
                         Text("Stop the seed in the sweet spot.\nGet as close as you can, three times.").font(.system(size:13)).foregroundStyle(DillTheme.muted)
                     }
                     Spacer(minLength:0)
-                    PickleCharacter(brine:store.pet.brine,outfit:.shades).frame(width:110,height:130).rotationEffect(.degrees(9))
+                    PickleCharacter(pet:store.pet,outfit:.shades,wearLook:false).frame(width:110,height:130).rotationEffect(.degrees(9))
                 }
                 HStack {
                     Label("\(store.pet.scores.first(where:{$0.day == daily.day})?.score ?? 0) best",systemImage:"trophy").font(.caption.bold())
@@ -141,7 +141,7 @@ struct GameView: View {
             }
             ZStack {
                 Circle().fill(DillTheme.sage).frame(width:205,height:205)
-                PickleCharacter(brine:store.pet.brine,outfit:store.pet.outfit,happy:stage == .roundResult).frame(width:220,height:220)
+                PickleCharacter(pet:store.pet,happy:stage == .roundResult).frame(width:220,height:220)
                 if stage == .roundResult { Text("+\(points.last ?? 0)").font(.system(size:28,weight:.black,design:.rounded)).padding(15).background(DillTheme.lime,in:Capsule()).rotationEffect(.degrees(-10)).offset(x:78,y:70) }
             }.frame(height:230)
             VStack(spacing:15) {
@@ -179,7 +179,7 @@ struct GameView: View {
     }
     private var handoff: some View {
         VStack(spacing:25) {
-            PickleCharacter(brine:store.pet.brine,outfit:.party,happy:true).frame(width:240,height:240)
+            PickleCharacter(pet:store.pet,outfit:.party,happy:true,wearLook:false).frame(width:240,height:240)
             Eyebrow(text:"Next up")
             Text("Pass it to\n\(playerName).").font(DillTheme.display(42)).multilineTextAlignment(.center)
             Text("Same course. Fresh pair of thumbs.\nNo peeking at the final scores yet.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
@@ -190,7 +190,7 @@ struct GameView: View {
         VStack(spacing:24) {
             Eyebrow(text:launch.mode == .party ? "The crunch council has spoken" : "One tiny victory, secured")
             Text(launch.mode == .party ? "A round of\napplause, please." : "Kind of\na big dill.").font(DillTheme.display(46)).tracking(-1.5).multilineTextAlignment(.center)
-            PickleCharacter(brine:store.pet.brine,outfit:.crown,happy:true).frame(width:210,height:210)
+            PickleCharacter(pet:store.pet,outfit:.crown,happy:true,wearLook:false).frame(width:210,height:210)
             if launch.mode == .party {
                 ForEach(Array(totals.indices.sorted { totals[$0] == totals[$1] ? $0 < $1 : totals[$0] > totals[$1] }),id:\.self) { index in
                     HStack {

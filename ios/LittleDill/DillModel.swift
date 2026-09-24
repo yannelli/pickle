@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-// Local pet and precision-game rules. The online arena runs its own authoritative server simulation.
+// Pet rules come from PetLife.swift (the web game's pet-life.js). The online arena runs its own authoritative server simulation.
 enum Brine: String, Codable, CaseIterable, Identifiable {
     case classic, garlic, spicy
     var id: String { rawValue }
@@ -12,6 +12,7 @@ enum Brine: String, Codable, CaseIterable, Identifiable {
     var color: Color {
         switch self { case .classic: return Color(hex: 0x91B65A); case .garlic: return Color(hex: 0xB7BB70); case .spicy: return Color(hex: 0xD6A05B) }
     }
+    var varieties: [PickleVariety] { PickleVariety.all.filter { $0.brine == rawValue } }
 }
 
 enum Outfit: String, Codable, CaseIterable, Identifiable {
@@ -40,6 +41,12 @@ enum Care: String, CaseIterable, Identifiable {
     }
 }
 
+struct CareResult: Equatable {
+    var applied: Bool
+    var coins: Int
+    var message: String
+}
+
 struct ScoreEntry: Codable, Identifiable, Equatable {
     var id = UUID()
     var day: String
@@ -48,17 +55,11 @@ struct ScoreEntry: Codable, Identifiable, Equatable {
 }
 
 struct PetState: Codable {
-    var version = 1
-    var name = "Dilly"
-    var brine: Brine = .classic
+    static let arcadeGames = ["hunt", "memory", "catch"]
+    static let nowKey = CodingUserInfoKey(rawValue: "little-dill.now")!
+    var version = 2
+    var life: WebPet
     var outfit: Outfit = .sprout
-    var adopted = false
-    var birthday = Date()
-    var updatedAt = Date()
-    var food = 80.0
-    var joy = 85.0
-    var clean = 80.0
-    var energy = 85.0
     var coins = 20
     var unlocked: Set<Outfit> = [.original, .sprout]
     var careDay = ""
@@ -69,8 +70,96 @@ struct PetState: Codable {
     var rewardedDays: Set<String> = []
     var haptics = true
     var soundEnabled: Bool?
-    var sounds: Bool {soundEnabled ?? true}
     var arenaBest: Int?
+    var arcadeRecords: [String: Int] = [:]
+    var lastPetAt: Int64?
+
+    init(now: Date = Date()) { life = PetLife.fresh(now: PetLife.ms(now)) }
+
+    var sounds: Bool { soundEnabled ?? true }
+    var adopted: Bool { life.phase == .living }
+    var brine: Brine { Brine(rawValue: life.brine) ?? .classic }
+    var name: String { life.name }
+    var variety: PickleVariety { PickleVariety.of(life.variety) }
+    var food: Double { life.fullness }
+    var joy: Double { life.happiness }
+    var clean: Double { life.hygiene }
+    var energy: Double { life.energy }
+    var birthday: Date { PetLife.date(life.bornAt) }
+    func stage(at now: Date = Date()) -> LifeStage { PetLife.stage(life, now: PetLife.ms(now)) }
+    func teen(at now: Date = Date()) -> TeenLook? { PetLife.teen(life, now: PetLife.ms(now)) }
+    func elder(at now: Date = Date()) -> ElderLook? { PetLife.elder(life, now: PetLife.ms(now)) }
+    func ageDays(at now: Date = Date()) -> Int { Int(PetLife.age(life, now: PetLife.ms(now)) / PetLife.DAY) }
+    func nextCareAt(after now: Date = Date()) -> Date { Date(timeIntervalSince1970: PetLife.nextCareAt(life, now: PetLife.ms(now)) / 1000) }
+
+    private enum CodingKeys: String, CodingKey {
+        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arcadeRecords
+        case name, brine, adopted, birthday, food, joy, clean, energy
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        version = try c.decode(Int.self, forKey: .version)
+        outfit = try c.decode(Outfit.self, forKey: .outfit)
+        coins = try c.decode(Int.self, forKey: .coins)
+        unlocked = try c.decode(Set<Outfit>.self, forKey: .unlocked)
+        careDay = try c.decode(String.self, forKey: .careDay)
+        dailyCare = try c.decode(Set<String>.self, forKey: .dailyCare)
+        streak = try c.decode(Int.self, forKey: .streak)
+        lastVisitDay = try c.decode(String.self, forKey: .lastVisitDay)
+        scores = try c.decode([ScoreEntry].self, forKey: .scores)
+        rewardedDays = try c.decode(Set<String>.self, forKey: .rewardedDays)
+        haptics = try c.decode(Bool.self, forKey: .haptics)
+        soundEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundEnabled)
+        arenaBest = try c.decodeIfPresent(Int.self, forKey: .arenaBest)
+        arcadeRecords = try c.decodeIfPresent([String: Int].self, forKey: .arcadeRecords) ?? [:]
+        switch version {
+        case 2: life = try c.decode(WebPet.self, forKey: .life)
+        case 1:
+            // Native v1 saves keep their pickle and restart the care clock at the moment of migration.
+            let now = PetLife.ms(decoder.userInfo[Self.nowKey] as? Date ?? Date())
+            life = PetLife.fresh(now: now)
+            version = 2
+            guard try c.decode(Bool.self, forKey: .adopted) else { return }
+            let brine = try c.decode(Brine.self, forKey: .brine)
+            let bornAt = min(now, max(0, PetLife.ms(try c.decode(Date.self, forKey: .birthday))))
+            life.phase = .living
+            life.name = Self.migratedName(try c.decode(String.self, forKey: .name))
+            life.brine = brine.rawValue
+            life.variety = PickleVariety.first(brine: brine.rawValue).id
+            life.fullness = try c.decode(Double.self, forKey: .food)
+            life.happiness = try c.decode(Double.self, forKey: .joy)
+            life.hygiene = try c.decode(Double.self, forKey: .clean)
+            life.energy = try c.decode(Double.self, forKey: .energy)
+            life.bornAt = bornAt; life.hatchAt = bornAt; life.brinedAt = max(0, bornAt - PetLife.HATCH_MS)
+        default: throw DecodingError.dataCorruptedError(forKey: .version, in: c, debugDescription: "Unknown save version")
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(version, forKey: .version)
+        try c.encode(life, forKey: .life)
+        try c.encode(outfit, forKey: .outfit)
+        try c.encode(coins, forKey: .coins)
+        try c.encode(unlocked, forKey: .unlocked)
+        try c.encode(careDay, forKey: .careDay)
+        try c.encode(dailyCare, forKey: .dailyCare)
+        try c.encode(streak, forKey: .streak)
+        try c.encode(lastVisitDay, forKey: .lastVisitDay)
+        try c.encode(scores, forKey: .scores)
+        try c.encode(rewardedDays, forKey: .rewardedDays)
+        try c.encode(haptics, forKey: .haptics)
+        try c.encodeIfPresent(soundEnabled, forKey: .soundEnabled)
+        try c.encodeIfPresent(arenaBest, forKey: .arenaBest)
+        try c.encode(arcadeRecords, forKey: .arcadeRecords)
+    }
+
+    static func migratedName(_ name: String) -> String {
+        let visible = String(String.UnicodeScalarView(name.unicodeScalars.filter { !PetLife.hasControl(String($0)) }))
+        let collapsed = PetLife.cleanName(visible) ?? PetLife.trim(visible)
+        return PetLife.cleanName(String(String.UnicodeScalarView(collapsed.unicodeScalars.prefix(24)))) ?? name
+    }
 
     static func dayKey(_ date: Date, calendar: Calendar = .current) -> String {
         let c = calendar.dateComponents([.year, .month, .day], from: date)
@@ -78,13 +167,7 @@ struct PetState: Codable {
     }
 
     mutating func refresh(at now: Date, calendar: Calendar = .current) {
-        let hours = max(0, now.timeIntervalSince(updatedAt)) / 3600
-        food = max(10, min(100, food - hours * 1.5))
-        joy = max(10, min(100, joy - hours))
-        clean = max(10, min(100, clean - hours * 1.25))
-        energy = min(100, max(10, energy + hours * 2))
-        // Never move the decay clock backwards if the device clock changes.
-        updatedAt = max(updatedAt, now)
+        PetLife.advance(&life, now: PetLife.ms(now))
         let day = Self.dayKey(now, calendar: calendar)
         if careDay != day { careDay = day; dailyCare = [] }
         guard adopted, lastVisitDay != day, day > lastVisitDay else { return }
@@ -93,17 +176,92 @@ struct PetState: Codable {
         lastVisitDay = day
     }
 
-    @discardableResult mutating func care(_ action: Care, at now: Date = Date()) -> Int {
-        refresh(at: now)
-        switch action {
-        case .feed: food = min(100, food + 35)
-        case .pet: joy = min(100, joy + 20)
-        case .wash: clean = 100
-        case .nap: energy = min(100, energy + 25)
-        }
+    private mutating func addHappy(_ amount: Double) -> Int {
+        let before = life.happiness
+        life.happiness = PetLife.clamp(before + amount)
+        return Int((life.happiness - before).rounded(.toNearestOrAwayFromZero))
+    }
+
+    private mutating func reward(_ action: Care) -> Int {
         let reward = dailyCare.insert(action.rawValue).inserted ? 5 : 0
         coins += reward
         return reward
+    }
+
+    private var restingMessage: String {
+        life.dead ? (life.eaten == true ? "you ate \(life.name). it was delicious. you monster." : "a good dill. gone, but not forgotten.") : ""
+    }
+
+    // Mirrors the web care(), petPickle() and toggleSleep() handlers. Wash follows the web Clean rules.
+    @discardableResult mutating func care(_ action: Care, at now: Date = Date()) -> CareResult {
+        if action == .nap { return toggleSleep(at: now) }
+        refresh(at: now)
+        guard life.phase == .living, !life.dead else { return CareResult(applied: false, coins: 0, message: restingMessage) }
+        if life.sleeping {
+            if action == .pet { return setSleeping(false, at: now, rewarding: .pet) }
+            return CareResult(applied: false, coins: 0, message: "zzZ... use Wake to rise & brine.")
+        }
+        let ms = PetLife.ms(now)
+        var applied = true, message = ""
+        switch action {
+        case .feed:
+            if life.fullness >= 99 { applied = false; message = "full to the brim. try a little pet!" }
+            else {
+                let added = min(40, 100 - life.fullness)
+                life.fullness = PetLife.clamp(life.fullness + 40)
+                message = "finest brine. +\(Int(added.rounded(.toNearestOrAwayFromZero))) food, +\(addHappy(3)) happy."
+            }
+        case .pet:
+            if let last = lastPetAt, ms - last < 2000 { return CareResult(applied: false, coins: 0, message: "so loved. another pet in a moment. ♥") }
+            lastPetAt = ms
+            let added = addHappy(8)
+            message = added > 0 ? "+\(added) happy. you’re my favorite human." : "100% happy. maximum pickle joy!"
+        case .wash:
+            if life.hygiene >= 99 { applied = false; message = "already sparkling. how about a game?" }
+            else { life.hygiene = 100; message = "a sudsy little bath. +\(addHappy(4)) happy, too." }
+        case .nap: break
+        }
+        PetLife.assess(&life)
+        life.lastCareAt = ms
+        return CareResult(applied: applied, coins: applied ? reward(action) : 0, message: message)
+    }
+
+    @discardableResult mutating func toggleSleep(at now: Date = Date()) -> CareResult { setSleeping(!life.sleeping, at: now) }
+
+    @discardableResult mutating func setSleeping(_ sleeping: Bool, at now: Date = Date(), rewarding action: Care = .nap) -> CareResult {
+        refresh(at: now)
+        guard life.phase == .living, !life.dead else { return CareResult(applied: false, coins: 0, message: restingMessage) }
+        life.sleeping = sleeping
+        life.lastCareAt = PetLife.ms(now)
+        return CareResult(applied: true, coins: reward(action), message: sleeping ? "night night. don’t let the dill bugs bite." : "rise & brine, sleepyhead.")
+    }
+
+    mutating func startArcade(at now: Date = Date()) -> Bool {
+        refresh(at: now)
+        guard life.phase == .living, !life.dead, !life.sleeping, life.energy >= 6 else { return false }
+        life.energy = PetLife.clamp(life.energy - 6)
+        return true
+    }
+
+    // Web rewards: hunt 10 + 8 per heart, memory 10 + 4 per level (34 for all five), catch 10 + 2 per point up to 34.
+    static func arcadeReward(game: String, score: Int) -> Int {
+        let score = max(0, score)
+        switch game {
+        case "hunt": return 10 + min(3, score) * 8
+        case "memory": return score >= 5 ? 34 : 10 + score * 4
+        case "catch": return 10 + min(24, score * 2)
+        default: return 0
+        }
+    }
+
+    mutating func finishArcade(game: String, score: Int, completed: Bool, at now: Date = Date()) -> Int {
+        refresh(at: now)
+        guard completed, Self.arcadeGames.contains(game), life.phase == .living, !life.dead else { return 0 }
+        let added = addHappy(Double(Self.arcadeReward(game: game, score: score)))
+        arcadeRecords[game] = max(arcadeRecords[game] ?? 0, max(0, score))
+        PetLife.assess(&life)
+        life.lastCareAt = PetLife.ms(now)
+        return added
     }
 
     @discardableResult mutating func record(score: Int, day: String, at now: Date = Date()) -> Int {
@@ -116,7 +274,8 @@ struct PetState: Codable {
         let reward = day == DailyChallenge.today(now) && rewardedDays.insert(day).inserted ? 25 : 0
         rewardedDays = Set(rewardedDays.sorted().suffix(120))
         coins += reward
-        joy = min(100, joy + 12)
+        refresh(at: now)
+        if adopted && !life.dead { _ = addHappy(12); PetLife.assess(&life) }
         return reward
     }
 
@@ -130,11 +289,39 @@ struct PetState: Codable {
         return true
     }
 
+    var native: DillBackup.Native {
+        DillBackup.Native(coins: coins, outfit: outfit.rawValue, unlocked: Outfit.allCases.filter { unlocked.contains($0) }.map(\.rawValue),
+                          streak: streak, lastVisitDay: lastVisitDay, careDay: careDay, dailyCare: dailyCare.sorted(),
+                          rewardedDays: Array(rewardedDays.sorted().suffix(30)),
+                          scores: scores.sorted { $0.day > $1.day }.prefix(20).map { DillBackup.Score(d: $0.day, s: $0.score, t: PetLife.ms($0.date)) },
+                          arenaBest: arenaBest, arcade: arcadeRecords, haptics: haptics, sounds: soundEnabled)
+    }
+
+    mutating func apply(_ native: DillBackup.Native) {
+        coins = min(1_000_000, max(0, native.coins))
+        unlocked = Set(native.unlocked.compactMap(Outfit.init(rawValue:))).union([.original, .sprout])
+        outfit = Outfit(rawValue: native.outfit).flatMap { unlocked.contains($0) ? $0 : nil } ?? .sprout
+        streak = max(0, native.streak)
+        lastVisitDay = DailyChallenge.validDay(native.lastVisitDay) ? native.lastVisitDay : ""
+        careDay = DailyChallenge.validDay(native.careDay) ? native.careDay : ""
+        dailyCare = Set(native.dailyCare.filter { Care(rawValue: $0) != nil })
+        rewardedDays = Set(native.rewardedDays.filter(DailyChallenge.validDay))
+        var best: [String: DillBackup.Score] = [:]
+        for score in native.scores where (0...300).contains(score.s) && DailyChallenge.validDay(score.d) && PetLife.isTimestamp(score.t) {
+            if score.s > best[score.d]?.s ?? -1 { best[score.d] = score }
+        }
+        scores = Array(best.values.sorted { $0.d > $1.d }.prefix(90).map { ScoreEntry(day: $0.d, score: $0.s, date: PetLife.date($0.t)) })
+        arenaBest = native.arenaBest.map { max(0, $0) }
+        arcadeRecords = native.arcade.filter { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
+        haptics = native.haptics
+        soundEnabled = native.sounds
+    }
+
     var isValid: Bool {
-        version == 1 && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && name.count <= 18 &&
-        [food, joy, clean, energy].allSatisfy { $0.isFinite && (0...100).contains($0) } &&
+        version == 2 && (try? PetLife.validate(life)) != nil &&
         coins >= 0 && coins <= 1_000_000 && streak >= 0 && unlocked.contains(outfit) &&
-        scores.count <= 90 && scores.allSatisfy { (0...300).contains($0.score) && DailyChallenge.validDay($0.day) }
+        scores.count <= 90 && scores.allSatisfy { (0...300).contains($0.score) && DailyChallenge.validDay($0.day) } &&
+        arcadeRecords.allSatisfy { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
     }
 }
 
@@ -172,53 +359,5 @@ struct DailyChallenge: Equatable {
         guard url.scheme == "littledill", url.host == "challenge" else { return nil }
         let day = url.lastPathComponent
         return validDay(day) ? DailyChallenge(day: day) : nil
-    }
-}
-
-@MainActor final class DillStore: ObservableObject {
-    @Published private(set) var pet: PetState
-    @Published var notice: String?
-    private let defaults: UserDefaults
-    private let key = "little-dill.native.v1"
-
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        if let data = defaults.data(forKey: key) {
-            if let saved = try? JSONDecoder().decode(PetState.self, from: data), saved.isValid {
-                pet = saved
-            } else {
-                defaults.set(data, forKey: key + ".recovery")
-                pet = PetState()
-                notice = "Your previous save could not be read. A recovery copy is preserved on this device."
-            }
-        } else { pet = PetState() }
-        refresh()
-    }
-    func save() {
-        guard let data = try? JSONEncoder().encode(pet) else { return }
-        defaults.set(data, forKey: key)
-    }
-    func refresh() { pet.refresh(at: Date()); save() }
-    func adopt(name: String, brine: Brine) {
-        let name = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(18))
-        pet.name = name.isEmpty ? "Dilly" : name
-        pet.brine = brine; pet.adopted = true; pet.birthday = Date()
-        refresh()
-    }
-    @discardableResult func care(_ action: Care) -> Int { let reward = pet.care(action); save(); return reward }
-    @discardableResult func record(score: Int, day: String) -> Int { let reward = pet.record(score: score, day: day); save(); return reward }
-    func equip(_ outfit: Outfit) -> Bool { let result = pet.equip(outfit); save(); return result }
-    func rename(_ name: String) {
-        let clean = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(18))
-        guard !clean.isEmpty else { return }
-        pet.name = clean; save()
-    }
-    func recordArena(best:Int) {guard best >= 0 else {return}; pet.arenaBest = max(pet.arenaBest ?? 0,best); save()}
-    func setHaptics(_ enabled: Bool) { pet.haptics = enabled; save() }
-    func setSounds(_ enabled: Bool) { pet.soundEnabled = enabled; save(); if !enabled {DillAudio.shared.stop()} }
-    func sound(_ cue:DillSound) {if pet.sounds {DillAudio.shared.play(cue)}}
-    func reset() { pet = PetState(); save() }
-    func feedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
-        if pet.haptics { UIImpactFeedbackGenerator(style: style).impactOccurred() }
     }
 }

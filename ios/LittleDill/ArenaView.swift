@@ -71,7 +71,7 @@ struct ArenaView: View {
     }
     private var connectionCard: some View {
         VStack(spacing:20) {
-            PickleCharacter(brine:store.pet.brine,outfit:store.pet.outfit).frame(width:150,height:150)
+            PickleCharacter(pet:store.pet).frame(width:150,height:150)
             ProgressView().tint(DillTheme.ink)
             Text("Something’s growing.").font(DillTheme.display(29)).multilineTextAlignment(.center)
             Text("Joining a live garden. A little room to roam, a lot of room to grow.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)

@@ -8,7 +8,7 @@ struct ClosetView: View {
         VStack(spacing:24) {
             PageHeading(eyebrow:"The dill dress code",title:"Very small.\nVery well dressed.",detail:"A little personality goes a long way. Earn coins through daily care and the daily crunch.")
             HStack(spacing:16) {
-                PickleCharacter(brine:store.pet.brine,outfit:store.pet.outfit).frame(width:100,height:100)
+                PickleCharacter(pet:store.pet).frame(width:100,height:100)
                 VStack(alignment:.leading,spacing:8) { Eyebrow(text:"Currently serving"); Text(store.pet.outfit.title).font(DillTheme.display(24)); Text("\(store.pet.unlocked.count) of \(Outfit.allCases.count) looks collected").font(.caption).foregroundStyle(DillTheme.muted) }
                 Spacer()
             }.padding(16).background(DillTheme.sage,in:RoundedRectangle(cornerRadius:26))
@@ -18,7 +18,7 @@ struct ClosetView: View {
                     let equipped = store.pet.outfit == outfit
                     Button { if owned { _ = store.equip(outfit); store.feedback() } else { selected = outfit } } label: {
                         VStack(alignment:.leading,spacing:8) {
-                            PickleCharacter(brine:store.pet.brine,outfit:outfit).frame(height:140).frame(maxWidth:.infinity)
+                            PickleCharacter(pet:store.pet,outfit:outfit,wearLook:false).frame(height:140).frame(maxWidth:.infinity)
                             Text(outfit.title).font(.system(size:14,weight:.bold,design:.rounded))
                             HStack {
                                 Text(equipped ? "Wearing it" : owned ? "Wear this" : "✦ \(outfit.cost) coins").font(.system(size:11,weight:.medium))
@@ -47,16 +47,24 @@ struct SettingsView: View {
     @EnvironmentObject private var store: DillStore
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
+    @State private var nameError: String?
     @State private var confirmReset = false
     var body: some View {
         NavigationStack {
             Form {
                 Section("Your little dill") {
-                    TextField("Name",text:$name).onChange(of:name) { _,v in name = String(v.prefix(18)) }
-                    Button("Save name") { store.rename(name); dismiss() }.disabled(name.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
+                    if store.pet.adopted {
+                        TextField("Name",text:$name).onChange(of:name) { _,v in
+                            if v.count > 48 { name = String(v.prefix(48)) }
+                            nameError = nil
+                        }
+                        Button("Save name") { saveName() }.disabled(name.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty)
+                        if let nameError { Text(nameError).font(.footnote).foregroundStyle(.red).accessibilityIdentifier("settings.nameError") }
+                    }
                     LabeledContent("Brine",value:store.pet.brine.title)
-                    LabeledContent("Adopted",value:store.pet.birthday.formatted(date:.abbreviated,time:.omitted))
+                    if store.pet.adopted { LabeledContent("Adopted",value:store.pet.birthday.formatted(date:.abbreviated,time:.omitted)) }
                 }
+                BackupSection()
                 Section("The little details") {
                     Toggle("Haptic feedback",isOn:Binding(get:{store.pet.haptics},set:{store.setHaptics($0)}))
                     Toggle("Sound effects",isOn:Binding(get:{store.pet.sounds},set:{store.setSounds($0)})).accessibilityIdentifier("soundEffects")
@@ -80,6 +88,9 @@ struct SettingsView: View {
                 Button("Erase progress and start over",role:.destructive) { store.reset(); dismiss() }
             } message: { Text("Your pet, coins, outfits, and scores will be permanently removed from this device.") }
     }
+    @MainActor private func saveName() {
+        if store.rename(name) { dismiss() } else { nameError = "Give your pickle a name with 1–24 characters." }
+    }
 }
 
 struct Scorecard: View {
@@ -93,7 +104,7 @@ struct Scorecard: View {
             Rectangle().fill(DillTheme.ink.opacity(0.15)).frame(height:1)
             Eyebrow(text:score == nil ? "Certified little legend" : arenaScore ? "Brine Royale · Personal best" : "The daily crunch · \(day)")
             Text(score == nil ? "Meet \(pet.name)." : "Kind of a big dill.").font(DillTheme.display(37)).tracking(-1).multilineTextAlignment(.center)
-            PickleCharacter(brine:pet.brine,outfit:pet.outfit,happy:true).frame(width:210,height:210)
+            PickleCharacter(pet:pet,happy:true).frame(width:210,height:210)
             if let score {
                 HStack(alignment:.firstTextBaseline,spacing:4) { Text("\(score)").font(.system(size:76,weight:.black,design:.rounded)); Text(arenaScore ? "mass" : "/ 300").font(.title3).foregroundStyle(DillTheme.muted) }
                 Text(arenaScore ? "\(pet.name) grew into a very big dill. Beat that." : "\(pet.name) brought the crunch. Your turn.").font(.system(size:14,weight:.medium,design:.rounded)).multilineTextAlignment(.center)
