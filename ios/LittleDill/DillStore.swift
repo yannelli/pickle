@@ -198,6 +198,7 @@ import SwiftUI
     func sound(_ cue:DillSound) {if pet.sounds {DillAudio.shared.play(cue)}}
     func reset() {
         arcadeActive = false; snackBites = nil; snackUntil = nil; previousPet = nil; speech = nil
+        defaults.removeObject(forKey: recoveryKey)
         pet = PetState(now: now); save()
     }
     func feedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {
