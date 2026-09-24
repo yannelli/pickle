@@ -76,22 +76,42 @@ enum DillSound: String, CaseIterable {
 
 @MainActor final class DillAudio {
     static let shared = DillAudio()
+    private let sessionQueue = DispatchQueue(label:"app.littledill.audio-session")
+    private var sessionActive = false
+    private var request = 0
     private var player: AVAudioPlayer?
     private var clips: [DillSound:Data] = [:]
+    /// The clip starts after the queued session change, so a stop followed by a play can't deactivate the new clip.
     func play(_ sound:DillSound) {
-        do {
-            let session = AVAudioSession.sharedInstance()
-            // Ambient respects the silent switch and mixes with the user's music.
-            try session.setCategory(.ambient,mode:.default,options:.mixWithOthers)
-            try session.setActive(true)
-            let data = clips[sound] ?? sound.waveData(); clips[sound] = data
-            player?.stop()
-            player = try AVAudioPlayer(data:data)
-            player?.volume = 0.7; player?.prepareToPlay(); player?.play()
-        } catch { player = nil }
+        let data = clips[sound] ?? sound.waveData(); clips[sound] = data
+        player?.stop(); player = nil
+        request += 1
+        let current = request, activate = !sessionActive
+        sessionActive = true
+        sessionQueue.async {
+            if activate { Self.setSession(active:true) }
+            Task { @MainActor in if self.request == current { self.start(data) } }
+        }
     }
     func stop() {
+        request += 1
         player?.stop(); player = nil
-        try? AVAudioSession.sharedInstance().setActive(false,options:.notifyOthersOnDeactivation)
+        guard sessionActive else {return}
+        sessionActive = false
+        sessionQueue.async { Self.setSession(active:false) }
+    }
+    private func start(_ data:Data) {
+        player = try? AVAudioPlayer(data:data)
+        player?.volume = 0.7; player?.prepareToPlay(); player?.play()
+    }
+    nonisolated private static func setSession(active:Bool) {
+        let session = AVAudioSession.sharedInstance()
+        if active {
+            // Ambient respects the silent switch and mixes with the user's music.
+            try? session.setCategory(.ambient,mode:.default,options:.mixWithOthers)
+            try? session.setActive(true)
+        } else {
+            try? session.setActive(false,options:.notifyOthersOnDeactivation)
+        }
     }
 }

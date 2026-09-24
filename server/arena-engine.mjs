@@ -39,6 +39,8 @@ class FoodGrid {
   }
 }
 export function cleanName(name) { return Array.from(String(name || 'Dilly').replace(/[\p{C}]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
+const RESERVED_NAMES = new Set(['you', ...BOT_NAMES].map(name => name.toLowerCase()));
+export function humanName(name) { const clean = cleanName(name); return RESERVED_NAMES.has(clean.toLowerCase()) ? 'Dilly' : clean; }
 export function parseIntent(raw) {
   if (typeof raw !== 'string' || raw.length > 256) return null;
   let p; try { p = JSON.parse(raw); } catch { return null; }
@@ -89,7 +91,7 @@ export class ArenaEngine {
     const mass = bot ? 25 + Math.floor(this.random() * 30) : RULES.startMass;
     const spawn = this.spawnPoint(mass);
     const p = {
-      id, name: cleanName(name), brine: BRINES.includes(brine) ? brine : 'classic', outfit: OUTFITS.includes(outfit) ? outfit : 'sprout', bot,
+      id, name: bot ? cleanName(name) : humanName(name), brine: BRINES.includes(brine) ? brine : 'classic', outfit: OUTFITS.includes(outfit) ? outfit : 'sprout', bot,
       cells: [this.makeCell(spawn.x,spawn.y,mass)], lastX: spawn.x, lastY: spawn.y,
       // Aggregate mass and center stay compatible with one-body clients and room scoring.
       get mass() { return this.cells.reduce((sum,c) => sum+c.mass,0); },

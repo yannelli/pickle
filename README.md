@@ -112,6 +112,15 @@ npx vercel
 
 Once the public URL is known, follow the deployment notes in the asset guide to finish the sharing URLs.
 
+**Arena Worker:** `wrangler.arena.jsonc` deploys the arena; `wrangler.arena-legacy.jsonc` deploys the older preview endpoint, which forwards to it from another account (deploy steps in [`ios/README.md`](ios/README.md)). The legacy proxy sends each player's IP in `X-Arena-Client-IP`. The arena trusts that header only when `X-Arena-Proxy-Secret` matches its `ARENA_PROXY_SECRET`; otherwise it uses `CF-Connecting-IP`. Set the same value on both Workers:
+
+```sh
+npx wrangler secret put ARENA_PROXY_SECRET -c wrangler.arena.jsonc
+npx wrangler secret put ARENA_PROXY_SECRET -c wrangler.arena-legacy.jsonc
+```
+
+The `CREW_JOINS` rate limit in `wrangler.arena.jsonc` allows 10 crew-room joins per client IP per 60 seconds in each Cloudflare location. See [`docs/INDEX.md`](docs/INDEX.md) for the researched Cloudflare docs and when to use them.
+
 ## Validation
 
 ```sh

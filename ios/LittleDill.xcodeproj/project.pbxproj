@@ -232,6 +232,7 @@
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					161CC4524A9CBFFF9874C835 = {
+						DevelopmentTeam = 2P58V89SR7;
 						ProvisioningStyle = Automatic;
 					};
 					3274DD825315DBEB6AB6377F = {
@@ -347,6 +348,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LittleDill/LittleDill.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 2P58V89SR7;
 				INFOPLIST_FILE = LittleDill/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -494,6 +496,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = LittleDill/LittleDill.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 2P58V89SR7;
 				INFOPLIST_FILE = LittleDill/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

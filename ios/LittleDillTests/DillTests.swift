@@ -44,6 +44,8 @@ final class DillTests: XCTestCase {
         XCTAssertNotNil(ArenaLaunch.from(URL(string:"littledill://arena")!))
         XCTAssertEqual(ArenaLaunch.from(ArenaLaunch.shareURL(room:"ABC123"))?.room,"ABC123")
         XCTAssertNotNil(ArenaLaunch.from(ArenaLaunch.shareURL()))
+        XCTAssertEqual(ArenaLaunch.shareURL(room:"ABC123").absoluteString,"https://arena.littledill.app/?room=ABC123")
+        XCTAssertEqual(ArenaLaunch.site(server:"wss://play.example.com:8443/arena?v=1").url?.absoluteString,"https://play.example.com:8443/")
         XCTAssertNil(ArenaLaunch.from(URL(string:"https://other.example/?room=ABC123")!))
         XCTAssertNil(ArenaLaunch.from(URL(string:"littledill://arena?room=invalid")!))
         for _ in 0..<100 {XCTAssertTrue(ArenaLaunch.validRoom(ArenaLaunch.newRoom()))}
@@ -81,6 +83,12 @@ final class DillTests: XCTestCase {
         XCTAssertTrue(survivor.alive); XCTAssertEqual(survivor.pieces.count,1)
         XCTAssertEqual(survivor.pieces.first?.id,"b")
         XCTAssertTrue(try arenaPlayer(["alive":false]).pieces.isEmpty)
+    }
+    func testArenaPlayerUnknownLooksUseServerDefaults() throws {
+        let unknown = try arenaPlayer(["brine":"pumpkin","outfit":"top-hat"])
+        XCTAssertEqual(unknown.brine,.classic); XCTAssertEqual(unknown.outfit,.sprout)
+        let known = try arenaPlayer(["brine":"spicy","outfit":"crown"])
+        XCTAssertEqual(known.brine,.spicy); XCTAssertEqual(known.outfit,.crown)
     }
     func testArenaSplitRequiresOneEligibleCellAndAvailableSlot() throws {
         let small:[[String:Any]] = [["id":"a","x":100,"y":200,"mass":45],["id":"b","x":150,"y":200,"mass":45]]
@@ -400,6 +408,26 @@ final class PetModelTests: XCTestCase {
         XCTAssertTrue(p.equip(.shades)); XCTAssertEqual(p.coins, 0)
         XCTAssertTrue(p.equip(.original)); XCTAssertTrue(p.equip(.shades)); XCTAssertEqual(p.coins, 0)
     }
+    func testCoinRewardsStopAtTheSaveLimit() {
+        var p = living(at: t0)
+        p.coins = PetState.maxCoins - 2; p.life.fullness = 50
+        XCTAssertEqual(p.care(.feed, at: t0).coins, 2); XCTAssertEqual(p.coins, PetState.maxCoins)
+        XCTAssertEqual(p.record(score: 150, day: DailyChallenge.today(t0), at: t0), 0); XCTAssertEqual(p.coins, PetState.maxCoins)
+        XCTAssertTrue(p.isValid)
+        p.coins = PetState.maxCoins + 1; XCTAssertFalse(p.isValid)
+    }
+    func testStreakStopsAtItsLimitWithoutOverflow() {
+        var p = living(at: t0)
+        p.refresh(at: t0, calendar: utc)
+        p.streak = PetState.maxStreak
+        p.refresh(at: t0.addingTimeInterval(86400), calendar: utc); XCTAssertEqual(p.streak, PetState.maxStreak)
+        p.streak = Int.max
+        p.refresh(at: t0.addingTimeInterval(2 * 86400), calendar: utc); XCTAssertEqual(p.streak, PetState.maxStreak)
+        p.streak = PetState.maxStreak + 1; XCTAssertFalse(p.isValid)
+        var native = p.native; native.streak = Int.max; native.coins = Int.max
+        p.apply(native)
+        XCTAssertEqual(p.streak, PetState.maxStreak); XCTAssertEqual(p.coins, PetState.maxCoins); XCTAssertTrue(p.isValid)
+    }
     func testInvalidSaveIsRejected() {
         var p = living(at: t0); XCTAssertTrue(p.isValid)
         p.coins = -1; XCTAssertFalse(p.isValid)
@@ -484,8 +512,26 @@ final class PetModelTests: XCTestCase {
         legacy["adopted"] = true; legacy["name"] = "   "
         let broken = try JSONSerialization.data(withJSONObject: legacy)
         defaults.set(broken, forKey: "little-dill.native.v1")
-        XCTAssertNotNil(DillStore(defaults: defaults, clock: { now }).notice)
+        let reset = DillStore(defaults: defaults, clock: { now })
+        XCTAssertNotNil(reset.notice); XCTAssertFalse(reset.pet.adopted); XCTAssertEqual(reset.pet.coins, 150, "A new egg keeps native progress")
         XCTAssertEqual(defaults.data(forKey: "little-dill.native.v1.recovery"), broken)
+    }
+    @MainActor func testOutOfRangeSaveIsRepairedAndKeepsThePickle() throws {
+        let defaults = suite(), clock = TestClock(t0)
+        var saved = hatched(defaults, clock, name: "Crunch").pet
+        saved.coins = 5_000_000; saved.streak = Int.max; saved.outfit = .crown
+        let original = try JSONEncoder().encode(saved)
+        defaults.set(original, forKey: "little-dill.native.v1")
+        let store = DillStore(defaults: defaults, clock: { clock.now })
+        XCTAssertTrue(store.pet.adopted); XCTAssertEqual(store.pet.name, "Crunch"); XCTAssertEqual(store.pet.life.bornAt, saved.life.bornAt)
+        XCTAssertEqual(store.pet.coins, PetState.maxCoins); XCTAssertEqual(store.pet.streak, PetState.maxStreak); XCTAssertEqual(store.pet.outfit, .sprout)
+        XCTAssertTrue(store.pet.isValid); XCTAssertEqual(store.recoveryCopy, original)
+        XCTAssertEqual(store.notice?.hasPrefix("Some saved progress was out of range"), true)
+        XCTAssertNil(DillStore(defaults: defaults, clock: { clock.now }).notice, "The repaired save loads cleanly")
+        defaults.set(Data("broken-save".utf8), forKey: "little-dill.native.v1")
+        let reset = DillStore(defaults: defaults, clock: { clock.now })
+        XCTAssertFalse(reset.pet.adopted); XCTAssertEqual(reset.recoveryCopy, original, "A later failure keeps the first recovery copy")
+        XCTAssertEqual(reset.notice?.hasSuffix("An earlier recovery copy is still in Settings → Backups."), true)
     }
     @MainActor func testBackupRoundTripCarriesNativeExtrasAndCanBeUndone() throws {
         let clockA = TestClock(t0), a = hatched(suite(), clockA, brine: .spicy, name: "Sir Crunch")
@@ -543,6 +589,12 @@ final class PetModelTests: XCTestCase {
             XCTAssertEqual($0.localizedDescription, "This file contains invalid pickle progress.")
         }
         XCTAssertEqual(try DillBackup.decode(file).pet, .current(pet))
+    }
+    func testBackupNativeKeepsDefaultsForMissingKeys() throws {
+        var pet = PetLife.fresh(now: ms(t0)); pet.phase = .naming; pet.brinedAt = ms(t0) - 60_000; pet.hatchAt = ms(t0)
+        let json = String(decoding: try JSONEncoder().encode(pet), as: UTF8.self)
+        let decoded = try DillBackup.decode(try seal("{\"version\":1,\"savedAt\":\(ms(t0)),\"pet\":\(json),\"native\":{\"coins\":42,\"streak\":3}}"))
+        XCTAssertEqual(decoded.native, DillBackup.Native(coins: 42, streak: 3))
     }
     @MainActor func testOversizedImportIsRejectedBeforeDecoding() {
         let store = DillStore(defaults: suite())

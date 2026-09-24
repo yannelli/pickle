@@ -1,6 +1,15 @@
 import { ArenaEngine, RULES, parseIntent, cleanName, BRINES, OUTFITS } from './arena-engine.mjs';
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 const validRoom = value => /^[A-Z0-9]{6}$/.test(value || '');
+const sameSecret = (given, secret) => {
+  const a = new TextEncoder().encode(given), b = new TextEncoder().encode(secret);
+  return a.length === b.length && (crypto.subtle.timingSafeEqual?.(a, b) ?? a.reduce((diff, byte, i) => diff | (byte ^ b[i]), 0) === 0);
+};
+export function clientIP(request, env) {
+  const claimed = request.headers.get('X-Arena-Client-IP');
+  const trusted = env.ARENA_PROXY_SECRET && claimed && sameSecret(request.headers.get('X-Arena-Proxy-Secret') || '', env.ARENA_PROXY_SECRET);
+  return (trusted ? claimed : request.headers.get('CF-Connecting-IP')) || 'local';
+}
 
 export function foodDelta(before, after) {
   const previous = new Map(before.map(pellet => [pellet[0], pellet]));
@@ -21,7 +30,10 @@ export default {
     if (env.ARENA_UPSTREAM) {
       const upstream = new URL(env.ARENA_UPSTREAM);
       url.protocol = upstream.protocol; url.host = upstream.host;
-      return fetch(new Request(url, request));
+      const forwarded = new Request(url, request), ip = request.headers.get('CF-Connecting-IP');
+      if (ip) forwarded.headers.set('X-Arena-Client-IP', ip); else forwarded.headers.delete('X-Arena-Client-IP');
+      if (env.ARENA_PROXY_SECRET) forwarded.headers.set('X-Arena-Proxy-Secret', env.ARENA_PROXY_SECRET); else forwarded.headers.delete('X-Arena-Proxy-Secret');
+      return fetch(forwarded);
     }
     if (url.pathname === '/health') return json({ app: 'Little Dill · Brine Royale', protocol: 1, mode: 'server-authoritative', maxPlayers: RULES.maxHumans, width: RULES.width, height: RULES.height, massLimit: null, botsFillTo: RULES.population, foodCount: RULES.foodCount, foodDeltas: true, foodMass: RULES.foodMass, bonusFoodMass: RULES.bonusFoodMass, decayFloor: RULES.decayFloor, decayGraceSeconds: RULES.decayGraceSeconds, decayPerSecond: RULES.decayPerSecond, maxCells: RULES.maxCells, splitMinMass: RULES.splitMinMass, splitCooldown: RULES.splitCooldown, mergeSeconds: RULES.mergeSeconds });
     if (url.pathname === '/.well-known/apple-app-site-association') return json({ applinks: { details: [{ appIDs: ['2P58V89SR7.com.littledill.ios'], components: [{ '/': '/', comment: 'Public arena and private crew invitations.' }] }] } });
@@ -30,14 +42,19 @@ export default {
     if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return json({ error: 'A WebSocket connection is required.' }, 426);
     const room = url.searchParams.get('room');
     if (room && !validRoom(room)) return json({ error: 'Room codes have six letters or digits.' }, 400);
-    // Try public rooms in order. Each object atomically enforces the configured human capacity.
+    const ip = clientIP(request, env);
+    if (room && env.CREW_JOINS && !(await env.CREW_JOINS.limit({ key: ip })).success) return json({ error: 'Too many private rooms. Try again in a minute.' }, 429);
+    // Try public rooms in order. Each object atomically enforces the configured human and per-network capacity.
+    let refused;
     for (let n = 1; n <= (room ? 1 : 16); n++) {
       const id = room ? `crew-${room}` : `public-${n}`;
       const internal = new URL(request.url); internal.searchParams.set('assignedRoom', id);
-      const response = await env.ARENAS.getByName(id).fetch(new Request(internal, request));
-      if (response.status !== 503 || room) return response;
+      const forwarded = new Request(internal, request); forwarded.headers.set('X-Arena-Client-IP', ip); forwarded.headers.delete('X-Arena-Proxy-Secret');
+      const response = await env.ARENAS.getByName(id).fetch(forwarded);
+      if (room || (response.status !== 503 && response.status !== 429)) return response;
+      if (response.status === 429) refused = response;
     }
-    return json({ error: 'All gardens are full. Try again in a moment.' }, 503);
+    return refused || json({ error: 'All gardens are full. Try again in a moment.' }, 503);
   }
 };
 
@@ -46,7 +63,7 @@ export class ArenaRoom {
   async fetch(request) {
     if (request.headers.get('Upgrade')?.toLowerCase() !== 'websocket') return json({ error: 'WebSocket required.' }, 426);
     if (this.sessions.size >= RULES.maxHumans) return json({ error: 'This garden is full.' }, 503);
-    const ip = request.headers.get('CF-Connecting-IP') || 'local';
+    const ip = request.headers.get('X-Arena-Client-IP') || 'local';
     if ([...this.sessions.values()].filter(s => s.ip === ip).length >= 8) return json({ error: 'Too many connections from this network.' }, 429);
     const url = new URL(request.url); this.room = url.searchParams.get('assignedRoom') || 'public-1';
     const name = cleanName(url.searchParams.get('name'));

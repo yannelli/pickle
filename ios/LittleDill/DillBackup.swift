@@ -188,3 +188,24 @@ enum DillBackup {
         return out
     }
 }
+
+extension DillBackup.Native {
+    /// Missing keys keep their defaults, so one absent field does not drop the whole native block.
+    init(from decoder: Decoder) throws {
+        self.init()
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        coins = try c.decodeIfPresent(Int.self, forKey: .coins) ?? coins
+        outfit = try c.decodeIfPresent(String.self, forKey: .outfit) ?? outfit
+        unlocked = try c.decodeIfPresent([String].self, forKey: .unlocked) ?? unlocked
+        streak = try c.decodeIfPresent(Int.self, forKey: .streak) ?? streak
+        lastVisitDay = try c.decodeIfPresent(String.self, forKey: .lastVisitDay) ?? lastVisitDay
+        careDay = try c.decodeIfPresent(String.self, forKey: .careDay) ?? careDay
+        dailyCare = try c.decodeIfPresent([String].self, forKey: .dailyCare) ?? dailyCare
+        rewardedDays = try c.decodeIfPresent([String].self, forKey: .rewardedDays) ?? rewardedDays
+        scores = try c.decodeIfPresent([DillBackup.Score].self, forKey: .scores) ?? scores
+        arenaBest = try c.decodeIfPresent(Int.self, forKey: .arenaBest)
+        arcade = try c.decodeIfPresent([String: Int].self, forKey: .arcade) ?? arcade
+        haptics = try c.decodeIfPresent(Bool.self, forKey: .haptics) ?? haptics
+        sounds = try c.decodeIfPresent(Bool.self, forKey: .sounds)
+    }
+}

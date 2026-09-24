@@ -316,3 +316,69 @@ test('split snapshots expose stable cells and regroup countdown while preserving
   assert.equal(player.cells.reduce((sum,c)=>sum+c.mass,0),player.mass);
   assert.ok(JSON.stringify(snapshot).length<5000);
 });
+const workerModule = import('../server/arena-worker.mjs');
+function arenaRequest(query = '', headers = {}) { return new Request('https://arena.test/arena' + query, { headers: { Upgrade: 'websocket', 'CF-Connecting-IP': '203.0.113.1', ...headers } }); }
+function fakeArenas(statuses) {
+  const calls = [];
+  return { calls, getByName: id => ({ fetch: async req => { calls.push({ id, ip: req.headers.get('X-Arena-Client-IP'), secret: req.headers.get('X-Arena-Proxy-Secret'), room: new URL(req.url).searchParams.get('assignedRoom') }); const status = statuses[calls.length - 1] ?? 200; return Response.json({ id, status }, { status }); } }) };
+}
+test('public matchmaking skips rooms refusing a full garden or a crowded network', async () => {
+  const worker = (await workerModule).default;
+  let ARENAS = fakeArenas([429, 503, 200]);
+  let response = await worker.fetch(arenaRequest(), { ARENAS });
+  assert.equal(response.status, 200); assert.deepEqual(ARENAS.calls.map(c => c.id), ['public-1', 'public-2', 'public-3']); assert.equal(ARENAS.calls[2].room, 'public-3');
+  ARENAS = fakeArenas([503, 429, ...Array(14).fill(503)]);
+  response = await worker.fetch(arenaRequest(), { ARENAS });
+  assert.equal(ARENAS.calls.length, 16); assert.equal(response.status, 429); assert.equal((await response.json()).id, 'public-2');
+  ARENAS = fakeArenas(Array(16).fill(503));
+  response = await worker.fetch(arenaRequest(), { ARENAS });
+  assert.equal(response.status, 503); assert.equal((await response.json()).error, 'All gardens are full. Try again in a moment.');
+  ARENAS = fakeArenas([429]);
+  response = await worker.fetch(arenaRequest('?room=ABC123'), { ARENAS });
+  assert.equal(response.status, 429); assert.deepEqual(ARENAS.calls.map(c => c.id), ['crew-ABC123']);
+});
+test('forwarded client IPs are trusted only with the matching proxy secret', async () => {
+  const worker = (await workerModule).default;
+  const proxied = secret => arenaRequest('', { 'X-Arena-Client-IP': '198.51.100.7', 'X-Arena-Proxy-Secret': secret });
+  for (const [env, request, ip] of [
+    [{ ARENA_PROXY_SECRET: 'brine-secret' }, proxied('brine-secret'), '198.51.100.7'],
+    [{ ARENA_PROXY_SECRET: 'brine-secret' }, proxied('brine-secreT'), '203.0.113.1'],
+    [{ ARENA_PROXY_SECRET: 'brine-secret' }, proxied('short'), '203.0.113.1'],
+    [{ ARENA_PROXY_SECRET: 'brine-secret' }, arenaRequest('', { 'X-Arena-Client-IP': '198.51.100.7' }), '203.0.113.1'],
+    [{}, proxied('brine-secret'), '203.0.113.1'],
+    [{}, proxied(''), '203.0.113.1'],
+    [{}, arenaRequest(), '203.0.113.1']
+  ]) {
+    const ARENAS = fakeArenas([200]);
+    assert.equal((await worker.fetch(request, { ...env, ARENAS })).status, 200);
+    assert.equal(ARENAS.calls[0].ip, ip); assert.equal(ARENAS.calls[0].secret, null);
+  }
+  const { ArenaRoom } = await workerModule, room = new ArenaRoom({});
+  for (let i = 0; i < 8; i++) room.sessions.set({}, { ip: '198.51.100.7' });
+  const crowded = await room.fetch(arenaRequest('?assignedRoom=public-1', { 'X-Arena-Client-IP': '198.51.100.7' }));
+  assert.equal(crowded.status, 429); assert.equal((await crowded.json()).error, 'Too many connections from this network.');
+});
+test('crew room joins are rate limited per resolved client IP when the binding exists', async () => {
+  const worker = (await workerModule).default, keys = [];
+  const CREW_JOINS = { limit: async ({ key }) => { keys.push(key); return { success: keys.length <= 1 }; } };
+  const env = { ARENA_PROXY_SECRET: 'brine-secret', CREW_JOINS };
+  const crew = () => arenaRequest('?room=ABC123', { 'X-Arena-Client-IP': '198.51.100.7', 'X-Arena-Proxy-Secret': 'brine-secret' });
+  let ARENAS = fakeArenas([200]);
+  assert.equal((await worker.fetch(crew(), { ...env, ARENAS })).status, 200); assert.equal(ARENAS.calls.length, 1);
+  ARENAS = fakeArenas([200]);
+  const limited = await worker.fetch(crew(), { ...env, ARENAS });
+  assert.equal(limited.status, 429); assert.equal((await limited.json()).error, 'Too many private rooms. Try again in a minute.');
+  assert.equal(ARENAS.calls.length, 0); assert.deepEqual(keys, ['198.51.100.7', '198.51.100.7']);
+  ARENAS = fakeArenas([200]);
+  assert.equal((await worker.fetch(arenaRequest(), { ...env, ARENAS })).status, 200); assert.equal(keys.length, 2);
+  ARENAS = fakeArenas([200]);
+  assert.equal((await worker.fetch(crew(), { ARENAS })).status, 200); assert.equal(ARENAS.calls[0].id, 'crew-ABC123');
+});
+test('humans cannot take the self label or a bot handle, while bots keep their handles', async () => {
+  const { engine, humanName } = await setup();
+  for (const name of ['you', ' YOU ', 'You', 'maya.j', 'MAYA.J', 'sophiek', 'Harper']) assert.equal(humanName(name), 'Dilly', name);
+  for (const name of ['Maya', 'you2', 'your pickle', 'Dilly']) assert.equal(humanName(name), name);
+  assert.equal(engine.addPlayer('h1', { name: 'You' }).name, 'Dilly');
+  assert.equal(engine.addPlayer('h2', { name: 'noah' }).name, 'Dilly');
+  assert.equal(engine.addPlayer('bot-x', { bot: true, name: 'maya.j' }).name, 'maya.j');
+});

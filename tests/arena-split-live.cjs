@@ -1,7 +1,7 @@
 // Explicit live split/merge smoke test. The player earns all mass using ordinary inputs.
 const assert = require('node:assert/strict');
 const { randomBytes } = require('node:crypto');
-const endpoint = process.argv[2] || 'wss://arena.littledill.app/arena';
+const endpoint = process.argv[2] || 'ws://127.0.0.1:8788/arena';
 async function attempt() {
   const room = randomBytes(3).toString('hex').toUpperCase(), sockets = [];
   let meID, ownState, peerState, food = [], seq = 0, phase = 0, splitAt = 0, peakCells = 0, sawSameCells = false, secondSplitRequested = false;

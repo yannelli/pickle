@@ -57,6 +57,8 @@ struct ScoreEntry: Codable, Identifiable, Equatable {
 struct PetState: Codable {
     static let arcadeGames = ["hunt", "memory", "catch"]
     static let nowKey = CodingUserInfoKey(rawValue: "little-dill.now")!
+    static let maxCoins = 1_000_000
+    static let maxStreak = 100_000
     var version = 2
     var life: WebPet
     var outfit: Outfit = .sprout
@@ -172,7 +174,7 @@ struct PetState: Codable {
         if careDay != day { careDay = day; dailyCare = [] }
         guard adopted, lastVisitDay != day, day > lastVisitDay else { return }
         let yesterday = Self.dayKey(calendar.date(byAdding: .day, value: -1, to: now) ?? now, calendar: calendar)
-        streak = lastVisitDay == yesterday ? streak + 1 : 1
+        streak = lastVisitDay == yesterday ? min(streak, Self.maxStreak - 1) + 1 : 1
         lastVisitDay = day
     }
 
@@ -183,9 +185,13 @@ struct PetState: Codable {
     }
 
     private mutating func reward(_ action: Care) -> Int {
-        let reward = dailyCare.insert(action.rawValue).inserted ? 5 : 0
-        coins += reward
-        return reward
+        addCoins(dailyCare.insert(action.rawValue).inserted ? 5 : 0)
+    }
+
+    private mutating func addCoins(_ amount: Int) -> Int {
+        let before = coins
+        coins = min(Self.maxCoins, coins + amount)
+        return coins - before
     }
 
     private var restingMessage: String {
@@ -271,9 +277,8 @@ struct PetState: Codable {
         } else { scores.append(ScoreEntry(day: day, score: score, date: now)) }
         scores = Array(scores.sorted { $0.day > $1.day }.prefix(90))
         // Replays improve a best score. Only today's challenge earns a daily reward.
-        let reward = day == DailyChallenge.today(now) && rewardedDays.insert(day).inserted ? 25 : 0
+        let reward = addCoins(day == DailyChallenge.today(now) && rewardedDays.insert(day).inserted ? 25 : 0)
         rewardedDays = Set(rewardedDays.sorted().suffix(120))
-        coins += reward
         refresh(at: now)
         if adopted && !life.dead { _ = addHappy(12); PetLife.assess(&life) }
         return reward
@@ -290,18 +295,34 @@ struct PetState: Codable {
     }
 
     var native: DillBackup.Native {
+        var native = progress
+        native.rewardedDays = Array(native.rewardedDays.suffix(30))
+        native.scores = Array(native.scores.prefix(20))
+        return native
+    }
+
+    private var progress: DillBackup.Native {
         DillBackup.Native(coins: coins, outfit: outfit.rawValue, unlocked: Outfit.allCases.filter { unlocked.contains($0) }.map(\.rawValue),
                           streak: streak, lastVisitDay: lastVisitDay, careDay: careDay, dailyCare: dailyCare.sorted(),
-                          rewardedDays: Array(rewardedDays.sorted().suffix(30)),
-                          scores: scores.sorted { $0.day > $1.day }.prefix(20).map { DillBackup.Score(d: $0.day, s: $0.score, t: PetLife.ms($0.date)) },
+                          rewardedDays: rewardedDays.sorted(),
+                          scores: scores.sorted { $0.day > $1.day }.map { DillBackup.Score(d: $0.day, s: $0.score, t: PetLife.ms($0.date)) },
                           arenaBest: arenaBest, arcade: arcadeRecords, haptics: haptics, sounds: soundEnabled)
     }
 
+    /// Runs a save that decoded but failed `isValid` through the backup import clamps.
+    /// Returns false when the pickle itself was invalid and became a new egg; coins, outfits and scores stay either way.
+    @discardableResult mutating func repair(now: Date) -> Bool {
+        apply(progress)
+        guard (try? PetLife.validate(life)) == nil else { return true }
+        life = PetLife.fresh(now: PetLife.ms(now)); lastPetAt = nil
+        return false
+    }
+
     mutating func apply(_ native: DillBackup.Native) {
-        coins = min(1_000_000, max(0, native.coins))
+        coins = min(Self.maxCoins, max(0, native.coins))
         unlocked = Set(native.unlocked.compactMap(Outfit.init(rawValue:))).union([.original, .sprout])
         outfit = Outfit(rawValue: native.outfit).flatMap { unlocked.contains($0) ? $0 : nil } ?? .sprout
-        streak = max(0, native.streak)
+        streak = min(Self.maxStreak, max(0, native.streak))
         lastVisitDay = DailyChallenge.validDay(native.lastVisitDay) ? native.lastVisitDay : ""
         careDay = DailyChallenge.validDay(native.careDay) ? native.careDay : ""
         dailyCare = Set(native.dailyCare.filter { Care(rawValue: $0) != nil })
@@ -319,7 +340,7 @@ struct PetState: Codable {
 
     var isValid: Bool {
         version == 2 && (try? PetLife.validate(life)) != nil &&
-        coins >= 0 && coins <= 1_000_000 && streak >= 0 && unlocked.contains(outfit) &&
+        (0...Self.maxCoins).contains(coins) && (0...Self.maxStreak).contains(streak) && unlocked.contains(outfit) &&
         scores.count <= 90 && scores.allSatisfy { (0...300).contains($0.score) && DailyChallenge.validDay($0.day) } &&
         arcadeRecords.allSatisfy { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
     }

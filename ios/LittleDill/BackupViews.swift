@@ -42,8 +42,8 @@ enum DillBackupFile {
         guard data.count <= DillBackup.MAX_FILE_BYTES else { throw DillBackupError.fileTooLarge }
         return data
     }
-    static func shareURL(_ data: Data) throws -> URL {
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent(basename() + ".dill")
+    static func shareURL(_ data: Data, filename: String = DillBackupFile.basename() + ".dill") throws -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
         try data.write(to: url, options: .atomic)
         return url
     }
@@ -195,6 +195,10 @@ struct BackupShare: Identifiable {
                 Button { undo() } label: { Label("Undo import", systemImage: "arrow.uturn.backward") }
                     .accessibilityIdentifier("backup.undo")
             }
+            if let recovery = store.recoveryCopy {
+                Button { shareRecovery(recovery) } label: { Label("Share recovery copy", systemImage: "doc.badge.ellipsis") }
+                    .accessibilityIdentifier("backup.recovery")
+            }
             if let notice {
                 Text(notice).font(.footnote).foregroundStyle(.secondary).accessibilityIdentifier("backup.notice")
             }
@@ -218,6 +222,12 @@ struct BackupShare: Identifiable {
             let data = try store.exportBackup()
             share = BackupShare(url: try DillBackupFile.shareURL(data))
         } catch { notice = DillBackupError.exportFailed.message }
+    }
+
+    /// The recovery copy is the raw on-device save, so it is shared as JSON instead of an encrypted .dill.
+    private func shareRecovery(_ data: Data) {
+        do { share = BackupShare(url: try DillBackupFile.shareURL(data, filename: "little-dill-recovery.json")) }
+        catch { notice = DillBackupError.exportFailed.message }
     }
 
     private func undo() {

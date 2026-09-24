@@ -14,23 +14,32 @@ import SwiftUI
     private var snackUntil: Date?
     private let defaults: UserDefaults
     private let key = "little-dill.native.v1"
+    private let recoveryKey = "little-dill.native.v1.recovery"
     private let clock: () -> Date
     private var now: Date { clock() }
+    /// The first save that failed to load, as stored. Later failures keep this copy.
+    var recoveryCopy: Data? { defaults.data(forKey: recoveryKey) }
 
     init(defaults: UserDefaults = .standard, clock: @escaping () -> Date = { Date() }) {
         self.defaults = defaults
         self.clock = clock
-        if let data = defaults.data(forKey: key) {
-            let decoder = JSONDecoder()
-            decoder.userInfo[PetState.nowKey] = clock()
-            if let saved = try? decoder.decode(PetState.self, from: data), saved.isValid {
-                pet = saved
-            } else {
-                defaults.set(data, forKey: key + ".recovery")
-                pet = PetState(now: clock())
-                notice = "Your previous save could not be read. A recovery copy is preserved on this device."
-            }
-        } else { pet = PetState(now: clock()) }
+        pet = PetState(now: clock())
+        guard let data = defaults.data(forKey: key) else { refresh(); return }
+        let decoder = JSONDecoder()
+        decoder.userInfo[PetState.nowKey] = clock()
+        let saved = try? decoder.decode(PetState.self, from: data)
+        if let saved, saved.isValid { pet = saved; refresh(); return }
+        let copied = recoveryCopy == nil
+        if copied { defaults.set(data, forKey: recoveryKey) }
+        let copy = copied ? "A copy of the original save is in Settings → Backups." : "An earlier recovery copy is still in Settings → Backups."
+        if var saved {
+            let keptPickle = saved.repair(now: clock())
+            pet = saved
+            notice = (keptPickle ? "Some saved progress was out of range and has been repaired. "
+                      : "Your pickle’s save was damaged, so a new egg is ready. Coins and outfits were kept. ") + copy
+        } else {
+            notice = "Your previous save could not be read, so a new egg is ready. " + copy
+        }
         refresh()
     }
     func save() {

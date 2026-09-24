@@ -6,14 +6,22 @@ struct ArenaLaunch: Identifiable {
     var room: String?
     static func validRoom(_ room:String) -> Bool { room.count == 6 && room.utf8.allSatisfy { (48...57).contains($0) || (65...90).contains($0) } }
     static func newRoom() -> String { String((0..<6).map { _ in "ABCDEFGHJKLMNPQRSTUVWXYZ23456789".randomElement()! }) }
+    static let defaultServer = "wss://arena.littledill.app/arena"
+    static var server: String { Bundle.main.object(forInfoDictionaryKey:"ArenaServerURL") as? String ?? defaultServer }
+    /// The arena web page on the server's host: `wss://host/arena` becomes `https://host/`.
+    static func site(server:String = ArenaLaunch.server) -> URLComponents {
+        guard var url = URLComponents(string:server), url.host != nil else {return site(server:defaultServer)}
+        url.scheme = "https"; url.path = "/"; url.query = nil; url.fragment = nil
+        return url
+    }
     static func shareURL(room:String? = nil) -> URL {
-        var url = URLComponents(string:"https://arena.littledill.app/")!
+        var url = site()
         if let room, validRoom(room) {url.queryItems = [URLQueryItem(name:"room",value:room)]}
         return url.url!
     }
     static func from(_ url:URL) -> ArenaLaunch? {
         let native = url.scheme == "littledill" && url.host == "arena"
-        let web = url.scheme == "https" && url.host == "arena.littledill.app" && (url.path.isEmpty || url.path == "/")
+        let web = url.scheme == "https" && url.host == site().host && (url.path.isEmpty || url.path == "/")
         guard native || web else {return nil}
         guard let code = URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems?.first(where:{$0.name == "room"})?.value else {return ArenaLaunch()}
         return validRoom(code) ? ArenaLaunch(room:code) : nil
@@ -30,11 +38,19 @@ struct ArenaCamera {
     let center: CGPoint
     let zoom: Double
 }
+/// A look this build doesn't know decodes as the server default, so a new server look can't fail every state message.
+protocol ArenaLook: RawRepresentable<String> { static var serverDefault: Self { get } }
+extension Brine: ArenaLook { static var serverDefault: Brine { .classic } }
+extension Outfit: ArenaLook { static var serverDefault: Outfit { .sprout } }
+@propertyWrapper struct ServerLook<Value: ArenaLook>: Decodable {
+    let wrappedValue: Value
+    init(from decoder: Decoder) throws { wrappedValue = Value(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .serverDefault }
+}
 struct ArenaPlayer: Decodable, Identifiable {
     let id: String
     let name: String
-    let brine: Brine
-    let outfit: Outfit
+    @ServerLook var brine: Brine
+    @ServerLook var outfit: Outfit
     let bot: Bool
     let x: Double
     let y: Double
@@ -144,8 +160,7 @@ private struct ArenaHeader: Decodable {
 
     func connect(pet:PetState,room requestedRoom:String?) {
         stop(); status = .connecting; errorMessage = ""; playerID = ""; snapshot = nil; previous = nil; food = []
-        let base = Bundle.main.object(forInfoDictionaryKey:"ArenaServerURL") as? String ?? "wss://arena.littledill.app/arena"
-        guard var url = URLComponents(string:base), url.scheme == "wss", url.host != nil else { fail("The arena server address is not configured."); return }
+        guard var url = URLComponents(string:ArenaLaunch.server), url.scheme == "wss", url.host != nil else { fail("The arena server address is not configured."); return }
         var query = [URLQueryItem(name:"name",value:pet.name),URLQueryItem(name:"brine",value:pet.brine.rawValue),URLQueryItem(name:"outfit",value:pet.outfit.rawValue),URLQueryItem(name:"foodDeltas",value:"1")]
         if let requestedRoom { guard ArenaLaunch.validRoom(requestedRoom) else {fail("That room code isn’t valid."); return}; query.append(URLQueryItem(name:"room",value:requestedRoom)) }
         url.queryItems = query
