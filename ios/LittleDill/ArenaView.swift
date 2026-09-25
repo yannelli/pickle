@@ -28,8 +28,8 @@ struct ArenaView: View {
                         if me.alive {controls(me,compact:compact)}
                     } else {Spacer()}
                 }
-                if client.status == .connecting {connectionCard}
-                else if client.status == .disconnected || away {disconnectedCard}
+                if client.status == .disconnected || away {disconnectedCard}
+                else if client.status == .connecting {connectionCard}
                 else if let me = client.me, !me.alive {respawnCard(me)}
             }
         }.foregroundStyle(DillTheme.ink)
@@ -82,7 +82,7 @@ struct ArenaView: View {
             Image(systemName:away ? "moon.zzz.fill" : "wifi.exclamationmark").font(.system(size:35))
             Text(away ? "A little breather." : "Lost in the brine.").font(DillTheme.display(29)).multilineTextAlignment(.center)
             Text(away ? "You left the garden while the app was in the background. Ready for a fresh spawn?" : client.errorMessage).font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
-            Button {away = false; client.connect(pet:store.pet,room:launch.room)} label: {Text("Jump back in")}.buttonStyle(DillButton()).accessibilityIdentifier("arenaReconnect")
+            Button {saveBest(); away = false; client.connect(pet:store.pet,room:launch.room)} label: {Text("Jump back in")}.buttonStyle(DillButton()).accessibilityIdentifier("arenaReconnect")
             Button("Back to my pickle") {dismiss()}.font(.subheadline.bold())
         }.padding(28).frame(maxWidth:350).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:30)).padding(24)
     }

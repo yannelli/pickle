@@ -38,7 +38,7 @@ class FoodGrid {
     return indices;
   }
 }
-export function cleanName(name) { return Array.from(String(name || 'Dilly').replace(/[\p{C}]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
+export function cleanName(name) { return Array.from(String(name || 'Dilly').replace(/[\p{C}\u115F\u1160\u2800\u3164\uFFA0]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
 const RESERVED_NAMES = new Set(['you', ...BOT_NAMES].map(name => name.toLowerCase()));
 export function humanName(name) { const clean = cleanName(name); return RESERVED_NAMES.has(clean.toLowerCase()) ? 'Dilly' : clean; }
 export function parseIntent(raw) {

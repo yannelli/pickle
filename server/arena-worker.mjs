@@ -77,7 +77,7 @@ export class ArenaRoom {
     server.addEventListener('close', () => this.remove(server));
     server.addEventListener('error', () => this.remove(server));
     server.send(JSON.stringify({ type: 'welcome', protocol: 1, id, room: this.room, tickRate: RULES.tickRate }));
-    server.send(JSON.stringify(this.engine.snapshot()));
+    server.send(JSON.stringify({ ...this.engine.snapshot(), food: this.lastFood }));
     if (!this.timer) this.timer = setInterval(() => this.tick(), 1000 / RULES.tickRate);
     return new Response(null, { status: 101, webSocket: client });
   }

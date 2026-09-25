@@ -66,7 +66,7 @@ export function direction(x, y) {
   const length = Math.max(1, Math.hypot(x, y));
   return { x: x / length, y: y / length };
 }
-export function playerName(value) { return Array.from(String(value || '').replace(/[\p{C}]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
+export function playerName(value) { return Array.from(String(value || '').replace(/[\p{C}\u115F\u1160\u2800\u3164\uFFA0]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
 export function socketURL(origin, settings, room = null) {
   const url = new URL('/arena', origin); url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
   url.searchParams.set('foodDeltas', '1');

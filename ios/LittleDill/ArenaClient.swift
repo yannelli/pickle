@@ -23,7 +23,7 @@ struct ArenaLaunch: Identifiable {
         let native = url.scheme == "littledill" && url.host == "arena"
         let web = url.scheme == "https" && url.host == site().host && (url.path.isEmpty || url.path == "/")
         guard native || web else {return nil}
-        guard let code = URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems?.first(where:{$0.name == "room"})?.value else {return ArenaLaunch()}
+        guard let code = URLComponents(url:url,resolvingAgainstBaseURL:false)?.queryItems?.first(where:{$0.name == "room"})?.value?.uppercased() else {return ArenaLaunch()}
         return validRoom(code) ? ArenaLaunch(room:code) : nil
     }
 }

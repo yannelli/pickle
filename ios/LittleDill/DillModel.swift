@@ -163,15 +163,17 @@ struct PetState: Codable {
         return PetLife.cleanName(String(String.UnicodeScalarView(collapsed.unicodeScalars.prefix(24)))) ?? name
     }
 
-    static func dayKey(_ date: Date, calendar: Calendar = .current) -> String {
+    static var localCalendar: Calendar { var calendar = Calendar(identifier: .gregorian); calendar.timeZone = .current; return calendar }
+
+    static func dayKey(_ date: Date, calendar: Calendar = PetState.localCalendar) -> String {
         let c = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", c.year ?? 2000, c.month ?? 1, c.day ?? 1)
     }
 
-    mutating func refresh(at now: Date, calendar: Calendar = .current) {
+    mutating func refresh(at now: Date, calendar: Calendar = PetState.localCalendar) {
         PetLife.advance(&life, now: PetLife.ms(now))
         let day = Self.dayKey(now, calendar: calendar)
-        if careDay != day { careDay = day; dailyCare = [] }
+        if careDay < day { careDay = day; dailyCare = [] }
         guard adopted, lastVisitDay != day, day > lastVisitDay else { return }
         let yesterday = Self.dayKey(calendar.date(byAdding: .day, value: -1, to: now) ?? now, calendar: calendar)
         streak = lastVisitDay == yesterday ? min(streak, Self.maxStreak - 1) + 1 : 1

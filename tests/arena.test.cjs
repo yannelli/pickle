@@ -376,9 +376,18 @@ test('crew room joins are rate limited per resolved client IP when the binding e
 });
 test('humans cannot take the self label or a bot handle, while bots keep their handles', async () => {
   const { engine, humanName } = await setup();
-  for (const name of ['you', ' YOU ', 'You', 'maya.j', 'MAYA.J', 'sophiek', 'Harper']) assert.equal(humanName(name), 'Dilly', name);
+  for (const name of ['you', ' YOU ', 'You', 'maya.j', 'MAYA.J', 'sophiek', 'Harper', 'you\u2800', 'noah\u3164']) assert.equal(humanName(name), 'Dilly', name);
   for (const name of ['Maya', 'you2', 'your pickle', 'Dilly']) assert.equal(humanName(name), name);
   assert.equal(engine.addPlayer('h1', { name: 'You' }).name, 'Dilly');
   assert.equal(engine.addPlayer('h2', { name: 'noah' }).name, 'Dilly');
   assert.equal(engine.addPlayer('bot-x', { bot: true, name: 'maya.j' }).name, 'maya.j');
+});
+test('join snapshot starts from the food list the next delta is built against', async () => {
+  const { ArenaRoom } = await workerModule, room = new ArenaRoom({}), sent = [];
+  const server = { accept() {}, addEventListener() {}, send: data => sent.push(JSON.parse(data)) };
+  globalThis.WebSocketPair = function () { return { 0: {}, 1: server }; };
+  room.lastFood = [[-1, 10, 10, 0]];
+  await room.fetch(arenaRequest('?assignedRoom=public-1&foodDeltas=1')).catch(() => {});
+  clearInterval(room.timer); delete globalThis.WebSocketPair;
+  assert.deepEqual(sent[1].food, [[-1, 10, 10, 0]]);
 });

@@ -42,6 +42,7 @@ final class DillTests: XCTestCase {
         XCTAssertFalse(ArenaLaunch.validRoom("ABC12/"))
         XCTAssertEqual(ArenaLaunch.from(URL(string:"littledill://arena?room=ABC123")!)?.room,"ABC123")
         XCTAssertNotNil(ArenaLaunch.from(URL(string:"littledill://arena")!))
+        XCTAssertEqual(ArenaLaunch.from(URL(string:"littledill://arena?room=abc234")!)?.room,"ABC234")
         XCTAssertEqual(ArenaLaunch.from(ArenaLaunch.shareURL(room:"ABC123"))?.room,"ABC123")
         XCTAssertNotNil(ArenaLaunch.from(ArenaLaunch.shareURL()))
         XCTAssertEqual(ArenaLaunch.shareURL(room:"ABC123").absoluteString,"https://arena.littledill.app/?room=ABC123")
@@ -383,6 +384,13 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(elder?.id, "grandill"); XCTAssertEqual(elder?.unlocked, 32); XCTAssertEqual(elder?.lap, 2)
         XCTAssertEqual(PickleVariety.all.count, 6); XCTAssertEqual(ElderLook.all.count, 32); XCTAssertEqual(TeenLook.all.count, 8)
     }
+    func testDayKeysAreGregorianAndCareDoesNotResetOnRollback() {
+        XCTAssertEqual(PetState.localCalendar.identifier, .gregorian)
+        var p = living(at: t0)
+        p.refresh(at: t0, calendar: utc); p.dailyCare = ["feed"]
+        p.refresh(at: t0.addingTimeInterval(-86400), calendar: utc); XCTAssertEqual(p.dailyCare, ["feed"])
+        p.refresh(at: t0.addingTimeInterval(86400), calendar: utc); XCTAssertEqual(p.dailyCare, [])
+    }
     func testStreakAndMissedDay() {
         var p = living(at: t0)
         p.refresh(at: t0, calendar: utc); XCTAssertEqual(p.streak, 1)
@@ -590,11 +598,13 @@ final class PetModelTests: XCTestCase {
         }
         XCTAssertEqual(try DillBackup.decode(file).pet, .current(pet))
     }
-    func testBackupNativeKeepsDefaultsForMissingKeys() throws {
+    func testBackupNativeKeepsDefaultsForMissingOrMistypedKeys() throws {
         var pet = PetLife.fresh(now: ms(t0)); pet.phase = .naming; pet.brinedAt = ms(t0) - 60_000; pet.hatchAt = ms(t0)
         let json = String(decoding: try JSONEncoder().encode(pet), as: UTF8.self)
         let decoded = try DillBackup.decode(try seal("{\"version\":1,\"savedAt\":\(ms(t0)),\"pet\":\(json),\"native\":{\"coins\":42,\"streak\":3}}"))
         XCTAssertEqual(decoded.native, DillBackup.Native(coins: 42, streak: 3))
+        let mistyped = try DillBackup.decode(try seal("{\"version\":1,\"savedAt\":\(ms(t0)),\"pet\":\(json),\"native\":{\"coins\":42,\"streak\":\"3\"}}"))
+        XCTAssertEqual(mistyped.native, DillBackup.Native(coins: 42))
     }
     @MainActor func testOversizedImportIsRejectedBeforeDecoding() {
         let store = DillStore(defaults: suite())
