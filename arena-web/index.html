@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8f6ed">
+  <meta name="description" content="Little pickle. Big appetite. Play Brine Royale with friends on the web and iPhone. Gather snacks, grow your dill, and survive the garden.">
+  <meta property="og:title" content="Brine Royale · Little Dill">
+  <meta property="og:description" content="There’s room for one more pickle. Join the garden, grow big, and bring your friends.">
+  <meta property="og:type" content="website">
+  <title>Brine Royale · Little Dill</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Crect x='19' y='5' width='42' height='70' rx='21' fill='%2396bb56' stroke='%23263e31' stroke-width='4'/%3E%3Ccircle cx='31' cy='33' r='3' fill='%23263e31'/%3E%3Ccircle cx='49' cy='33' r='3' fill='%23263e31'/%3E%3Cpath d='M33 43Q40 51 47 43' fill='none' stroke='%23263e31' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/arena.css">
+  <script type="module" src="/arena.js"></script>
+</head>
+<body>
+  <svg class="icons" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><symbol id="sound-icon" viewBox="0 0 24 24"><path d="M11 4 5 9H2v6h3l6 5V4Zm5 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol><symbol id="arrow-icon" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol><symbol id="share-icon" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M5 12v8h14v-8"/></symbol><symbol id="bolt-icon" viewBox="0 0 24 24"><path d="m14 2-11 12h8l-1 8 11-13h-8l1-7Z"/></symbol><symbol id="close-icon" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol></svg>
+  <main id="lobby" class="lobby">
+    <header class="site-header"><a class="brand" href="https://littledill.app">little dill<span>.</span></a><span class="edition"><i></i> MADE FOR A LITTLE CHAOS</span><button class="icon-button sound-toggle" aria-label="Turn sound on" aria-pressed="false" title="Sound off"><svg><use href="#sound-icon"/></svg><span class="mute-line"></span></button></header>
+    <section class="hero">
+      <div class="intro">
+        <span class="eyebrow">THE GARDEN IS OPEN</span>
+        <h1>Little pickle.<br><em>Big appetite.</em></h1>
+        <p class="lede">Snack. Grow. Steal the crown.<br>A very unserious fight to be the biggest dill.</p>
+        <div class="hero-art" aria-hidden="true"><span class="art-orbit"></span><span class="float-chip chip-top">100% brine. 0% chill.</span><canvas id="preview" width="560" height="480"></canvas><span class="float-chip chip-bottom"><span class="spark">✦</span> small but snacky</span><span class="art-flower flower-one">✳</span><span class="art-flower flower-two">✦</span></div>
+        <div class="quick-rules"><span><b>01</b> Gather snacks</span><span><b>02</b> Gobble smaller dills</span><span><b>03</b> Dash out of trouble</span></div>
+      </div>
+      <section class="join-card" aria-labelledby="join-heading">
+        <div class="card-kicker"><span class="pill">BRINE ROYALE</span><span class="mini-star">✳</span></div>
+        <h2 id="join-heading">Make a little trouble.</h2>
+        <p>A bigger garden. Ridiculous pickles. Jump right in.</p>
+        <form id="join-form">
+          <label for="name">YOUR PICKLE’S NAME</label>
+          <input id="name" name="name" type="text" maxlength="18" autocomplete="nickname" placeholder="Dilly" required value="Dilly">
+          <fieldset><legend>PICK YOUR BRINE</legend><div class="brines"><button type="button" class="brine selected" data-brine="classic" aria-pressed="true"><span class="swatch classic"></span>Classic</button><button type="button" class="brine" data-brine="garlic" aria-pressed="false"><span class="swatch garlic"></span>Garlic</button><button type="button" class="brine" data-brine="spicy" aria-pressed="false"><span class="swatch spicy"></span>Spicy</button></div></fieldset>
+          <label for="outfit">A LITTLE SOMETHING EXTRA</label><select id="outfit" name="outfit"><option value="sprout">Fresh little sprout</option><option value="original">The original dill</option><option value="bow">A very good bow</option><option value="shades">Too cool to crunch</option><option value="crown">Big dill royalty</option><option value="party">Life of the pickle party</option></select>
+          <button class="button primary play-button" id="play" type="submit"><span id="play-label">Let’s get pickled</span><svg><use href="#arrow-icon"/></svg></button>
+        </form>
+        <div class="friend-actions"><button id="create-room" class="button secondary">Start a friend room</button><button id="show-room" class="text-button">Got a room code?</button><button id="public-room" class="text-button" hidden>Play in the public garden instead</button></div>
+        <form id="room-form" class="room-form" hidden><label for="room-code">SIX-CHARACTER ROOM CODE</label><div class="room-fields"><input id="room-code" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="ABC123" pattern="[A-Za-z0-9]{6}" required aria-describedby="room-error"><button type="submit" class="button secondary">Join</button></div><p id="room-error" class="error" role="alert"></p></form>
+        <p class="lobby-note">Play together on web & iPhone.<br>Split to pounce. Dash to escape.</p>
+        <div id="personal-best" class="personal-best" hidden>YOUR BIGGEST DILL <strong id="lobby-best">0</strong><span>mass</span></div>
+      </section>
+    </section>
+    <footer class="site-footer"><a href="https://littledill.app">Meet your pocket pickle <span>↗</span></a><span>Free to play. No download. All dill.</span></footer>
+  </main>
+  <section id="game" class="game" aria-label="Brine Royale arena" hidden>
+    <canvas id="arena" aria-label="Live multiplayer garden. Move with arrow keys, W A S D, your mouse, or the touch joystick. Press Space to dash or E to split. Split pieces regroup automatically."></canvas>
+    <div class="game-top">
+    <header class="game-header"><div class="game-brand"><span class="eyebrow">LITTLE DILL</span><strong>Brine Royale<span>.</span></strong><span id="population">Finding your garden…</span></div><div class="game-actions"><button id="invite" class="icon-button" aria-label="Invite friends" title="Invite friends"><svg><use href="#share-icon"/></svg></button><button class="icon-button sound-toggle" aria-label="Turn sound on" aria-pressed="false" title="Sound off"><svg><use href="#sound-icon"/></svg><span class="mute-line"></span></button><button id="leave" class="icon-button" aria-label="Leave arena" title="Leave arena"><svg><use href="#close-icon"/></svg></button></div></header>
+    <div class="game-stats">
+    <div class="score-bar"><div class="score-main"><span>MASS</span><strong id="mass">25</strong></div><div><span>RANK</span><strong id="rank">—</strong></div><div><span>BEST</span><strong id="best">25</strong></div></div>
+    <aside class="leaderboard" aria-label="Leaderboard"><h2>BIG DILLS <span>♛</span></h2><ol id="leaders"></ol></aside>
+    </div>
+    <div id="room-badge" class="room-badge" hidden></div>
+    </div>
+    <div class="map-wrap"><canvas id="minimap" width="160" height="120" aria-label="Garden map"></canvas><span>THE GARDEN</span></div>
+    <div id="protection" class="protection" hidden>✦ A little head start · protected</div>
+    <div class="game-controls">
+      <div id="joystick" class="joystick" role="group" aria-label="Touch movement joystick"><span class="joystick-cross"></span><span id="stick" class="stick"></span></div>
+      <p class="desktop-hint"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>or move your mouse <i>·</i> <kbd>SPACE</kbd> dash <i>·</i> <kbd>E</kbd> split</p>
+      <div class="ability-group" role="group" aria-label="Pickle abilities">
+        <div class="piece-status"><strong id="cell-count">1 / 4 pieces</strong><span id="merge-note">60 mass per piece to split</span></div>
+        <button id="split" class="dash-button split-button" aria-label="Split, needs 60 mass in one piece" aria-describedby="split-note" disabled><svg aria-hidden="true"><circle cx="6" cy="9" r="4"/><circle cx="18" cy="15" r="4"/><path d="m10 3 4 3-4 3m4 6-4 3 4 3"/></svg><strong>SPLIT</strong><span id="split-note">35 more mass</span></button>
+        <button id="dash" class="dash-button" aria-label="Dash, costs 5 mass" aria-describedby="dash-note"><svg aria-hidden="true"><use href="#bolt-icon"/></svg><strong>DASH</strong><span id="dash-note">35 mass to unlock</span></button>
+      </div>
+    </div>
+    <div id="overlay" class="overlay" hidden><section class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title"><span class="overlay-pickle" aria-hidden="true">✳</span><span class="eyebrow" id="overlay-kicker">ONE MOMENT</span><h2 id="overlay-title">Finding your garden.</h2><p id="overlay-message">Your little dill is on the way.</p><div id="run-result" class="run-result" hidden><span>BEST MASS<strong id="run-best">0</strong></span><span>DILLS GOBBLED<strong id="run-kills">0</strong></span></div><button id="overlay-action" class="button primary" hidden>Try again</button><button id="share-run" class="button secondary" hidden>Share your biggest dill</button><button id="overlay-back" class="text-button">Back to the garden gate</button></section></div>
+  </section>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript><p class="noscript">Turn on JavaScript to play Brine Royale.</p></noscript>
+</body>
+</html>

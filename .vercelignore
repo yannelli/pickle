@@ -12,4 +12,10 @@ assets/PROMPTS.md
 .gitignore
 .vercelignore
 server/
+ios
+
+wrangler.arena.jsonc
+wrangler.arena-legacy.jsonc
+arena-web/
 website/
+docs/

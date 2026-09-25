@@ -6,6 +6,10 @@ Raise a pickle pet in your browser.
 
 Open `index.html` to play, or serve this folder with any static web server. Progress saves in your browser.
 
+A native iPhone and iPad app now lives in [`ios/`](ios/README.md), with **Brine Royale**, a real online survival arena with shared worlds and server-controlled bots, plus collectible outfits, animated care, sound effects, daily challenges, pass-and-play, and shareable scorecards. Open `ios/LittleDill.xcodeproj` to run it. The browser arena at [arena.littledill.app](https://arena.littledill.app) shares its live rooms with iOS; its dependency-free source lives in `arena-web/`. The official site is [littledill.app](https://littledill.app). It now features a dedicated Brine Royale section and direct arena links. The arena supports 64 players per room in a 6,000 × 4,500 garden, with matching web/iOS artwork, split/regroup, and quiet-room opponents.
+
+The official landing site uses the separate `pickle-website` Worker. Its current response layer is preserved in `server/website-worker.mjs`; it adds the arena feature to the existing site assets. Deploy that module using Cloudflare’s Worker **content replacement** endpoint (`PUT /accounts/{account}/workers/scripts/pickle-website/content`, multipart `main_module: worker.js`) to preserve the deployed assets, routes, and `GAME_URL` binding. The root `wrangler.jsonc` deploys the separate browser pet, not the official landing site.
+
 ## Raise your pickle
 
 Put a cucumber into Classic, Garlic, or Spicy brine. After 1 real minute, one of 6 varieties hatches and you name it. The app chooses and saves the variety once; closing or reloading the app does not change it. An unnamed hatchling waits safely for you.
@@ -107,6 +111,15 @@ npx vercel
 ```
 
 Once the public URL is known, follow the deployment notes in the asset guide to finish the sharing URLs.
+
+**Arena Worker:** `wrangler.arena.jsonc` deploys the arena; `wrangler.arena-legacy.jsonc` deploys the older preview endpoint, which forwards to it from another account (deploy steps in [`ios/README.md`](ios/README.md)). The legacy proxy sends each player's IP in `X-Arena-Client-IP`. The arena trusts that header only when `X-Arena-Proxy-Secret` matches its `ARENA_PROXY_SECRET`; otherwise it uses `CF-Connecting-IP`. Set the same value on both Workers:
+
+```sh
+npx wrangler secret put ARENA_PROXY_SECRET -c wrangler.arena.jsonc
+npx wrangler secret put ARENA_PROXY_SECRET -c wrangler.arena-legacy.jsonc
+```
+
+The `CREW_JOINS` rate limit in `wrangler.arena.jsonc` allows 10 crew-room joins per client IP per 60 seconds in each Cloudflare location. See [`docs/INDEX.md`](docs/INDEX.md) for the researched Cloudflare docs and when to use them.
 
 ## Validation
 
