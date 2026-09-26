@@ -90,8 +90,8 @@ test('web pickles keep their variety look and change face with the game', async 
   const { VARIETIES, varietyOf, pickleBody, faceMood, blinking, drawPickle } = await import(modulePath);
   assert.equal(varietyOf({ variety: 'butter', brine: 'classic' }), 'butter');
   assert.equal(varietyOf({ variety: 'constructor', brine: 'spicy' }), 'chili');
-  assert.equal(new Set(Object.values(VARIETIES).map(v => v.shape)).size, 3);
-  assert.ok(pickleBody('round', 50).halfWidth > pickleBody('long', 50).halfWidth); assert.ok(pickleBody('crooked', 50).lean > 0);
+  assert.equal(new Set(Object.values(VARIETIES).map(v => v.shape)).size, 6);
+  assert.ok(pickleBody('round', 50).halfWidth > pickleBody('long', 50).halfWidth); assert.equal(pickleBody('pear', 50).lean, 0);
   assert.equal(faceMood({ threatened: true }), 'threatened');
   assert.equal(faceMood({ threatened: true, dash: 1 }), 'threatened');
   assert.equal(faceMood({ drain: 1, dash: 1 }), 'threatened', 'a draining cell looks threatened');
@@ -101,7 +101,7 @@ test('web pickles keep their variety look and change face with the game', async 
   assert.equal(blinking('anyone', 0), false);
   const calls = [], ctx = new Proxy({}, { get: (target, key) => key in target ? target[key] : () => calls.push(key), set: (target, key, value) => { target[key] = value; return true; } });
   for (const variety of Object.keys(VARIETIES)) for (const extra of [{}, { drain: 1 }, { dash: 1 }, { threatened: true }, { sliced: true }]) drawPickle(ctx, { variety, outfit: 'crown', lookX: 1, ...extra }, 0, 0, 40, 1.5);
-  assert.ok(calls.includes('rotate') && calls.includes('ellipse') && calls.includes('roundRect'));
+  assert.ok(calls.includes('quadraticCurveTo') && calls.includes('ellipse') && calls.includes('roundRect'));
 });
 test('web food deltas remove then upsert IDs, preserve omitted updates, and reset on full snapshots', async () => {
   const { applyFoodUpdate } = await import(modulePath);
@@ -400,8 +400,8 @@ test('web membranes dent where bodies press together or reach a wall and relax w
   assert.equal(shapeRadius(capsule, 0), 80); assert.equal(shapeRadius(capsule, Math.PI / 2), 100);
   assert.ok(Math.abs(shapeRadius(capsule, Math.PI / 4) - 92.88) < .01);
   assert.equal(shapeRadius({ hw: 96, hh: 90, ellipse: true }, 0), 96);
-  assert.deepEqual(bodyShape({ sliced: true }, 50), { hw: 50, hh: 50, lean: 0, ellipse: false });
-  assert.equal(bodyShape({ variety: 'garlic' }, 50).lean, .16);
+  assert.deepEqual(bodyShape({ sliced: true }, 50), { hw: 35, hh: 50, lean: 0, ellipse: false });
+  assert.equal(bodyShape({ variety: 'garlic' }, 50).lean, 0);
   assert.equal(membraneSize(10), 18); assert.equal(membraneSize(1000), 72); assert.equal(membraneSize(150) % 6, 0);
   const slice = r => ({ hw: r, hh: r, lean: 0, ellipse: false }), r = radius(200);
   const a = { x: 500, y: 500, shape: slice(r), m: makeMembrane(36) }, b = { x: 500 + r * 1.7, y: 500, shape: slice(r), m: makeMembrane(36) };

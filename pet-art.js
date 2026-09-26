@@ -1,15 +1,6 @@
 (function (root) {
   'use strict';
-  // The body is a border-box element with a 3px border, so the art SVG (viewBox "-40 -40 150 160",
-  // one unit per pixel, pinned at left/top -40) shares coordinates with the body's padding box.
-  // Every accessory is authored in a local space that render() maps onto the body:
-  //   HATS   x 0 at the head centre, y 0 at the crown. Scaled by body width / 56.
-  //   FACES  x 0 at the face centre, y 0 at the eye line. The face box is 32x27 at every stage, so no scale.
-  //   PROPS  x 0 sixteen pixels right of the body, y 0 on the ground. The right hand lands at (-3, -20).
-  //   HELD   like FACES, but scaled with the body: a held object grows with the pickle.
-  //   HAND   x 0, y 0 at the bottom outer corner of the left arm.
-  // The head reads as a dome of radius 28 centred at (0, 28): its surface drops to y 3.8 at x 14,
-  // y 8.4 at x 20 and y 13.6 at x 24, which is the line hat brims follow.
+  // Accessories use the body's inner box, inside its transparent 3 px border.
   const BODY = {
     baby: { w: 42, h: 51, face: 15, arm: 29 },
     young: { w: 48, h: 70, face: 25, arm: 42 },
@@ -97,15 +88,64 @@
     fire: '<g stroke="none"><path d="M-38 100 -12 92M-38 92 -12 100" stroke="#7a5a3a" stroke-width="5" stroke-linecap="round"/><g class="flame"><path d="M-25 90Q-40 76-27 58Q-24 68-19 66Q-14 74-25 90Z" fill="#e0893a"/><path d="M-25 88Q-32 78-26 68Q-23 74-20 72Q-18 80-25 88Z" fill="#f1c85c"/></g></g>'
   };
   const WRAP = '<g fill="none" stroke="var(--pixel)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">';
-  function anchors(stage) {
-    const body = BODY[stage] || BODY.adult;
+  const number = value => String(Math.round(value * 1000) / 1000);
+  function edge(points, value, axis) {
+    const crosses = [];
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i], b = points[(i + 1) % points.length];
+      if ((a[axis] <= value && b[axis] > value) || (b[axis] <= value && a[axis] > value)) {
+        crosses.push(a[1 - axis] + (b[1 - axis] - a[1 - axis]) * (value - a[axis]) / (b[axis] - a[axis]));
+      }
+    }
+    return crosses.length ? [Math.min(...crosses), Math.max(...crosses)] : [0, 0];
+  }
+  function frame(stage, shape) {
+    const base = BODY[stage] || BODY.adult, profile = root.LittleDillBody.profile(shape);
+    const w = base.w * profile.width / .8, h = base.h * profile.height;
+    const face = base.face * profile.height, arm = base.arm * profile.height;
+    const points = root.LittleDillBody.points(shape, (w + 3) / 2, (h + 3) / 2).map(([x, y]) => [x + w / 2, y + h / 2]);
+    return { w, h, face, arm, points, armEdge: edge(points, arm + 13.5, 1)[0] };
+  }
+  function anchors(body, stage) {
     return {
-      hat: 'translate(' + body.w / 2 + ' 0) scale(' + (body.w / BODY.adult.w).toFixed(3) + ')',
-      face: 'translate(' + body.w / 2 + ' ' + body.face + ')',
-      held: 'translate(' + body.w / 2 + ' ' + body.face + ') scale(' + (body.w / BODY.adult.w).toFixed(3) + ')',
-      prop: 'translate(' + (body.w + 16) + ' ' + (body.h + 6) + ')',
-      hand: 'translate(-13 ' + (body.arm + 15) + ')'
+      hat: 'translate(' + number(body.w / 2) + ' 0) scale(' + (body.w / BODY.adult.w).toFixed(3) + ')',
+      face: 'translate(' + number(body.w / 2) + ' ' + number(body.face) + ')',
+      held: 'translate(' + number(body.w / 2) + ' ' + number(body.face) + ') scale(' + (body.w / BODY.adult.w).toFixed(3) + ')',
+      prop: 'translate(' + number(body.w + 16) + ' ' + number(body.h + 6) + ')',
+      hand: 'translate(' + number(body.armEdge - (stage === 'baby' ? 9 : 13)) + ' ' + number(body.arm + 15) + ')'
     };
+  }
+  function outline(points) {
+    const mid = (a, b) => number((a + b) / 2);
+    let path = 'M' + mid(points[0][0], points.at(-1)[0]) + ' ' + mid(points[0][1], points.at(-1)[1]);
+    for (let i = 0; i < points.length; i++) {
+      const a = points[i], b = points[(i + 1) % points.length];
+      path += 'Q' + number(a[0]) + ' ' + number(a[1]) + ' ' + mid(a[0], b[0]) + ' ' + mid(a[1], b[1]);
+    }
+    return path + 'Z';
+  }
+  function paintBody(body, variety, pet, stage, room) {
+    const variables = { 'body-width': body.w + 6, 'body-height': body.h + 6, 'face-x': body.w / 2 - 16,
+      'face-y': body.face, 'arm-y': body.arm, 'arm-left': body.armEdge - 13, 'baby-arm-left': body.armEdge - 9,
+      'foot-x': body.w * .34 - 7 };
+    for (const [name, value] of Object.entries(variables)) room.style.setProperty('--' + name, number(value) + 'px');
+    const svg = document.getElementById('body-art');
+    svg.setAttribute('viewBox', '-3 -3 ' + number(body.w + 6) + ' ' + number(body.h + 6));
+    const path = outline(body.points), skin = pet.sick ? '#8ba46a' : variety.color;
+    const spots = [[.18, .19], [.78, .14], [.84, .62], [.23, .76], [.65, .88]].map(([x, y]) =>
+      '<ellipse cx="' + number(body.w * x) + '" cy="' + number(body.h * y) + '" rx="2.4" ry="1.8"/>').join('');
+    const feet = [.34, .66].map(fraction => {
+      const x = body.w * fraction, y = edge(body.points, x, 0)[1] - 1;
+      return '<path d="M' + number(x) + ' ' + number(y) + 'V' + number(body.h + 5) + '"/>';
+    }).join('');
+    const markup = '<defs><clipPath id="pet-body-clip"><path d="' + path + '"/></clipPath>' +
+      '<linearGradient id="pet-body-shade"><stop stop-color="' + variety.light + '"/><stop offset=".3" stop-color="' + skin + '"/>' +
+      '<stop offset="1" stop-color="' + variety.dark + '"/></linearGradient></defs>' +
+      '<g stroke="#3c5733" stroke-width="3">' + feet + '</g><path d="' + path + '" fill="url(#pet-body-shade)" stroke="none"/>' +
+      '<g clip-path="url(#pet-body-clip)" stroke="none"><ellipse cx="' + number(body.w * .24) + '" cy="' + number(body.h * .27) +
+      '" rx="' + number(body.w * .14) + '" ry="' + number(body.h * .3) + '" fill="' + variety.light + '" opacity=".5"/>' +
+      '<g fill="' + variety.dark + '" opacity=".7">' + spots + '</g></g><path d="' + path + '" stroke="#3c5733" stroke-width="3"/>';
+    paint(svg, variety.id + ':' + stage + ':' + !!pet.sick, markup);
   }
   function place(transform, markup) {
     return markup ? '<g transform="' + transform + '">' + markup + '</g>' : '';
@@ -123,18 +163,20 @@
     room.style.setProperty('--skin', variety.color); room.style.setProperty('--highlight', variety.light); room.style.setProperty('--shade', variety.dark);
     const stage = life.stage(pet, now);
     const elder = life.elder(pet, now), teen = life.teen(pet, now), look = elder || teen;
-    const worn = WORN[vibe] || {}, at = anchors(stage);
+    const body = frame(stage, variety.shape);
+    paintBody(body, variety, pet, stage, room);
+    const worn = WORN[vibe] || {}, at = anchors(body, stage);
     room.dataset.hat = worn.face === FACES.sunglasses ? 'sunglasses' : look?.hat || '';
     const readers = elder && HATS[look.hat] && worn.face !== FACES.sunglasses ? FACES.readers : '';
     const wornArt = (look ? place(HATS[look.hat] ? at.hat : at.face, HATS[look.hat] || FACES[look.hat]) : '') +
       place(at.face, readers + (worn.face || '')) + place(at.held, worn.held) + place(at.hand, worn.hand);
     const art = document.getElementById('elder-art');
-    paint(art, (look?.id || '') + ':' + stage + ':' + (worn.face || worn.held || worn.hand ? vibe : ''), wornArt);
+    paint(art, variety.id + ':' + (look?.id || '') + ':' + stage + ':' + (worn.face || worn.held || worn.hand ? vibe : ''), wornArt);
     art.style.color = look?.accent || '';
     const prop = document.getElementById('prop-art');
-    paint(prop, (look?.id || '') + ':' + stage, look ? place(at.prop, PROPS[look.prop]) : '');
+    paint(prop, variety.id + ':' + (look?.id || '') + ':' + stage, look ? place(at.prop, PROPS[look.prop]) : '');
     prop.style.color = look?.accent || '';
     paint(document.getElementById('scene-art'), SCENES[vibe] ? vibe : '', SCENES[vibe] || '');
   }
-  root.LittleDillArt = { render };
+  root.LittleDillArt = { render, frame };
 })(globalThis);

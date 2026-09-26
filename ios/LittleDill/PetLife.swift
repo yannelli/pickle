@@ -32,17 +32,17 @@ enum JSONValue: Decodable, Equatable {
 }
 
 struct PickleVariety: Equatable, Identifiable {
-    enum Shape: String { case long, round, crooked }
+    enum Shape: String { case long, gherkin, pear, round, tapered, ribbed }
     let id: String, name: String, brine: String
     let color: UInt32, light: UInt32, dark: UInt32
     let shape: Shape
     static let all = [
         PickleVariety(id: "dill", name: "Classic Dill", brine: "classic", color: 0x78954b, light: 0xa1b56b, dark: 0x527637, shape: .long),
-        PickleVariety(id: "gherkin", name: "Tiny Gherkin", brine: "classic", color: 0x709855, light: 0xbad28c, dark: 0x486b37, shape: .round),
-        PickleVariety(id: "garlic", name: "Garlic Goblin", brine: "garlic", color: 0x98a76d, light: 0xd1d99d, dark: 0x617c4c, shape: .crooked),
+        PickleVariety(id: "gherkin", name: "Tiny Gherkin", brine: "classic", color: 0x709855, light: 0xbad28c, dark: 0x486b37, shape: .gherkin),
+        PickleVariety(id: "garlic", name: "Garlic Goblin", brine: "garlic", color: 0x98a76d, light: 0xd1d99d, dark: 0x617c4c, shape: .pear),
         PickleVariety(id: "butter", name: "Butter Bean", brine: "garlic", color: 0xb0a44d, light: 0xddce80, dark: 0x877a39, shape: .round),
-        PickleVariety(id: "chili", name: "Chili Dill", brine: "spicy", color: 0x958749, light: 0xd2af73, dark: 0x6a693a, shape: .long),
-        PickleVariety(id: "pepper", name: "Pepper Punk", brine: "spicy", color: 0x66875d, light: 0xa7c18a, dark: 0x415c3f, shape: .crooked)
+        PickleVariety(id: "chili", name: "Chili Dill", brine: "spicy", color: 0x958749, light: 0xd2af73, dark: 0x6a693a, shape: .tapered),
+        PickleVariety(id: "pepper", name: "Pepper Punk", brine: "spicy", color: 0x66875d, light: 0xa7c18a, dark: 0x415c3f, shape: .ribbed)
     ]
     static func of(_ id: String) -> PickleVariety { all.first { $0.id == id } ?? all[0] }
     static func first(brine: String) -> PickleVariety { all.first { $0.brine == brine } ?? all[0] }

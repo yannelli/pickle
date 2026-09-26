@@ -169,11 +169,9 @@ struct CareScene: View {
 
     /// The mouth's scene position, following the pose's squash and hop so the food meets it.
     static func mouth(look: PickleLook, pose: PicklePose) -> CGPoint {
-        let f = PickleFrame(look: look), round = look.variety.shape == .round
-        var t = CGAffineTransform(translationX: 0, y: groundOffset).scaledBy(x: unit * (round ? 1.18 : 1), y: unit * (round ? 0.87 : 1))
-        for m in [pose.actor, pose.body] {
-            t = t.translatedBy(x: m.x, y: m.y).rotated(by: m.rotation * .pi / 180).scaledBy(x: m.sx, y: m.sy)
-        }
+        let f = PickleFrame(look: look)
+        var t = CGAffineTransform(translationX: 0, y: groundOffset).scaledBy(x: unit, y: unit)
+        for m in [pose.actor, pose.body] { t = PickleArtist.transform(m).concatenating(t) }
         return CGPoint(x: pose.faceX, y: f.face + 12.5 - f.h - 6).applying(t)
     }
 

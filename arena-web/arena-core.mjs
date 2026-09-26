@@ -1,3 +1,4 @@
+import { bodyProfile, bodyRadius, bodyPoints } from './pickle-body.mjs';
 import { WARDROBE_IDS, drawWardrobe } from './arena-wardrobe.mjs';
 import { EAT_OVERLAP, drawSmile, tearPose } from './arena-expression.mjs';
 export { EAT_OVERLAP, SMILES, skinSmile, pickupCue } from './arena-expression.mjs';
@@ -7,11 +8,11 @@ export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party',
 // Pet varieties, matching PickleVariety in the iOS app.
 export const VARIETIES = {
   dill: { brine: 'classic', color: '#78954B', light: '#A1B56B', dark: '#527637', shape: 'long' },
-  gherkin: { brine: 'classic', color: '#709855', light: '#BAD28C', dark: '#486B37', shape: 'round' },
-  garlic: { brine: 'garlic', color: '#98A76D', light: '#D1D99D', dark: '#617C4C', shape: 'crooked' },
+  gherkin: { brine: 'classic', color: '#709855', light: '#BAD28C', dark: '#486B37', shape: 'gherkin' },
+  garlic: { brine: 'garlic', color: '#98A76D', light: '#D1D99D', dark: '#617C4C', shape: 'pear' },
   butter: { brine: 'garlic', color: '#B0A44D', light: '#DDCE80', dark: '#877A39', shape: 'round' },
-  chili: { brine: 'spicy', color: '#958749', light: '#D2AF73', dark: '#6A693A', shape: 'long' },
-  pepper: { brine: 'spicy', color: '#66875D', light: '#A7C18A', dark: '#415C3F', shape: 'crooked' }
+  chili: { brine: 'spicy', color: '#958749', light: '#D2AF73', dark: '#6A693A', shape: 'tapered' },
+  pepper: { brine: 'spicy', color: '#66875D', light: '#A7C18A', dark: '#415C3F', shape: 'ribbed' }
 };
 const SPOTS = [[.42, -.55], [.5, .38], [-.45, .5], [.05, .74]];
 export function varietyOf(p) {
@@ -19,8 +20,8 @@ export function varietyOf(p) {
   return Object.keys(VARIETIES).find(id => VARIETIES[id].brine === p?.brine) || 'dill';
 }
 export function pickleBody(shape, size) {
-  if (shape === 'round') return { halfWidth: size * .96, halfHeight: size * .9, lean: 0, round: true };
-  return { halfWidth: size * .8, halfHeight: size, lean: shape === 'crooked' ? .16 : 0, round: false };
+  const profile = bodyProfile(shape);
+  return { halfWidth: size * profile.width, halfHeight: size * profile.height, lean: 0, round: shape === 'round' };
 }
 // Tight squint when threatened or draining, narrowed eyes while dashing.
 export function faceMood(p) {
@@ -183,12 +184,12 @@ export function interpolate(previous, next, alpha) {
 // Drawn in world coordinates; screenScale keeps outlines and shields native-sized.
 export function drawPickle(ctx, p, x, y, size, time = 0, own = false, screenScale = 1, reduceMotion = false) {
   const ink = '#263E31', peach = '#F1C9B4';
-  // Live split pieces are round pickle cross-sections until actually regrouped.
+  // Split pieces keep their cucumber shape until the server regroups them.
   const sliced = p.sliced === true || Array.isArray(p.cells) && p.cells.length > 1;
   const look = VARIETIES[varietyOf(p)];
-  const { halfWidth, halfHeight, lean, round } = sliced ? { halfWidth: size, halfHeight: size, lean: 0, round: false } : pickleBody(look.shape, size);
+  const shape = bodyShape(p, size), halfWidth = shape.hw, halfHeight = shape.hh;
   const pixel = 1 / screenScale, mood = faceMood(p);
-  ctx.save(); ctx.translate(x, y); ctx.rotate(lean); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.save(); ctx.translate(x, y); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   if (p.dash > 0) {
     ctx.fillStyle = '#D4EB8566'; ctx.beginPath();
     ctx.ellipse(0, 0, halfWidth + 8 * pixel, halfHeight + 8 * pixel, 0, 0, Math.PI * 2); ctx.fill();
@@ -199,27 +200,30 @@ export function drawPickle(ctx, p, x, y, size, time = 0, own = false, screenScal
   }
   const outline = p.outline, body = () => {
     if (outline) traceOutline(ctx, outline);
-    else { ctx.beginPath(); if (round) ctx.ellipse(0, 0, halfWidth, halfHeight, 0, 0, Math.PI * 2); else ctx.roundRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2, halfWidth); }
+    else traceOutline(ctx, bodyPoints(sliced ? 'long' : look.shape, halfWidth, halfHeight));
   };
   ctx.fillStyle = '#263E311A'; ctx.save(); ctx.translate(pixel, 5 * pixel); body(); ctx.fill(); ctx.restore();
-  ctx.fillStyle = sliced ? '#4D8650' : look.color; ctx.strokeStyle = ink; ctx.lineWidth = (own ? 2.5 : 1.5) * pixel;
+  ctx.fillStyle = sliced ? '#6DA86B' : look.color; ctx.strokeStyle = ink; ctx.lineWidth = (own ? 2.5 : 1.5) * pixel;
   body(); ctx.fill(); ctx.stroke();
   if (p.danger > 0) { ctx.save(); ctx.globalAlpha = clamp(p.danger, 0, 1); ctx.strokeStyle = '#C8553D'; ctx.lineWidth = 3.5 * pixel; ctx.stroke(); ctx.restore(); }
   ctx.save(); body(); ctx.clip();
   if (sliced) {
-    ctx.fillStyle = '#D8E8A4'; ctx.beginPath(); ctx.arc(0, 0, size * .82, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#E5EEC0'; ctx.beginPath(); ctx.arc(0, 0, size * .64, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#F8F6EDE6';
-    for (let n = 0; n < 6; n++) {
-      const angle = n * Math.PI / 3;
-      ctx.beginPath(); ctx.ellipse(Math.cos(angle) * size * .53, Math.sin(angle) * size * .53, size * .11, size * .045, angle, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#B9D889A6'; ctx.lineWidth = Math.max(pixel, size * .075);
+    for (const offset of [-.35, 0, .35]) {
+      ctx.beginPath(); ctx.moveTo(size * offset, -size * .58);
+      ctx.quadraticCurveTo(size * (offset - .08), 0, size * offset, size * .62); ctx.stroke();
     }
   } else {
     ctx.fillStyle = look.dark;
     for (const [sx, sy] of SPOTS) { ctx.beginPath(); ctx.roundRect(sx * halfWidth - size * .065, sy * halfHeight - size * .05, size * .13, size * .1, size * .04); ctx.fill(); }
-    ctx.fillStyle = look.light + '99'; ctx.beginPath(); ctx.roundRect(-halfWidth * .68, -halfHeight * .6, halfWidth * .26, halfHeight * .5, 5 * pixel); ctx.fill();
   }
+  ctx.fillStyle = sliced ? '#FFFFFF4D' : look.light + '99'; ctx.beginPath();
+  ctx.roundRect(-halfWidth * .68, -halfHeight * .6, halfWidth * .26, halfHeight * .5, 5 * pixel); ctx.fill();
   ctx.restore();
+  if (sliced && p.outfit === 'original') {
+    ctx.strokeStyle = ink; ctx.lineWidth = Math.max(pixel, size * .045); ctx.beginPath();
+    ctx.moveTo(0, -size * .98); ctx.quadraticCurveTo(-size * .16, -size * 1.18, size * .04, -size * 1.16); ctx.stroke();
+  }
   const eye = Math.max(2 * pixel, size * .075);
   const lookX = clamp(p.lookX || 0, -1, 1) * eye * .6, lookY = clamp(p.lookY || 0, -1, 1) * eye * .5;
   ctx.strokeStyle = ink; ctx.lineWidth = Math.max(1.5 * pixel, size * .04);
@@ -296,15 +300,16 @@ export function killRings(players, ownID) {
   }
   return rings;
 }
-// Body outline in the piece's own frame: capsule for pickles and slices, ellipse for round varieties.
 export function bodyShape(p, size) {
   const sliced = p.sliced === true || Array.isArray(p.cells) && p.cells.length > 1;
-  if (sliced) return { hw: size, hh: size, lean: 0, ellipse: false };
-  const { halfWidth, halfHeight, lean, round } = pickleBody(VARIETIES[varietyOf(p)].shape, size);
-  return { hw: halfWidth, hh: halfHeight, lean, ellipse: round };
+  if (sliced) return { hw: size * .7, hh: size, lean: 0, ellipse: false };
+  const profile = VARIETIES[varietyOf(p)].shape;
+  const { halfWidth, halfHeight } = pickleBody(profile, size);
+  return { hw: halfWidth, hh: halfHeight, lean: 0, ellipse: profile === 'round', profile };
 }
 // Distance from the center to the undeformed outline along a local angle.
 export function shapeRadius(shape, angle) {
+  if (shape.profile) return bodyRadius(shape.profile, angle, shape.hw, shape.hh);
   const c = Math.abs(Math.cos(angle)), s = Math.abs(Math.sin(angle));
   if (shape.ellipse) return 1 / Math.hypot(c / shape.hw, s / shape.hh);
   const k = Math.max(0, shape.hh - shape.hw);
@@ -328,7 +333,7 @@ export function outlineRadius(shape, m, angle) {
   return base + m.dr[j % m.n] * (1 - t) + m.dr[(j + 1) % m.n] * t;
 }
 function inside(body, x, y) {
-  const dx = x - body.x, dy = y - body.y, reach = Math.max(body.shape.hw, body.shape.hh) + 4;
+  const dx = x - body.x, dy = y - body.y, reach = Math.max(body.shape.hw, body.shape.hh) * 1.16 + 4;
   if (dx * dx + dy * dy > reach * reach) return false;
   const angle = Math.atan2(dy, dx) - body.shape.lean;
   return Math.hypot(dx, dy) < outlineRadius(body.shape, body.m, angle) + 1;

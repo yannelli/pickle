@@ -163,7 +163,8 @@ test('all elder accessories are visible SVGs and every form has distinct artwork
   const sceneAttrs = new Set(['hidden']);
   const scene = { dataset: {}, style: {}, innerHTML: '', toggleAttribute: (name, on) => on ? sceneAttrs.add(name) : sceneAttrs.delete(name) };
   const room = { dataset: {}, style: { setProperty() {} } };
-  const sandbox = { LittleDillLife: life, document: { getElementById: id => ({ 'scene-art': scene, 'prop-art': prop, 'elder-art': art })[id] } };
+  const body = { dataset: {}, style: {}, setAttribute() {}, toggleAttribute() {} };
+  const sandbox = { LittleDillLife: life, LittleDillBody: require('../pet-body.js'), document: { getElementById: id => ({ 'scene-art': scene, 'prop-art': prop, 'elder-art': art, 'body-art': body })[id] } };
   vm.runInNewContext(fs.readFileSync(require.resolve('../pet-art.js'), 'utf8'), sandbox);
   const seen = new Set();
   for (let i = 0; i < 32; i++) {

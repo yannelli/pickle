@@ -37,6 +37,7 @@ Read [README.md](README.md) for player behavior and deployment targets, [ios/REA
 - Eating requires at least 1.22 times the prey's mass and center distance below `hunterRadius - 0.6 * preyRadius`. Membrane deformation is visual; danger outlines use the server geometry.
 - The slicer, shaker, and grater halve movement speed. Gadget draining stops at 500 mass per piece. Touching pieces over 2,500 mass split with a two-second gadget cooldown, within the eight-piece cap.
 - Gadget leakage is separate from passive decay above 300 mass. Preserve mass accounting and the per-piece drain floor across multiple pieces.
+- Body profiles live in `arena-web/pickle-body.mjs`, `pet-body.js`, and `ios/LittleDill/PickleBody.swift`; sampled radii in the parity fixture keep their geometry aligned. Preserve saved variety IDs when changing silhouettes. Update pet stage anchors, feeding mouth positions, and photo exports with body dimensions.
 - Keep six variety smiles and 15-second sadness after nonfatal piece loss on both clients. Roll the 25% tear chance on the server once per loss; both clients draw one small tear from its remaining timer.
 - Bots have bounded perception and distinct risk profiles. Public bot spawns use weighted masses up to 5,000 and one hard role; crew bots start small. Gadget routes retain their encounter state; rare crossings roll once per encounter.
 - New optional snapshot fields need defaults for older clients. Keep protocol 1, full-food snapshots, and `foodDeltas=1` compatibility unless a protocol migration is requested.

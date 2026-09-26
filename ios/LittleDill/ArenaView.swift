@@ -299,22 +299,26 @@ struct ArenaKillRing {
     let alpha: Double
 }
 
-/// Port of `bodyShape`: a piece's outline in its own frame, a capsule (corner radius `hw`) or an ellipse, turned by `lean`.
+/// Visual outlines share profiles with the web; eating uses the server radius.
 struct ArenaShape: Equatable {
     var hw: Double
     var hh: Double
     var lean = 0.0
     var ellipse = false
-    var reach: Double {max(hw,hh)}
+    var profile: PickleVariety.Shape?
+    var reach: Double {max(hw,hh) * 1.16}
     init(hw:Double,hh:Double,lean:Double = 0,ellipse:Bool = false) {self.hw = hw; self.hh = hh; self.lean = lean; self.ellipse = ellipse}
-    /// Cucumbers are 0.7r x r capsules, round varieties 0.96r x 0.9r ellipses, long and crooked 0.8r x r capsules; crooked leans 0.16 rad.
     init(_ player:ArenaPlayer,r:Double) {
-        let cucumber = player.isCucumber, shape = player.look.shape
-        if !cucumber && shape == .round {self.init(hw:r*0.96,hh:r*0.9,ellipse:true)}
-        else {self.init(hw:r*(cucumber ? 0.7 : 0.8),hh:r,lean:!cucumber && shape == .crooked ? 0.16 : 0)}
+        if player.isCucumber {self.init(hw:r*0.7,hh:r)}
+        else {
+            let shape = player.look.shape, dimensions = PickleBody.profile(shape)
+            self.init(hw:r*dimensions.width,hh:r*dimensions.height,ellipse:shape == .round)
+            profile = shape
+        }
     }
     /// Port of `shapeRadius`: distance from the center to the undeformed outline along a local angle.
     func radius(at angle:Double) -> Double {
+        if let profile {return PickleBody.radius(profile,at:angle,width:hw,height:hh)}
         let c = abs(cos(angle)), s = abs(sin(angle))
         if ellipse {return 1 / hypot(c / hw,s / hh)}
         let k = max(0,hh - hw)
@@ -799,7 +803,7 @@ struct ArenaCanvas: View {
         var c = context
         if shape.lean != 0 {c.rotate(by:.radians(shape.lean))}
         let rect = CGRect(x:-halfWidth,y:-halfHeight,width:halfWidth*2,height:halfHeight*2)
-        let body = outline.map(outlinePath) ?? (shape.ellipse ? Path(ellipseIn:rect) : Path(roundedRect:rect,cornerRadius:halfWidth))
+        let body = outline.map(outlinePath) ?? outlinePath(PickleBody.points(shape.profile ?? .long,width:halfWidth,height:halfHeight))
         if p.dash > 0 {c.fill(Path(ellipseIn:rect.insetBy(dx:-8,dy:-8)),with:.color(DillTheme.lime.opacity(0.4)))}
         if p.shield > 0 {c.stroke(Path(ellipseIn:rect.insetBy(dx:-7,dy:-7)),with:.color(.white.opacity(0.9)),style:StrokeStyle(lineWidth:2,dash:[4,4]))}
         c.fill(body.offsetBy(dx:1,dy:5),with:.color(ink.opacity(0.1)))

@@ -30,7 +30,9 @@
   function svgImage(element) {
     const style = getComputedStyle(element);
     if (element.hidden || style.display === 'none' || !element.innerHTML) return Promise.resolve(null);
-    const source = '<svg xmlns="http://www.w3.org/2000/svg" width="150" height="160" viewBox="-40 -40 150 160" fill="none" stroke="' + style.color + '" color="' + style.color + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + element.innerHTML + '</svg>';
+    const viewBox = element.getAttribute('viewBox') || '-40 -40 150 160';
+    const markup = element.innerHTML.replaceAll('var(--pixel)', style.getPropertyValue('--pixel').trim() || '#3c5733');
+    const source = '<svg xmlns="http://www.w3.org/2000/svg" width="' + parseFloat(style.width) + '" height="' + parseFloat(style.height) + '" viewBox="' + viewBox + '" fill="none" stroke="' + style.color + '" color="' + style.color + '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + markup + '</svg>';
     return new Promise((resolve, reject) => {
       const image = new Image();
       image.onload = () => resolve(image);
@@ -123,7 +125,7 @@
   async function portrait(room) {
     const $ = selector => room.querySelector(selector);
     const size = $('.pet-size'), body = $('.pickle');
-    const [scene, outfit] = await Promise.all([svgImage($('#scene-art')), svgImage($('#elder-art'))]);
+    const [scene, outfit, silhouette] = await Promise.all([svgImage($('#scene-art')), svgImage($('#elder-art')), svgImage($('#body-art'))]);
     const [image, ctx] = canvas(800, 720);
     ctx.scale(4, 4);
     ctx.translate(100 - size.offsetLeft - size.offsetWidth / 2, 156 - size.offsetTop - size.offsetHeight);
@@ -131,6 +133,7 @@
     element(ctx, size, () => {
       overlay(ctx, $('#scene-art'), scene, size);
       element(ctx, $('.pet-actor'), () => element(ctx, body, () => {
+        overlay(ctx, $('#body-art'), silhouette, body);
         pseudo(ctx, body, '::before');
         for (const selector of ['.arm.left', '.arm.right', '.foot.left', '.foot.right', '.sweat']) element(ctx, $(selector));
         pseudo(ctx, body, '::after');

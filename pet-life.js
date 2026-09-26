@@ -5,11 +5,11 @@
   const RATES = { fullness: 1.5, happiness: 1, hygiene: 1.25 };
   const VARIETIES = [
     { id: 'dill', name: 'Classic Dill', brine: 'classic', color: '#78954b', light: '#a1b56b', dark: '#527637', shape: 'long' },
-    { id: 'gherkin', name: 'Tiny Gherkin', brine: 'classic', color: '#709855', light: '#bad28c', dark: '#486b37', shape: 'round' },
-    { id: 'garlic', name: 'Garlic Goblin', brine: 'garlic', color: '#98a76d', light: '#d1d99d', dark: '#617c4c', shape: 'crooked' },
+    { id: 'gherkin', name: 'Tiny Gherkin', brine: 'classic', color: '#709855', light: '#bad28c', dark: '#486b37', shape: 'gherkin' },
+    { id: 'garlic', name: 'Garlic Goblin', brine: 'garlic', color: '#98a76d', light: '#d1d99d', dark: '#617c4c', shape: 'pear' },
     { id: 'butter', name: 'Butter Bean', brine: 'garlic', color: '#b0a44d', light: '#ddce80', dark: '#877a39', shape: 'round' },
-    { id: 'chili', name: 'Chili Dill', brine: 'spicy', color: '#958749', light: '#d2af73', dark: '#6a693a', shape: 'long' },
-    { id: 'pepper', name: 'Pepper Punk', brine: 'spicy', color: '#66875d', light: '#a7c18a', dark: '#415c3f', shape: 'crooked' }
+    { id: 'chili', name: 'Chili Dill', brine: 'spicy', color: '#958749', light: '#d2af73', dark: '#6a693a', shape: 'tapered' },
+    { id: 'pepper', name: 'Pepper Punk', brine: 'spicy', color: '#66875d', light: '#a7c18a', dark: '#415c3f', shape: 'ribbed' }
   ];
   // Each elder has its own silhouette/accessory pairing as well as a title.
   const ELDERS = [

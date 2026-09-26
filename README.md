@@ -10,6 +10,8 @@ A native iPhone and iPad app now lives in [`ios/`](ios/README.md), with **Brine 
 
 The official landing site uses the separate `pickle-website` Worker. Its current response layer is preserved in `server/website-worker.mjs`; it adds the arena feature to the existing site assets. Deploy that module using Cloudflare’s Worker **content replacement** endpoint (`PUT /accounts/{account}/workers/scripts/pickle-website/content`, multipart `main_module: worker.js`) to preserve the deployed assets, routes, and `GAME_URL` binding. The root `wrangler.jsonc` deploys the separate browser pet, not the official landing site.
 
+The six varieties have upright body silhouettes: classic dill, stubby gherkin, pear-shaped garlic, round butter bean, tapered chili, and ribbed pepper. Pet care and arena art use the same profiles across web and iOS; saved varieties keep their identity.
+
 ## Raise your pickle
 
 Put a cucumber into Classic, Garlic, or Spicy brine. After 1 real minute, one of 6 varieties hatches and you name it. The app chooses and saves the variety once; closing or reloading the app does not change it. An unnamed hatchling waits safely for you.

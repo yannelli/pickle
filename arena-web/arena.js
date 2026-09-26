@@ -476,8 +476,8 @@ function render(now) {
       membraneClock = Math.min(membraneClock + dt, 4 / 60);
       for (; membraneClock >= 1 / 60; membraneClock -= 1 / 60) {
         for (const body of bodies) {
-          const reach = Math.max(body.shape.hw, body.shape.hh);
-          const near = bodies.filter(other => other !== body && Math.hypot(other.x - body.x, other.y - body.y) < reach + Math.max(other.shape.hw, other.shape.hh) + 8);
+          const reach = Math.max(body.shape.hw, body.shape.hh) * 1.16;
+          const near = bodies.filter(other => other !== body && Math.hypot(other.x - body.x, other.y - body.y) < reach + Math.max(other.shape.hw, other.shape.hh) * 1.16 + 8);
           stepMembrane(body.m, body, near, { width: state.width, height: state.height }, { jitter: reducedMotion.matches ? 0 : undefined });
         }
       }
