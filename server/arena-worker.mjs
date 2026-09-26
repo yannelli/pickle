@@ -1,4 +1,4 @@
-import { ArenaEngine, RULES, parseIntent, cleanName, BRINES, OUTFITS } from './arena-engine.mjs';
+import { ArenaEngine, RULES, parseIntent, cleanName, BRINES, OUTFITS, VARIETIES } from './arena-engine.mjs';
 const json = (body, status = 200) => Response.json(body, { status, headers: { 'Cache-Control': 'no-store' } });
 const validRoom = value => /^[A-Z0-9]{6}$/.test(value || '');
 const sameSecret = (given, secret) => {
@@ -67,11 +67,11 @@ export class ArenaRoom {
     if ([...this.sessions.values()].filter(s => s.ip === ip).length >= 8) return json({ error: 'Too many connections from this network.' }, 429);
     const url = new URL(request.url); this.room = url.searchParams.get('assignedRoom') || 'public-1';
     const name = cleanName(url.searchParams.get('name'));
-    const brine = url.searchParams.get('brine'), outfit = url.searchParams.get('outfit');
-    if ((brine && !BRINES.includes(brine)) || (outfit && !OUTFITS.includes(outfit))) return json({ error: 'Unknown pickle appearance.' }, 400);
+    const brine = url.searchParams.get('brine'), outfit = url.searchParams.get('outfit'), variety = url.searchParams.get('variety');
+    if ((brine && !BRINES.includes(brine)) || (outfit && !OUTFITS.includes(outfit)) || (variety && !VARIETIES.includes(variety))) return json({ error: 'Unknown pickle appearance.' }, 400);
     const id = crypto.randomUUID(); const [client, server] = Object.values(new WebSocketPair());
     server.accept();
-    this.engine.addPlayer(id, { name, brine, outfit });
+    this.engine.addPlayer(id, { name, brine, outfit, variety });
     this.sessions.set(server, { id, ip, foodDeltas: url.searchParams.get('foodDeltas') === '1', tokens: 60, refill: Date.now(), lastSeen: Date.now(), joined: Date.now() });
     server.addEventListener('message', event => this.onMessage(server, event.data));
     server.addEventListener('close', () => this.remove(server));

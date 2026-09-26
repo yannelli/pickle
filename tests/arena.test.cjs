@@ -180,6 +180,22 @@ test('names and appearances are bounded at the server', async () => {
   const p = engine.addPlayer('a', { name: 'a\u0000b', brine: 'hacked', outfit: 'unknown' });
   assert.equal(p.name, 'ab'); assert.equal(p.brine, 'classic'); assert.equal(p.outfit, 'sprout');
 });
+test('pet varieties reach snapshots, fall back within the brine, and spread across bots', async () => {
+  const { engine, VARIETIES, BRINES, pickVariety } = await setup();
+  assert.equal(engine.addPlayer('a', { brine: 'spicy', variety: 'butter' }).variety, 'butter');
+  for (const id of ['b', 'c', 'dd', 'eee']) assert.ok(['chili', 'pepper'].includes(engine.addPlayer(id, { brine: 'spicy', variety: 'hacked' }).variety));
+  assert.equal(pickVariety(undefined, 'garlic', 'x'), pickVariety(undefined, 'garlic', 'x'));
+  const state = engine.snapshot(false);
+  assert.equal(state.players.find(p => p.id === 'a').variety, 'butter');
+  const bots = state.players.filter(p => p.bot);
+  assert.deepEqual(new Set(bots.map(p => p.variety)), new Set(VARIETIES));
+  for (const bot of bots) assert.equal(bot.brine, BRINES[Math.floor(VARIETIES.indexOf(bot.variety) / 2)]);
+});
+test('joins reject unknown varieties', async () => {
+  const { ArenaRoom } = await workerModule;
+  const response = await new ArenaRoom({}).fetch(arenaRequest('?assignedRoom=public-1&variety=cucumber'));
+  assert.equal(response.status, 400); assert.equal((await response.json()).error, 'Unknown pickle appearance.');
+});
 
 test('fresh pickles can forage to dash quickly and reach 100 mass without a long empty-world grind', async () => {
   const { ArenaEngine } = await engineModule;

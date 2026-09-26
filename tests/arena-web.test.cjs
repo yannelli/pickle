@@ -16,6 +16,31 @@ test('web socket handshake carries only valid appearance, name and optional room
   assert.equal(url.searchParams.get('outfit'), 'shades'); assert.equal(url.searchParams.get('room'), 'ABC123');
   assert.equal(url.searchParams.get('foodDeltas'), '1');
   assert.equal(socketURL('http://localhost:8788', {}, null).protocol, 'ws:');
+  assert.equal(url.searchParams.get('variety'), 'dill');
+  assert.equal(socketURL('https://arena.littledill.app', { brine: 'spicy', variety: 'pepper' }).searchParams.get('variety'), 'pepper');
+});
+test('web pickles keep their variety look, fall back within the brine, and change face with the game', async () => {
+  const { VARIETIES, varietyOf, pickleBody, pieceMood, blinking, drawPickle } = await import(modulePath);
+  assert.equal(varietyOf({ variety: 'butter', brine: 'classic' }), 'butter');
+  assert.equal(varietyOf({ variety: 'constructor', brine: 'spicy' }), 'chili');
+  assert.equal(varietyOf({}), 'dill');
+  assert.equal(new Set(Object.values(VARIETIES).map(v => v.shape)).size, 3);
+  assert.ok(pickleBody('round', 50).halfWidth > pickleBody('long', 50).halfWidth);
+  assert.ok(pickleBody('crooked', 50).lean > 0); assert.equal(pickleBody('crooked', 50, true).lean, 0);
+  const me = { ownerID: 'me', x: 0, y: 0, mass: 100, dash: 0 }, big = { ownerID: 'big', x: 100, y: 0, mass: 130, dash: 0 };
+  assert.equal(pieceMood(me, [me, big], .1), 'chomp');
+  assert.equal(pieceMood(me, [me, big]), 'threatened');
+  assert.equal(pieceMood({ ...me, dash: 1 }, [me, big]), 'threatened');
+  assert.equal(pieceMood({ ...me, dash: 1 }, [me]), 'dash');
+  assert.equal(pieceMood({ ...me, shield: 2 }, [me, big]), 'calm');
+  assert.equal(pieceMood(me, [me, { ...big, shield: 2 }]), 'calm');
+  assert.equal(pieceMood(me, [me, { ...big, mass: 110 }]), 'calm');
+  assert.equal(pieceMood(me, [me, { ...big, ownerID: 'me' }]), 'calm');
+  assert.equal(pieceMood(me, [me, { ...big, x: 5000 }]), 'calm');
+  assert.equal(blinking('anyone', 0), false);
+  const calls = [], ctx = new Proxy({}, { get: (target, key) => key in target ? target[key] : () => calls.push(key), set: (target, key, value) => { target[key] = value; return true; } });
+  for (const variety of Object.keys(VARIETIES)) for (const mood of ['calm', 'chomp', 'dash', 'threatened']) drawPickle(ctx, { variety, mood, outfit: 'crown', lookX: 1 }, 0, 0, 40, 1.5);
+  assert.ok(calls.includes('rotate') && calls.includes('ellipse') && calls.includes('roundRect'));
 });
 test('web food deltas remove then upsert IDs, preserve omitted updates, and reset on full snapshots', async () => {
   const { applyFoodUpdate } = await import(modulePath);

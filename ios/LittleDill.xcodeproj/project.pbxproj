@@ -9,32 +9,45 @@
 /* Begin PBXBuildFile section */
 		09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AB56478D42F0459AD96023 /* LittleDillApp.swift */; };
 		13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365E6C0F663ED79DF2D480C4 /* FriendsView.swift */; };
+		18FBCB80DC205B29921EB949 /* ArcadeHop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */; };
 		1BC693056355D165FD855B57 /* CareScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B0F6D2E819F561B210A39D /* CareScene.swift */; };
+		1F9F368991F311C19E05CAA0 /* ArcadeChopBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD28F4AA5AA8C7B04609510E /* ArcadeChopBoard.swift */; };
 		20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2FE43078A3B5B5644D9E83 /* GameViews.swift */; };
+		24CA9E9803D023D863BE0964 /* NurseryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548B33A220B4E2700C2D20E3 /* NurseryView.swift */; };
 		307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */; };
+		316B14844A8655410DD55BF5 /* ArcadeGames.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E8CEB235B0518083AA26F0 /* ArcadeGames.swift */; };
+		33B7CB346A9678496154854F /* arena-slicer.wav in Resources */ = {isa = PBXBuildFile; fileRef = FE23CB78789E0FA747896F85 /* arena-slicer.wav */; };
+		348D0861D4DE62FD3A35AF99 /* PetArtData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832F1EEED47E489CA28DC996 /* PetArtData.swift */; };
+		34B4FCB550513CEB062C516F /* ArcadeActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA365E1170AADE42E32A480 /* ArcadeActionTests.swift */; };
+		352D29B8DF2DDE82721BAD7C /* DillBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38B8F2975FA299D889705BF8 /* DillBackup.swift */; };
 		3631E4611129DA11F1250217 /* ArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A331BC7F61DEE3A77445FB4E /* ArenaView.swift */; };
+		3C6B6928D7448C9CF16A7921 /* NestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E0471074D024AB8668C438 /* NestView.swift */; };
+		4DE1F54989CADDFAA87EADC8 /* NestProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */; };
 		517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6AE199A809890C135FF5CF /* DillTests.swift */; };
+		5F6AF5B31FEF53426F092951 /* NestText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA495131EFC009273AA7DA8 /* NestText.swift */; };
 		79AC77633956986EFD962D70 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */; };
+		7BA7B1B3A32F024442F76964 /* PetLooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF87E5DB22E6001365377EDF /* PetLooks.swift */; };
+		8144210ADBBEF3E68D6D6316 /* PetStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5D78C8B6D5690D37D8EEC1 /* PetStage.swift */; };
+		82E77C18E19919F9E2AA3B59 /* ArcadeChop.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */; };
 		87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 442704C35098D0258234BA9A /* Assets.xcassets */; };
 		8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94597CBADE2648796879E08 /* CollectionViews.swift */; };
+		92388A5657106EB180EF8600 /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE2470389F37B37AE6D9D0 /* BackupViews.swift */; };
+		924DE7770F52A23604E909F0 /* arena-grater.wav in Resources */ = {isa = PBXBuildFile; fileRef = C681DCBE740415262BAE485C /* arena-grater.wav */; };
+		A968F609E7B05DBDBC4C63CB /* ArenaSplitParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */; };
+		B0A4B9509F1BB8F9B334BC53 /* gadget-audio.json in Resources */ = {isa = PBXBuildFile; fileRef = 781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */; };
+		B15F36B588A21167DD531D59 /* PetArtShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA957EEAE7B7301A5D39496 /* PetArtShapes.swift */; };
 		BF8CC73229925DEFF629656C /* DillModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */; };
-		3347EC2DB863D9F1DC99FFCC /* PetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26586EB4E1B8A98719B2EBEB /* PetLife.swift */; };
-		7A30C897D7D0BAA726E466B9 /* ArcadeGames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */; };
-		59E9AA9DD2794FA0372FFFC5 /* ArcadeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */; };
-		7C04635C8340D2B8A574E17D /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA44CCB9F1679B8E2838FD /* BackupViews.swift */; };
-		291846AEE3171313D1991B81 /* NestProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFD0F07127F679663DE27AE /* NestProfile.swift */; };
-		D3C317596E37E45A1883E767 /* NestText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F10BAA6EF20557B9732032 /* NestText.swift */; };
-		E2056B072E56C7BB2D58E945 /* NestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9741297B2CB7FF393D6CC42A /* NestView.swift */; };
-		95C0AA1055AA1A89790AEDD0 /* NurseryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */; };
-		EC0B8BC0A029EFC27BDA1AB1 /* PetArtData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */; };
-		786CC2CD22A9FD57F05D3567 /* PetArtShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55BEAA057A7F02E412B55408 /* PetArtShapes.swift */; };
-		528260CE3C2B3475614D5634 /* PetLooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9FBE5E55408045CF326297 /* PetLooks.swift */; };
-		353D0CA937C5CA51BAD879BA /* PetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB4E775B4F50B7029739446 /* PetMotion.swift */; };
-		FF9266163B7A196EEFA4843F /* PetStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A705C96686571A04E0670A3 /* PetStage.swift */; };
-		5E65D9FFF9E7018C7613B49C /* DillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FE6682233A62A0141AA1D2 /* DillStore.swift */; };
-		3FF55AB1A55A7BD1B47F31DB /* DillBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */; };
+		C3CD676CB043169CEA8A85B8 /* ArcadeToss.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */; };
+		D215CED4B7D146B18569DCE5 /* DillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7624C5DB7F330E4CB30D615E /* DillStore.swift */; };
 		D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07138856D58D603AA5147715 /* LittleDillUITests.swift */; };
+		D803B2C63A66785E63FBF15F /* ArcadeArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9009B603D369568F09C9588 /* ArcadeArt.swift */; };
 		DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84E43162441E79C5E7EE976 /* ArenaClient.swift */; };
+		DF542A4AD96506ADC6A39744 /* ArcadeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1909F605020F3F7001953F /* ArcadeViews.swift */; };
+		E089736DA1A96B67C8ABFB12 /* ArenaAudioParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */; };
+		E46A4A05B5AAD9DEB61EC6D7 /* PetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24AF5B68964EA18E99630EA /* PetMotion.swift */; };
+		F58B96584F3A3F07000DD3B7 /* PetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9487E60E0C2FEA26D77BBC5B /* PetLife.swift */; };
+		F88E7DD3F06A615AEEF12D03 /* ArcadeTossBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4849F27E1C170BA8DC35F7F8 /* ArcadeTossBoard.swift */; };
+		FBC65563AB0BB3407FB8227D /* arena-shaker.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3DA54E77E1AD483188C987A6 /* arena-shaker.wav */; };
 		FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDA33CEC165E433E0EB5022 /* Design.swift */; };
 /* End PBXBuildFile section */
 
@@ -58,73 +71,93 @@
 /* Begin PBXFileReference section */
 		07138856D58D603AA5147715 /* LittleDillUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillUITests.swift; sourceTree = "<group>"; };
 		0C2FE43078A3B5B5644D9E83 /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
+		1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeHop.swift; sourceTree = "<group>"; };
+		2E1909F605020F3F7001953F /* ArcadeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeViews.swift; sourceTree = "<group>"; };
 		365E6C0F663ED79DF2D480C4 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		38B8F2975FA299D889705BF8 /* DillBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillBackup.swift; sourceTree = "<group>"; };
+		3BA365E1170AADE42E32A480 /* ArcadeActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeActionTests.swift; sourceTree = "<group>"; };
+		3DA54E77E1AD483188C987A6 /* arena-shaker.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-shaker.wav"; sourceTree = "<group>"; };
+		3FA957EEAE7B7301A5D39496 /* PetArtShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtShapes.swift; sourceTree = "<group>"; };
+		43DE2470389F37B37AE6D9D0 /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
 		442704C35098D0258234BA9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4849F27E1C170BA8DC35F7F8 /* ArcadeTossBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeTossBoard.swift; sourceTree = "<group>"; };
 		4BD8988210523CD0527594C2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaSplitParityTests.swift; sourceTree = "<group>"; };
 		4E6AE199A809890C135FF5CF /* DillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillTests.swift; sourceTree = "<group>"; };
+		548B33A220B4E2700C2D20E3 /* NurseryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurseryView.swift; sourceTree = "<group>"; };
 		6556B1CFDD693A8FCB63B70D /* LittleDill.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LittleDill.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6CA495131EFC009273AA7DA8 /* NestText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestText.swift; sourceTree = "<group>"; };
+		7624C5DB7F330E4CB30D615E /* DillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillStore.swift; sourceTree = "<group>"; };
+		781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "gadget-audio.json"; sourceTree = "<group>"; };
 		7FDA33CEC165E433E0EB5022 /* Design.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Design.swift; sourceTree = "<group>"; };
+		832F1EEED47E489CA28DC996 /* PetArtData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtData.swift; sourceTree = "<group>"; };
+		839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestProfile.swift; sourceTree = "<group>"; };
+		9487E60E0C2FEA26D77BBC5B /* PetLife.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLife.swift; sourceTree = "<group>"; };
+		980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaAudioParityTests.swift; sourceTree = "<group>"; };
 		9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillAudio.swift; sourceTree = "<group>"; };
 		A331BC7F61DEE3A77445FB4E /* ArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaView.swift; sourceTree = "<group>"; };
 		A6B0F6D2E819F561B210A39D /* CareScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareScene.swift; sourceTree = "<group>"; };
+		A9009B603D369568F09C9588 /* ArcadeArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeArt.swift; sourceTree = "<group>"; };
+		AF87E5DB22E6001365377EDF /* PetLooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLooks.swift; sourceTree = "<group>"; };
+		B6E8CEB235B0518083AA26F0 /* ArcadeGames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeGames.swift; sourceTree = "<group>"; };
 		B94597CBADE2648796879E08 /* CollectionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViews.swift; sourceTree = "<group>"; };
+		BD28F4AA5AA8C7B04609510E /* ArcadeChopBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeChopBoard.swift; sourceTree = "<group>"; };
+		BD5D78C8B6D5690D37D8EEC1 /* PetStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetStage.swift; sourceTree = "<group>"; };
+		C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeToss.swift; sourceTree = "<group>"; };
+		C681DCBE740415262BAE485C /* arena-grater.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-grater.wav"; sourceTree = "<group>"; };
+		D24AF5B68964EA18E99630EA /* PetMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMotion.swift; sourceTree = "<group>"; };
 		D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D8E0471074D024AB8668C438 /* NestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestView.swift; sourceTree = "<group>"; };
 		D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillModel.swift; sourceTree = "<group>"; };
-		26586EB4E1B8A98719B2EBEB /* PetLife.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLife.swift; sourceTree = "<group>"; };
-		5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeGames.swift; sourceTree = "<group>"; };
-		A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeViews.swift; sourceTree = "<group>"; };
-		84EA44CCB9F1679B8E2838FD /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
-		3EFD0F07127F679663DE27AE /* NestProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestProfile.swift; sourceTree = "<group>"; };
-		53F10BAA6EF20557B9732032 /* NestText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestText.swift; sourceTree = "<group>"; };
-		9741297B2CB7FF393D6CC42A /* NestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestView.swift; sourceTree = "<group>"; };
-		E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurseryView.swift; sourceTree = "<group>"; };
-		A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtData.swift; sourceTree = "<group>"; };
-		55BEAA057A7F02E412B55408 /* PetArtShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtShapes.swift; sourceTree = "<group>"; };
-		4B9FBE5E55408045CF326297 /* PetLooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLooks.swift; sourceTree = "<group>"; };
-		5EB4E775B4F50B7029739446 /* PetMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMotion.swift; sourceTree = "<group>"; };
-		5A705C96686571A04E0670A3 /* PetStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetStage.swift; sourceTree = "<group>"; };
-		11FE6682233A62A0141AA1D2 /* DillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillStore.swift; sourceTree = "<group>"; };
-		B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillBackup.swift; sourceTree = "<group>"; };
 		EA2A451EFE0DF93D5DBFA2DE /* LittleDillUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1998A860FA7B5DB186AB6F1 /* LittleDillTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2AB56478D42F0459AD96023 /* LittleDillApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillApp.swift; sourceTree = "<group>"; };
 		F3A5C327E3985E9856200209 /* LittleDill.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LittleDill.entitlements; sourceTree = "<group>"; };
 		F84E43162441E79C5E7EE976 /* ArenaClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaClient.swift; sourceTree = "<group>"; };
+		FE23CB78789E0FA747896F85 /* arena-slicer.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-slicer.wav"; sourceTree = "<group>"; };
+		FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeChop.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		353026AD950176F9CB36E8BF /* LittleDill */ = {
 			isa = PBXGroup;
 			children = (
+				A9009B603D369568F09C9588 /* ArcadeArt.swift */,
+				FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */,
+				BD28F4AA5AA8C7B04609510E /* ArcadeChopBoard.swift */,
+				B6E8CEB235B0518083AA26F0 /* ArcadeGames.swift */,
+				1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */,
+				C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */,
+				4849F27E1C170BA8DC35F7F8 /* ArcadeTossBoard.swift */,
+				2E1909F605020F3F7001953F /* ArcadeViews.swift */,
 				F84E43162441E79C5E7EE976 /* ArenaClient.swift */,
 				A331BC7F61DEE3A77445FB4E /* ArenaView.swift */,
 				442704C35098D0258234BA9A /* Assets.xcassets */,
+				43DE2470389F37B37AE6D9D0 /* BackupViews.swift */,
 				A6B0F6D2E819F561B210A39D /* CareScene.swift */,
 				B94597CBADE2648796879E08 /* CollectionViews.swift */,
 				7FDA33CEC165E433E0EB5022 /* Design.swift */,
 				9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */,
+				38B8F2975FA299D889705BF8 /* DillBackup.swift */,
 				D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */,
-				26586EB4E1B8A98719B2EBEB /* PetLife.swift */,
-				5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */,
-				A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */,
-				84EA44CCB9F1679B8E2838FD /* BackupViews.swift */,
-				3EFD0F07127F679663DE27AE /* NestProfile.swift */,
-				53F10BAA6EF20557B9732032 /* NestText.swift */,
-				9741297B2CB7FF393D6CC42A /* NestView.swift */,
-				E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */,
-				A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */,
-				55BEAA057A7F02E412B55408 /* PetArtShapes.swift */,
-				4B9FBE5E55408045CF326297 /* PetLooks.swift */,
-				5EB4E775B4F50B7029739446 /* PetMotion.swift */,
-				5A705C96686571A04E0670A3 /* PetStage.swift */,
-				11FE6682233A62A0141AA1D2 /* DillStore.swift */,
-				B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */,
+				7624C5DB7F330E4CB30D615E /* DillStore.swift */,
 				365E6C0F663ED79DF2D480C4 /* FriendsView.swift */,
 				0C2FE43078A3B5B5644D9E83 /* GameViews.swift */,
 				4BD8988210523CD0527594C2 /* Info.plist */,
 				F3A5C327E3985E9856200209 /* LittleDill.entitlements */,
 				F2AB56478D42F0459AD96023 /* LittleDillApp.swift */,
+				839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */,
+				6CA495131EFC009273AA7DA8 /* NestText.swift */,
+				D8E0471074D024AB8668C438 /* NestView.swift */,
+				548B33A220B4E2700C2D20E3 /* NurseryView.swift */,
+				832F1EEED47E489CA28DC996 /* PetArtData.swift */,
+				3FA957EEAE7B7301A5D39496 /* PetArtShapes.swift */,
+				9487E60E0C2FEA26D77BBC5B /* PetLife.swift */,
+				AF87E5DB22E6001365377EDF /* PetLooks.swift */,
+				D24AF5B68964EA18E99630EA /* PetMotion.swift */,
+				BD5D78C8B6D5690D37D8EEC1 /* PetStage.swift */,
 				D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */,
+				799D87CA764AFE7FB4809EBA /* Audio */,
 			);
 			path = LittleDill;
 			sourceTree = "<group>";
@@ -132,9 +165,23 @@
 		473B30417340CCD68313A6EB /* LittleDillTests */ = {
 			isa = PBXGroup;
 			children = (
+				3BA365E1170AADE42E32A480 /* ArcadeActionTests.swift */,
+				980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */,
+				4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */,
 				4E6AE199A809890C135FF5CF /* DillTests.swift */,
 			);
 			path = LittleDillTests;
+			sourceTree = "<group>";
+		};
+		799D87CA764AFE7FB4809EBA /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				C681DCBE740415262BAE485C /* arena-grater.wav */,
+				3DA54E77E1AD483188C987A6 /* arena-shaker.wav */,
+				FE23CB78789E0FA747896F85 /* arena-slicer.wav */,
+				781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 		7E0C56A139D30F83F22FF856 /* LittleDillUITests */ = {
@@ -272,6 +319,10 @@
 			files = (
 				87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */,
 				79AC77633956986EFD962D70 /* PrivacyInfo.xcprivacy in Resources */,
+				924DE7770F52A23604E909F0 /* arena-grater.wav in Resources */,
+				FBC65563AB0BB3407FB8227D /* arena-shaker.wav in Resources */,
+				33B7CB346A9678496154854F /* arena-slicer.wav in Resources */,
+				B0A4B9509F1BB8F9B334BC53 /* gadget-audio.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,31 +333,37 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D803B2C63A66785E63FBF15F /* ArcadeArt.swift in Sources */,
+				82E77C18E19919F9E2AA3B59 /* ArcadeChop.swift in Sources */,
+				1F9F368991F311C19E05CAA0 /* ArcadeChopBoard.swift in Sources */,
+				316B14844A8655410DD55BF5 /* ArcadeGames.swift in Sources */,
+				18FBCB80DC205B29921EB949 /* ArcadeHop.swift in Sources */,
+				C3CD676CB043169CEA8A85B8 /* ArcadeToss.swift in Sources */,
+				F88E7DD3F06A615AEEF12D03 /* ArcadeTossBoard.swift in Sources */,
+				DF542A4AD96506ADC6A39744 /* ArcadeViews.swift in Sources */,
 				DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */,
 				3631E4611129DA11F1250217 /* ArenaView.swift in Sources */,
+				92388A5657106EB180EF8600 /* BackupViews.swift in Sources */,
 				1BC693056355D165FD855B57 /* CareScene.swift in Sources */,
 				8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */,
 				FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */,
 				307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */,
+				352D29B8DF2DDE82721BAD7C /* DillBackup.swift in Sources */,
 				BF8CC73229925DEFF629656C /* DillModel.swift in Sources */,
-				3347EC2DB863D9F1DC99FFCC /* PetLife.swift in Sources */,
-				7A30C897D7D0BAA726E466B9 /* ArcadeGames.swift in Sources */,
-				59E9AA9DD2794FA0372FFFC5 /* ArcadeViews.swift in Sources */,
-				7C04635C8340D2B8A574E17D /* BackupViews.swift in Sources */,
-				291846AEE3171313D1991B81 /* NestProfile.swift in Sources */,
-				D3C317596E37E45A1883E767 /* NestText.swift in Sources */,
-				E2056B072E56C7BB2D58E945 /* NestView.swift in Sources */,
-				95C0AA1055AA1A89790AEDD0 /* NurseryView.swift in Sources */,
-				EC0B8BC0A029EFC27BDA1AB1 /* PetArtData.swift in Sources */,
-				786CC2CD22A9FD57F05D3567 /* PetArtShapes.swift in Sources */,
-				528260CE3C2B3475614D5634 /* PetLooks.swift in Sources */,
-				353D0CA937C5CA51BAD879BA /* PetMotion.swift in Sources */,
-				FF9266163B7A196EEFA4843F /* PetStage.swift in Sources */,
-				5E65D9FFF9E7018C7613B49C /* DillStore.swift in Sources */,
-				3FF55AB1A55A7BD1B47F31DB /* DillBackup.swift in Sources */,
+				D215CED4B7D146B18569DCE5 /* DillStore.swift in Sources */,
 				13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */,
 				20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */,
 				09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */,
+				4DE1F54989CADDFAA87EADC8 /* NestProfile.swift in Sources */,
+				5F6AF5B31FEF53426F092951 /* NestText.swift in Sources */,
+				3C6B6928D7448C9CF16A7921 /* NestView.swift in Sources */,
+				24CA9E9803D023D863BE0964 /* NurseryView.swift in Sources */,
+				348D0861D4DE62FD3A35AF99 /* PetArtData.swift in Sources */,
+				B15F36B588A21167DD531D59 /* PetArtShapes.swift in Sources */,
+				F58B96584F3A3F07000DD3B7 /* PetLife.swift in Sources */,
+				7BA7B1B3A32F024442F76964 /* PetLooks.swift in Sources */,
+				E46A4A05B5AAD9DEB61EC6D7 /* PetMotion.swift in Sources */,
+				8144210ADBBEF3E68D6D6316 /* PetStage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,6 +379,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34B4FCB550513CEB062C516F /* ArcadeActionTests.swift in Sources */,
+				E089736DA1A96B67C8ABFB12 /* ArenaAudioParityTests.swift in Sources */,
+				A968F609E7B05DBDBC4C63CB /* ArenaSplitParityTests.swift in Sources */,
 				517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -55,7 +55,7 @@ struct ScoreEntry: Codable, Identifiable, Equatable {
 }
 
 struct PetState: Codable {
-    static let arcadeGames = ["hunt", "memory", "catch"]
+    static let arcadeGames = ["hunt", "memory", "catch", "hop", "chop", "toss"]
     static let nowKey = CodingUserInfoKey(rawValue: "little-dill.now")!
     static let maxCoins = 1_000_000
     static let maxStreak = 100_000
@@ -252,12 +252,14 @@ struct PetState: Codable {
     }
 
     // Web rewards: hunt 10 + 8 per heart, memory 10 + 4 per level (34 for all five), catch 10 + 2 per point up to 34.
+    // iOS only: hop and toss 10 + 2 per point, chop 10 + 1 per two cukes, each up to 34.
     static func arcadeReward(game: String, score: Int) -> Int {
         let score = max(0, score)
         switch game {
         case "hunt": return 10 + min(3, score) * 8
         case "memory": return score >= 5 ? 34 : 10 + score * 4
-        case "catch": return 10 + min(24, score * 2)
+        case "catch", "hop", "toss": return 10 + min(24, score * 2)
+        case "chop": return 10 + min(24, score / 2)
         default: return 0
         }
     }

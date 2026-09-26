@@ -98,7 +98,7 @@ final class DillTests: XCTestCase {
         XCTAssertFalse(try arenaPlayer(["cells":eligible,"splitCooldown":0.1]).canSplit)
         XCTAssertFalse(try arenaPlayer(["cells":eligible,"alive":false]).canSplit)
         let four = (0..<4).map {["id":"cell-\($0)","x":100,"y":200,"mass":100] as [String:Any]}
-        XCTAssertFalse(try arenaPlayer(["cells":four,"mass":400]).canSplit)
+        XCTAssertTrue(try arenaPlayer(["cells":four,"mass":400]).canSplit)
         XCTAssertTrue(try arenaPlayer(["cells":[["id":"a","x":100,"y":200,"mass":60]],"mass":60,"splitCooldown":0]).canSplit)
         XCTAssertFalse(try arenaPlayer(["cells":[["id":"a","x":100,"y":200,"mass":59.9]],"mass":59.9]).canSplit)
         XCTAssertEqual(try arenaPlayer(["cells":small,"merge":0]).regroupHint,"2 cucumbers · regrouping")
@@ -212,6 +212,108 @@ final class DillTests: XCTestCase {
         XCTAssertEqual(inventory,[[9,110,120,9]],"A full snapshot must replace stale inventory")
         XCTAssertEqual(try snapshot(["food":[]]).updatedFood(from:inventory),[])
     }
+    private func arenaState(_ update:[String:Any]) throws -> ArenaSnapshot {
+        var state:[String:Any] = ["tick":1,"time":1,"width":6000,"height":4500,"humans":1,"bots":0,"players":[]]
+        state.merge(update) {_,new in new}
+        return try JSONDecoder().decode(ArenaSnapshot.self,from:JSONSerialization.data(withJSONObject:state))
+    }
+    func testArenaHazardsAndDrainDecodeOptionally() throws {
+        let cells:[[String:Any]] = [["id":"a","x":900,"y":800,"mass":40,"drain":1],["id":"b","x":1200,"y":800,"mass":40]]
+        let player:[String:Any] = ["id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":900,"y":800,"mass":80,"best":80,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","cells":cells]
+        let hazards:[[String:Any]] = [["id":1,"x":1000,"y":800,"r":150,"kind":"grater"],["id":"h2","x":4000,"y":3000,"r":150,"kind":"blender"],["id":"h3","x":3000,"y":3250,"r":150]]
+        let live = try arenaState(["players":[player],"hazards":hazards])
+        XCTAssertEqual(live.hazards?.map(\.id),["1","h2","h3"])
+        XCTAssertEqual(live.hazards?.first?.r,150); XCTAssertEqual(live.hazards?[1].x,4000)
+        XCTAssertEqual(live.hazards?.map(\.kind),["grater","blender",nil])
+        XCTAssertEqual(live.hazards?.enumerated().map {$0.element.gadget(index:$0.offset)},[.grater,.shaker,.grater],"A known kind wins; unknown or missing kinds fall back by index")
+        XCTAssertEqual(ArenaHazard(id:"s",x:0,y:0,r:150).gadget(index:3),.slicer)
+        let fields = try XCTUnwrap(live.hazards)
+        XCTAssertEqual(ArenaHazard.draining(ArenaCell(id:"c",x:4100,y:3000,mass:60),in:fields),.shaker,"The closest field edge picks the gadget")
+        XCTAssertEqual(ArenaHazard.draining(ArenaCell(id:"c",x:1100,y:800,mass:60),in:fields),.grater)
+        XCTAssertNil(ArenaHazard.draining(ArenaCell(id:"c",x:0,y:0,mass:60),in:[]))
+        XCTAssertEqual(Set(ArenaGadget.allCases.map(\.drainSound)).count,3,"Each gadget has its own drain sound")
+        XCTAssertEqual(live.players[0].pieces.map(\.draining),[true,false])
+        XCTAssertTrue(try XCTUnwrap(live.hazards?.first).touches(live.players[0].pieces[0]))
+        let older = try arenaState(["players":[player.filter {$0.key != "cells"}]])
+        XCTAssertNil(older.hazards); XCTAssertFalse(older.players[0].pieces[0].draining)
+        XCTAssertFalse(ArenaCell(id:"a",x:0,y:0,mass:20).draining)
+    }
+    func testArenaSpitPelletsTrackFirstSeenNearDevicesAndPrune() {
+        let device = ArenaHazard(id:"h",x:1000,y:1000,r:150)
+        let first = Date(timeIntervalSince1970:10), later = Date(timeIntervalSince1970:11)
+        let near = [7.0,1000,1300,4], far = [8.0,3000,3000,4], plain = [9.0,1000,1250,3]
+        let seen = ArenaSnapshot.spitArrivals(food:[near,far,plain],hazards:[device],seen:[:],at:first)
+        XCTAssertEqual(seen,[7:first])
+        XCTAssertEqual(ArenaSnapshot.spitArrivals(food:[near],hazards:[device],seen:seen,at:later),[7:first],"A pellet keeps its first-seen time")
+        XCTAssertEqual(ArenaSnapshot.spitArrivals(food:[plain],hazards:[device],seen:seen,at:later),[:],"Eaten pellets are pruned")
+    }
+    func testArenaZoomEasesInLogSpaceAndSnapsFromInvalidValues() {
+        for invalid in [Double.nan,.infinity,0,-1] {XCTAssertEqual(ArenaPlayer.easeZoom(current:invalid,target:0.8,dt:0.016),0.8)}
+        XCTAssertEqual(ArenaPlayer.easeZoom(current:0.6,target:0.8,dt:0),0.6,accuracy:1e-12)
+        let out = ArenaPlayer.easeZoom(current:1,target:0.5,dt:0.1), into = ArenaPlayer.easeZoom(current:0.5,target:1,dt:0.1)
+        XCTAssertEqual(out,exp(log(0.5) * (1 - exp(-0.7))),accuracy:1e-12)
+        XCTAssertEqual(into,exp(log(0.5) + log(2) * (1 - exp(-0.25))),accuracy:1e-12)
+        XCTAssertGreaterThan(abs(log(out)),abs(log(into / 0.5)),"Zooming out is faster than zooming in")
+        XCTAssertEqual(ArenaPlayer.easeZoom(current:1,target:0.5,dt:10),0.5,accuracy:1e-9)
+        var zoom = 1.0
+        for _ in 0..<60 {let next = ArenaPlayer.easeZoom(current:zoom,target:0.5,dt:1/60.0); XCTAssertLessThan(next,zoom); XCTAssertGreaterThan(next,0.5); zoom = next}
+    }
+    func testArenaKillRingsUseServerEatBoundaryAndProximity() throws {
+        func player(_ id:String,_ cells:[[String:Any]],shield:Double = 0) throws -> ArenaPlayer {
+            try arenaPlayer(["id":id,"cells":cells,"mass":cells.reduce(0.0) {$0 + ($1["mass"] as! Double)},"shield":shield])
+        }
+        let me = try player("you",[["id":"a","x":1000.0,"y":1000.0,"mass":100.0],["id":"b","x":1000.0,"y":3000.0,"mass":900.0]])
+        let small = ArenaPlayer.radius(for:100), hunterRadius = ArenaPlayer.radius(for:400)
+        let reach = hunterRadius - 0.35 * small
+        let near = try player("near",[["id":"h","x":1200.0,"y":1000.0,"mass":400.0]])
+        let far = try player("far",[["id":"h","x":1000.0 + reach + 330,"y":1000.0,"mass":400.0]])
+        let shielded = try player("safe",[["id":"h","x":1200.0,"y":1000.0,"mass":400.0]],shield:3)
+        let tooSmall = try player("tiny",[["id":"h","x":1100.0,"y":1000.0,"mass":121.0]])
+        let rings = ArenaCanvas.killRings(players:[me,near,far,shielded,tooSmall],me:me)
+        XCTAssertEqual(rings.map(\.hunter),["near:h"],"Far, shielded, too-small and own pieces draw no ring")
+        let ring = try XCTUnwrap(rings.first)
+        XCTAssertEqual(ring.radius,reach,accuracy:1e-9)
+        XCTAssertEqual(ring.center,CGPoint(x:1200,y:1000))
+        XCTAssertEqual(ring.alpha,0.25 + 0.65 * (1 - (200 - reach) / 320),accuracy:1e-9)
+        let inside = try player("inside",[["id":"h","x":1010.0,"y":1000.0,"mass":400.0]])
+        XCTAssertEqual(ArenaCanvas.killRings(players:[inside],me:me).first?.alpha ?? 0,0.9,accuracy:1e-9)
+        XCTAssertEqual(ArenaCanvas.killRings(players:[near],me:try player("you",[["id":"a","x":1000.0,"y":1000.0,"mass":100.0]],shield:2)).count,0)
+        let crowded = try player("you",[["id":"a","x":1000.0,"y":1000.0,"mass":100.0],["id":"b","x":1000.0,"y":1120.0,"mass":900.0]])
+        XCTAssertLessThan(hypot(0,120) - (ArenaPlayer.radius(for:900) - 0.35 * small),320,"Own piece b is within ring range of a")
+        XCTAssertTrue(ArenaCanvas.killRings(players:[crowded],me:crowded).isEmpty,"Own pieces draw no ring for each other")
+        let big = try player("big",[["id":"h","x":1000.0,"y":2600.0,"mass":2000.0]])
+        let bigRing = try XCTUnwrap(ArenaCanvas.killRings(players:[big],me:me).first)
+        XCTAssertEqual(bigRing.radius,ArenaPlayer.radius(for:2000) - 0.35 * ArenaPlayer.radius(for:900),accuracy:1e-9,"The ring follows the piece with the smallest gap")
+    }
+    func testArenaMembranesDentWherePiecesPressOrReachAWallAndRelaxWhenFree() throws {
+        let capsule = ArenaShape(hw:80,hh:100)
+        XCTAssertEqual(capsule.radius(at:0),80); XCTAssertEqual(capsule.radius(at:.pi/2),100)
+        XCTAssertEqual(capsule.radius(at:.pi/4),92.88,accuracy:0.01)
+        XCTAssertEqual(ArenaShape(hw:96,hh:90,ellipse:true).radius(at:0),96,accuracy:1e-9)
+        let cucumbers = try arenaPlayer(["cells":[["id":"a","x":80,"y":190,"mass":30],["id":"b","x":110,"y":205,"mass":60]]])
+        XCTAssertEqual(ArenaShape(cucumbers,r:50),ArenaShape(hw:35,hh:50))
+        XCTAssertEqual(ArenaShape(try arenaPlayer(["variety":"garlic"]),r:50),ArenaShape(hw:40,hh:50,lean:0.16))
+        XCTAssertEqual(ArenaShape(try arenaPlayer(["variety":"gherkin"]),r:50),ArenaShape(hw:48,hh:45,ellipse:true))
+        XCTAssertEqual(ArenaMembrane.size(screenRadius:10),18); XCTAssertEqual(ArenaMembrane.size(screenRadius:1000),72)
+        XCTAssertEqual(ArenaMembrane.size(screenRadius:150) % 6,0)
+        let r = ArenaPlayer.radius(for:200)
+        func slice(_ x:Double,_ y:Double) -> ArenaBody {ArenaBody(key:"\(x),\(y)",x:x,y:y,shape:ArenaShape(hw:r,hh:r),membrane:ArenaMembrane(36))}
+        let a = slice(500,500), b = slice(500 + r*1.7,500)
+        for _ in 0..<120 {for body in [a,b] {body.step(among:[a,b],bounds:nil,jitter:0)}}
+        XCTAssertLessThan(a.membrane.dr[0],-0.05*r,"Facing sides dent"); XCTAssertLessThan(b.membrane.dr[18],-0.05*r)
+        XCTAssertLessThan(abs(a.membrane.dr[18]),1,"Far sides keep their shape"); XCTAssertLessThan(abs(b.membrane.dr[0]),1)
+        XCTAssertLessThan(a.outlineRadius(at:0) + b.outlineRadius(at:.pi),r*1.7 + 4,"The two outlines meet instead of overlapping")
+        XCTAssertGreaterThanOrEqual(try XCTUnwrap(a.membrane.dr.min()),-0.35*r - 1e-9,"Dents are capped")
+        let bounds = CGSize(width:6000,height:4500), wall = slice(r - 6,500)
+        for _ in 0..<60 {wall.step(among:[wall],bounds:bounds,jitter:0)}
+        XCTAssertLessThan(wall.membrane.dr[18],-4,"The wall side flattens")
+        let free = slice(3000,2000); free.membrane.dr = Array(repeating:-10,count:36)
+        for _ in 0..<120 {free.step(among:[free],bounds:bounds,jitter:0)}
+        XCTAssertLessThan(try XCTUnwrap(free.membrane.dr.map(abs).max()),0.1,"Free bodies relax back")
+        let resized = a.membrane.resized(to:72)
+        XCTAssertEqual(resized.n,72); XCTAssertEqual(resized.dr[0],a.membrane.dr[0],accuracy:1e-9); XCTAssertTrue(resized.resized(to:72) === resized)
+        XCTAssertEqual(a.outline().count,36)
+    }
     @MainActor func testSoundPreferenceMigratesOldSavesAndPersists() throws {
         let suite = "test.sound.\(UUID())"
         // Absence of the optional sound key is the pre-audio v1 save format.
@@ -235,7 +337,7 @@ final class DillTests: XCTestCase {
                 let value = Double(Int16(bitPattern:UInt16(bytes[i]) | UInt16(bytes[i+1]) << 8)) / 32767
                 energy += value*value; peak = max(peak,abs(value))
             }
-            XCTAssertGreaterThan(sqrt(energy / Double(bytes.count/2)),0.005,"Silent \(cue)")
+            XCTAssertGreaterThan(sqrt(energy / Double(bytes.count/2)),cue.isGadget ? 0.001 : 0.005,"Silent \(cue)")
             XCTAssertLessThanOrEqual(peak,0.851,"Clipped \(cue)")
         }
     }
@@ -358,7 +460,7 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(p.finishArcade(game: "hunt", score: 2, completed: true, at: t0), 26)
         XCTAssertEqual(p.life.happiness, 66); XCTAssertEqual(p.arcadeRecords["hunt"], 2)
         XCTAssertEqual(p.finishArcade(game: "hunt", score: 3, completed: false, at: t0), 0); XCTAssertEqual(p.arcadeRecords["hunt"], 2)
-        for (game, score, reward) in [("hunt", 3, 34), ("memory", 3, 22), ("memory", 5, 34), ("catch", 5, 20), ("catch", 40, 34), ("catch", 0, 10), ("other", 9, 0)] {
+        for (game, score, reward) in [("hunt", 3, 34), ("memory", 3, 22), ("memory", 5, 34), ("catch", 5, 20), ("catch", 40, 34), ("catch", 0, 10), ("hop", 5, 20), ("hop", 40, 34), ("chop", 9, 14), ("chop", 90, 34), ("toss", 3, 16), ("other", 9, 0)] {
             XCTAssertEqual(PetState.arcadeReward(game: game, score: score), reward, game)
         }
         p.life.energy = 5; XCTAssertFalse(p.startArcade(at: t0))

@@ -5,13 +5,20 @@ enum ArcadeGame: String, CaseIterable, Identifiable {
     case hunt = "hunt"
     case memory = "memory"
     case brineCatch = "catch"
+    case hop = "hop"
+    case chop = "chop"
+    case toss = "toss"
 
     var id: String { rawValue }
+    var isClassic: Bool { [.hunt, .memory, .brineCatch].contains(self) }
     var title: String {
         switch self {
         case .hunt: return "Heart hunt"
         case .memory: return "Dill says"
         case .brineCatch: return "Brine catch"
+        case .hop: return "Pickle hop"
+        case .chop: return "Cuke chop"
+        case .toss: return "Jar toss"
         }
     }
     var tagline: String {
@@ -19,6 +26,9 @@ enum ArcadeGame: String, CaseIterable, Identifiable {
         case .hunt: return "follow the jar"
         case .memory: return "echo the tune"
         case .brineCatch: return "catch & dodge"
+        case .hop: return "tap to hop the forks"
+        case .chop: return "swipe cukes · spare your pickle"
+        case .toss: return "pull back · fling into brine"
         }
     }
     var glyph: String {
@@ -26,6 +36,9 @@ enum ArcadeGame: String, CaseIterable, Identifiable {
         case .hunt: return "♥"
         case .memory: return "♫"
         case .brineCatch: return "⌴"
+        case .hop: return "↑"
+        case .chop: return "✂\u{FE0E}"
+        case .toss: return "◡"
         }
     }
     var rounds: Int {
@@ -33,12 +46,34 @@ enum ArcadeGame: String, CaseIterable, Identifiable {
         case .hunt: return 3
         case .memory: return 5
         case .brineCatch: return 12
+        case .hop, .chop, .toss: return 0
+        }
+    }
+
+    func play(reduceMotion: Bool, seed: UInt64 = UInt64.random(in: UInt64.min...UInt64.max)) -> any ArcadePlay {
+        switch self {
+        case .hunt, .memory, .brineCatch: return ArcadeEngine(game: self, reduceMotion: reduceMotion, seed: seed)
+        case .hop: return HopRun(seed: seed)
+        case .chop: return ChopRun(seed: seed)
+        case .toss: return TossRun(seed: seed)
         }
     }
 }
 
+/// One arcade session. `advance(by:)` is the only thing that moves game time.
+protocol ArcadePlay {
+    var game: ArcadeGame { get }
+    var score: Int { get }
+    var message: String { get }
+    var finishMessage: String? { get }
+    var isFinished: Bool { get }
+    func meta(best: Int) -> String
+    mutating func advance(by seconds: Double) -> [ArcadeCue]
+}
+
 enum ArcadeCue: Equatable {
     case shuffle, good, miss, select, finished
+    case hop, ding, chop, bonk, fling, splash, clank
     case note(Int)
 }
 
@@ -85,7 +120,7 @@ enum MemoryRules {
     static func deadline(length: Int) -> Double { 10 + Double(length) * 2 }
 }
 
-struct ArcadeEngine {
+struct ArcadeEngine: ArcadePlay {
     enum Phase: Equatable { case watch, shuffle, choose, reveal, listen, respond, between, ready, falling, result }
     private enum Event {
         case huntShuffle, huntSwap(Int, Int), huntChoose, huntNext
@@ -137,6 +172,7 @@ struct ArcadeEngine {
             phase = .ready
             message = "catch ♥ · dodge salt × · move below"
             later(1.6, .catchDrop)
+        case .hop, .chop, .toss: phase = .result
         }
     }
 
@@ -151,6 +187,7 @@ struct ArcadeEngine {
         case .hunt: return phase == .choose
         case .memory: return phase == .respond
         case .brineCatch: return phase == .ready || phase == .falling
+        case .hop, .chop, .toss: return false
         }
     }
     func slot(ofJar jar: Int) -> Int { order.firstIndex(of: jar) ?? jar }
@@ -159,6 +196,7 @@ struct ArcadeEngine {
         case .hunt: return "ROUND \(round)/3 · \(score) FOUND · BEST \(best)"
         case .memory: return "LEVEL \(round)/5 · BEST \(best)"
         case .brineCatch: return "DROP \(round)/12 · \(score) PTS · BEST \(best)"
+        case .hop, .chop, .toss: return ""
         }
     }
 

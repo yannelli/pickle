@@ -2,6 +2,8 @@
 export const RULES = Object.freeze({ width: 6000, height: 4500, tickRate: 20, maxHumans: 64, population: 32, foodCount: 3375, foodMass: 3, bonusFoodMass: 9, startMass: 25, shieldSeconds: 4, respawnSeconds: 2, sessionSeconds: 1800, decayFloor: 300, decayGraceSeconds: 8, decayPerSecond: 0.001, maxCells: 4, splitMinMass: 60, splitCooldown: 1, mergeSeconds: 12 });
 export const BRINES = ['classic', 'garlic', 'spicy'];
 export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party'];
+// Pet varieties in brine order: two per brine, matching PickleVariety in the iOS app.
+export const VARIETIES = ['dill', 'gherkin', 'garlic', 'butter', 'chili', 'pepper'];
 const BOT_NAMES = ['maya.j', 'alex_27', 'SophieK', 'noah', 'emilyrose', 'Leo99', 'itsChloe', 'sam.png', 'oliver', 'NoraB', 'luke_7', 'isabel', 'Theo', 'grace.m', 'Jules', 'benji', 'zoe17', 'henry', 'mila_', 'jackson', 'AvaGrace', 'rylee', 'ethan_42', 'sienna', 'Finn', 'ellie.jpg', 'Caleb', 'rubyroo', 'oscar', 'lucy.h', 'daniel', 'Freya', 'Maxwell', 'tess', 'will_8', 'amelia', 'josh.jpeg', 'violet', 'Nathan', 'eve_22', 'charlie', 'Leah', 'aaron_7', 'poppy', 'Dylan', 'lilymae', 'owen', 'amber.k', 'Archie', 'hannah', 'eli_19', 'clara', 'mason', 'Sadie', 'jamie', 'alice.w', 'isaac', 'Eva', 'nico_5', 'summer', 'Jordan', 'holly', 'felix', 'rosie', 'miles', 'erin_23', 'seb', 'Maddie', 'cole', 'lauren', 'kai_11', 'Harper'];
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 export const radius = mass => {
@@ -41,6 +43,12 @@ class FoodGrid {
 export function cleanName(name) { return Array.from(String(name || 'Dilly').replace(/[\p{C}\u115F\u1160\u2800\u3164\uFFA0]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
 const RESERVED_NAMES = new Set(['you', ...BOT_NAMES].map(name => name.toLowerCase()));
 export function humanName(name) { const clean = cleanName(name); return RESERVED_NAMES.has(clean.toLowerCase()) ? 'Dilly' : clean; }
+// Older clients send no variety, so pick one of their brine's two from the player ID.
+export function pickVariety(variety, brine, id = '') {
+  if (VARIETIES.includes(variety)) return variety;
+  const pair = Math.max(0, BRINES.indexOf(brine)) * 2;
+  return VARIETIES[pair + ([...String(id)].reduce((sum, c) => sum + c.charCodeAt(0), 0) & 1)];
+}
 export function parseIntent(raw) {
   if (typeof raw !== 'string' || raw.length > 256) return null;
   let p; try { p = JSON.parse(raw); } catch { return null; }
@@ -86,12 +94,12 @@ export class ArenaEngine {
     }
     return best;
   }
-  addPlayer(id, { name, brine, outfit, bot = false } = {}) {
+  addPlayer(id, { name, brine, outfit, variety, bot = false } = {}) {
     if (this.players.has(id) || (!bot && this.humans >= RULES.maxHumans)) return null;
     const mass = bot ? 25 + Math.floor(this.random() * 30) : RULES.startMass;
     const spawn = this.spawnPoint(mass);
     const p = {
-      id, name: bot ? cleanName(name) : humanName(name), brine: BRINES.includes(brine) ? brine : 'classic', outfit: OUTFITS.includes(outfit) ? outfit : 'sprout', bot,
+      id, name: bot ? cleanName(name) : humanName(name), brine: BRINES.includes(brine) ? brine : 'classic', outfit: OUTFITS.includes(outfit) ? outfit : 'sprout', variety: pickVariety(variety, brine, id), bot,
       cells: [this.makeCell(spawn.x,spawn.y,mass)], lastX: spawn.x, lastY: spawn.y,
       // Aggregate mass and center stay compatible with one-body clients and room scoring.
       get mass() { return this.cells.reduce((sum,c) => sum+c.mass,0); },
@@ -117,7 +125,8 @@ export class ArenaEngine {
       const usedNames = new Set([...this.players.values()].map(p => p.name.toLowerCase()));
       const availableNames = BOT_NAMES.filter(name => !usedNames.has(name.toLowerCase()));
       const name = availableNames[Math.floor(this.random()*availableNames.length)] || `guest_${n}`;
-      const bot = this.addPlayer(`bot-${n}`, { bot: true, name, brine: BRINES[n % 3], outfit: OUTFITS[n % OUTFITS.length] });
+      const variety = VARIETIES[(n + Math.floor(n / VARIETIES.length)) % VARIETIES.length];
+      const bot = this.addPlayer(`bot-${n}`, { bot: true, name, brine: BRINES[Math.floor(VARIETIES.indexOf(variety) / 2)], outfit: OUTFITS[n % OUTFITS.length], variety });
       bots.push(bot);
     }
   }
@@ -254,7 +263,7 @@ export class ArenaEngine {
     return {
       type: 'state', tick: this.tick, time: round(this.time), width: RULES.width, height: RULES.height,
       humans: this.humans, bots: [...this.players.values()].filter(p => p.bot).length,
-      players: [...this.players.values()].map(p => ({ id: p.id, name: p.name, brine: p.brine, outfit: p.outfit, bot: p.bot, x: round(p.x), y: round(p.y), mass: round(p.mass), best: Math.floor(p.best), kills: p.kills, alive: p.alive, shield: round(Math.max(0, p.shieldUntil - this.time)), dash: round(Math.max(0, p.dashUntil - this.time)), cooldown: round(Math.max(0, p.dashReady - this.time)), splitCooldown: round(Math.max(0,p.splitReady-this.time)), merge: p.cells.length > 1 ? round(Math.max(0,p.mergeUntil-this.time)) : 0, cells: p.cells.map(c => ({id:c.id,x:round(c.x),y:round(c.y),mass:round(c.mass)})), respawn: p.alive ? 0 : round(Math.max(0, RULES.respawnSeconds - (this.time - p.diedAt))), eatenBy: p.eatenBy })),
+      players: [...this.players.values()].map(p => ({ id: p.id, name: p.name, brine: p.brine, outfit: p.outfit, variety: p.variety, bot: p.bot, x: round(p.x), y: round(p.y), mass: round(p.mass), best: Math.floor(p.best), kills: p.kills, alive: p.alive, shield: round(Math.max(0, p.shieldUntil - this.time)), dash: round(Math.max(0, p.dashUntil - this.time)), cooldown: round(Math.max(0, p.dashReady - this.time)), splitCooldown: round(Math.max(0,p.splitReady-this.time)), merge: p.cells.length > 1 ? round(Math.max(0,p.mergeUntil-this.time)) : 0, cells: p.cells.map(c => ({id:c.id,x:round(c.x),y:round(c.y),mass:round(c.mass)})), respawn: p.alive ? 0 : round(Math.max(0, RULES.respawnSeconds - (this.time - p.diedAt))), eatenBy: p.eatenBy })),
       ...(includeFood ? { food: this.food.map(f => [f.id, Math.round(f.x), Math.round(f.y), f.value]) } : {})
     };
   }

@@ -113,18 +113,25 @@ struct GameView: View {
     var body: some View {
         ZStack {
             DillTheme.cream.ignoresSafeArea()
-            ScrollView {
-                VStack(spacing:26) {
-                    HStack {
-                        Button { if stage == .finished { dismiss() } else { pause(); quit = true } } label: { Image(systemName:"xmark").font(.system(size:15,weight:.semibold)).frame(width:44,height:44).background(DillTheme.sage,in:Circle()) }.accessibilityLabel("Leave game")
-                        Spacer(); Eyebrow(text:launch.mode == .party ? "Pass the pickle" : "Daily crunch / \(launch.challenge.number)"); Spacer(); Image(systemName:"sparkle").frame(width:44)
+            GeometryReader { viewport in
+                let compact = viewport.size.height < 720
+                ScrollView {
+                    FillHeight(minHeight:viewport.size.height) {
+                        VStack(spacing:compact ? 16 : 26) {
+                            HStack {
+                                Button { if stage == .finished { dismiss() } else { pause(); quit = true } } label: { Image(systemName:"xmark").font(.system(size:15,weight:.semibold)).frame(width:44,height:44).background(DillTheme.sage,in:Circle()) }.accessibilityLabel("Leave game")
+                                Spacer(); Eyebrow(text:launch.mode == .party ? "Pass the pickle" : "Daily crunch / \(launch.challenge.number)"); Spacer(); Image(systemName:"sparkle").frame(width:44)
+                            }
+                            if stage == .finished { results }
+                            else if stage == .handoff { handoff }
+                            else { course(compact:compact,barHeight:min(92,max(60,viewport.size.height * 0.085))) }
+                        }.padding(.horizontal,24).padding(.vertical,compact ? 16 : 24).frame(maxWidth:580).frame(maxWidth:.infinity)
                     }
-                    if stage == .finished { results }
-                    else if stage == .handoff { handoff }
-                    else { course }
-                }.padding(24).frame(maxWidth:580).frame(maxWidth:.infinity)
-            }.scrollIndicators(.hidden)
+                }.scrollIndicators(.hidden).scrollBounceBehavior(.basedOnSize)
+            }
         }.foregroundStyle(DillTheme.ink).interactiveDismissDisabled(stage != .finished)
+            .statusBarHidden()
+            .persistentSystemOverlays(.hidden)
             .onReceive(clock) { _ in tick() }
             .onChange(of:scenePhase) { _,phase in if phase != .active { pause() } }
             .confirmationDialog("Leave this game?",isPresented:$quit,titleVisibility:.visible) {
@@ -132,32 +139,36 @@ struct GameView: View {
                 Button("Keep playing",role:.cancel) {}
             } message: { Text("This unfinished run won’t be saved.") }
     }
-    private var course: some View {
-        VStack(spacing:24) {
-            VStack(spacing:9) {
+    private func course(compact: Bool,barHeight: CGFloat) -> some View {
+        let bar = barHeight / 66
+        return VStack(spacing:compact ? 14 : 24) {
+            VStack(spacing:compact ? 6 : 9) {
                 Eyebrow(text:"\(playerName)’s turn · Round \(round+1) of 3")
-                Text(stage == .roundResult ? verdict : "Find your\nsweet spot.").font(DillTheme.display(43)).tracking(-1.5).multilineTextAlignment(.center)
+                Text(stage == .roundResult ? verdict : "Find your\nsweet spot.").font(DillTheme.display(compact ? 34 : 43)).tracking(-1.5).multilineTextAlignment(.center)
                 Text(stage == .roundResult ? "\(points.last ?? 0) points. Every little crunch counts." : "Tap CRUNCH when the seed meets the stripe.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
-            }
-            ZStack {
-                Circle().fill(DillTheme.sage).frame(width:205,height:205)
-                PickleCharacter(pet:store.pet,happy:stage == .roundResult).frame(width:220,height:220)
-                if stage == .roundResult { Text("+\(points.last ?? 0)").font(.system(size:28,weight:.black,design:.rounded)).padding(15).background(DillTheme.lime,in:Capsule()).rotationEffect(.degrees(-10)).offset(x:78,y:70) }
-            }.frame(height:230)
-            VStack(spacing:15) {
+            }.fixedSize(horizontal:false,vertical:true)
+            GeometryReader { geometry in
+                let unit = min(geometry.size.width,geometry.size.height) / 230
+                ZStack {
+                    Circle().fill(DillTheme.sage).frame(width:205 * unit,height:205 * unit)
+                    PickleCharacter(pet:store.pet,happy:stage == .roundResult).frame(width:220 * unit,height:220 * unit)
+                    if stage == .roundResult { Text("+\(points.last ?? 0)").font(.system(size:28 * min(unit,1.4),weight:.black,design:.rounded)).padding(15).background(DillTheme.lime,in:Capsule()).rotationEffect(.degrees(-10)).offset(x:78 * unit,y:70 * unit) }
+                }.frame(width:geometry.size.width,height:geometry.size.height)
+            }.frame(minHeight:150,maxHeight:430)
+            VStack(spacing:compact ? 10 : 15) {
                 HStack { Eyebrow(text:"The sweet spot"); Spacer(); Text(stage == .playing ? String(format:"%.1fs",max(0,6-elapsed)) : "Aim for \(Int(target * 100))%").font(.system(size:11,weight:.medium,design:.monospaced)).foregroundStyle(DillTheme.muted) }
                 GeometryReader { geometry in
                     let width = max(1,geometry.size.width - 28)
                     ZStack(alignment:.leading) {
-                        RoundedRectangle(cornerRadius:25).fill(DillTheme.sage)
-                        RoundedRectangle(cornerRadius:14).fill(DillTheme.ink).frame(width:32,height:66).offset(x:14 + width * target - 16)
-                        Rectangle().fill(DillTheme.lime).frame(width:2,height:50).offset(x:14 + width * target - 1)
-                        Capsule().fill(DillTheme.lime).frame(width:22,height:38).overlay(Capsule().stroke(DillTheme.ink,lineWidth:2)).rotationEffect(.degrees(-15)).offset(x:3 + width * cursor)
+                        RoundedRectangle(cornerRadius:25 * bar).fill(DillTheme.sage)
+                        RoundedRectangle(cornerRadius:14 * bar).fill(DillTheme.ink).frame(width:32 * bar,height:barHeight).offset(x:14 + width * target - 16 * bar)
+                        Rectangle().fill(DillTheme.lime).frame(width:2,height:50 * bar).offset(x:14 + width * target - 1)
+                        Capsule().fill(DillTheme.lime).frame(width:22 * bar,height:38 * bar).overlay(Capsule().stroke(DillTheme.ink,lineWidth:2)).rotationEffect(.degrees(-15)).offset(x:14 + width * cursor - 11 * bar)
                     }
-                }.frame(height:66).accessibilityElement(children:.ignore).accessibilityLabel("Seed position \(Int(cursor * 100)) percent. Target \(Int(target * 100)) percent.")
+                }.frame(height:barHeight).accessibilityElement(children:.ignore).accessibilityLabel("Seed position \(Int(cursor * 100)) percent. Target \(Int(target * 100)) percent.")
                 HStack(spacing:8) {
                     ForEach(0..<3,id:\.self) { index in
-                        HStack(spacing:6) { Text("0\(index+1)").foregroundStyle(DillTheme.muted); Text(index < points.count ? "\(points[index])" : "—").bold() }.font(.system(size:12,design:.monospaced)).frame(maxWidth:.infinity).padding(12).background(.white.opacity(0.7),in:RoundedRectangle(cornerRadius:12))
+                        HStack(spacing:6) { Text("0\(index+1)").foregroundStyle(DillTheme.muted); Text(index < points.count ? "\(points[index])" : "—").bold() }.font(.system(size:12,design:.monospaced)).frame(maxWidth:.infinity).padding(compact ? 9 : 12).background(.white.opacity(0.7),in:RoundedRectangle(cornerRadius:12))
                     }
                 }
             }
@@ -171,6 +182,7 @@ struct GameView: View {
                 Text(paused ? "All good. Your round is paused." : "Feel the little tap when you enter the sweet spot.").font(.caption).foregroundStyle(DillTheme.muted)
             } else {
                 Button { advance() } label: { HStack { Text(round == 2 ? "See how you did" : "Next crunch"); Image(systemName:"arrow.right") } }.buttonStyle(DillButton()).accessibilityIdentifier("gameNext")
+                Text(" ").font(.caption).accessibilityHidden(true)
             }
         }
     }
@@ -244,4 +256,19 @@ struct GameView: View {
         carried += max(0,ProcessInfo.processInfo.systemUptime - started); paused = true
     }
     private func resume() { started = ProcessInfo.processInfo.systemUptime; paused = false }
+}
+
+/// Proposes `minHeight` to content shorter than it, so flexible views fill a scroll view's visible height; taller content keeps its natural height and scrolls.
+struct FillHeight: Layout {
+    var minHeight: CGFloat
+    func sizeThatFits(proposal: ProposedViewSize,subviews: Subviews,cache: inout ()) -> CGSize {
+        guard let content = subviews.first else { return .zero }
+        let natural = content.sizeThatFits(ProposedViewSize(width:proposal.width,height:nil))
+        return CGSize(width:proposal.width ?? natural.width,height:max(minHeight,natural.height))
+    }
+    func placeSubviews(in bounds: CGRect,proposal: ProposedViewSize,subviews: Subviews,cache: inout ()) {
+        guard let content = subviews.first else { return }
+        let natural = content.sizeThatFits(ProposedViewSize(width:bounds.width,height:nil))
+        content.place(at:bounds.origin,proposal:ProposedViewSize(width:bounds.width,height:natural.height < minHeight ? minHeight : nil))
+    }
 }

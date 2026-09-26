@@ -37,7 +37,7 @@ struct NestView: View {
             dailyCard
             HStack { Image(systemName:"tshirt"); Text("A new look, a whole new dill.").font(.caption); Spacer(); Button("Dress up",action:closet).font(.caption.bold()) }.foregroundStyle(DillTheme.muted)
         }
-        .sheet(isPresented:$arcade,onDismiss:arcadeClosed) { ArcadeSheet().environmentObject(store) }
+        .fullScreenCover(isPresented:$arcade,onDismiss:arcadeClosed) { ArcadeSheet().environmentObject(store) }
         .onAppear {
             if let line = store.speech, PetLife.ms(Date()) - life.bornAt < 15_000 { stage.say(line,for:6) }
         }

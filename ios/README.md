@@ -71,7 +71,7 @@ The server accepts bounded direction inputs and monotonic sequence numbers rathe
 - Pet care follows the browser rules in `../pet-life.js`. Put a cucumber in Classic, Garlic, or Spicy brine; one of 6 varieties hatches after 1 real minute, even with the app closed, and you name it. Pickles grow from baby (under 1 day) to young, teen (a new stereotype each day from day 3), adult (day 7), and elder (day 14, a new one of 32 forms every 3 days).
 - Feed adds 40 food, Pet adds 8 happiness every 2 seconds, Clean restores hygiene, and Nap/Wake controls sleep. Needs drain by real elapsed time; a food, happiness, or hygiene meter left empty for 48 more hours ends the pickle's life. Daily care awards 5 coins per action once each day.
 - The Nest mirrors the web moods (happy, hungry, sick, sleeping, scared), idle acts (hop, look, stretch, wiggle, turn), content vibes (shades, lounge, book, campfire), the mess pile, a profile card, and the elder club collection. Hold the pickle to find the eat-your-pickle secret; Restart starts a new egg and keeps coins and outfits.
-- Play opens the pet arcade: Heart hunt, Dill says, and Brine catch. Entry costs 6 energy; completed games award 10 to 34 happiness.
+- Play opens the pet arcade: Heart hunt, Dill says, and Brine catch from the web, plus iOS-only Pickle hop (tap to hop through forks), Cuke chop (swipe cucumbers, spare your pickle), and Jar toss (pull back and fling your pickle into a jar). Entry costs 6 energy; completed games award 10 to 34 happiness.
 - Care has distinct layered cartoon scenes: chewing and crumbs, stroking and hearts, shower/foam/bubbles, and a moonlit blanket with breathing. Controls remain beside the visible scene after tapping, including on compact phones. Repeat actions restart cleanly.
 - Original synthesized PCM sound effects accompany care, dash, eating/respawns, and challenge results. Ordinary food pickups are quiet and have no burst effects. Settings → Sound effects persists across launches; native sounds honor Silent Mode and mix with music. Old saves default to sounds enabled without losing progress.
 - Play **Daily Crunch**, three six-second precision rounds with a shared UTC-date seed. Earn up to 300 points and 25 coins for the first completion that day. Replay to improve your personal best.
@@ -122,7 +122,8 @@ Online UI tests require the configured server to be available. Debug-only `--ui-
 | `NestView.swift`, `NestProfile.swift`, `NestText.swift` | Meters, care controls, messages, profile, elder club |
 | `PetLooks.swift`, `PetArtData.swift`, `PetArtShapes.swift` | Varieties, stages, teen and elder hats and props |
 | `PetMotion.swift`, `PetStage.swift` | Moods, idle acts, vibes, animation clock |
-| `ArcadeGames.swift`, `ArcadeViews.swift` | Heart hunt, Dill says, Brine catch |
+| `ArcadeGames.swift`, `ArcadeViews.swift` | Heart hunt, Dill says, Brine catch, and the shared `ArcadePlay` session |
+| `ArcadeArt.swift`, `ArcadeHop.swift`, `ArcadeChop.swift`, `ArcadeChopBoard.swift`, `ArcadeToss.swift`, `ArcadeTossBoard.swift` | Pickle hop, Cuke chop, Jar toss |
 | `BackupViews.swift` | Backup export, import, preview, and opening `.dill` files |
 | `Design.swift` | Palette, components, vector character, animated garden |
 | `CareScene.swift` | Action-specific cartoon props, expressions, and animation timing |

@@ -1,17 +1,19 @@
-import { BRINES, OUTFITS, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, splitState, massLabel, roomCode, direction, playerName, socketURL, applyFoodUpdate, shareURL, interpolate, drawPickle } from './arena-core.mjs';
+import { BRINES, OUTFITS, VARIETIES, varietyOf, pieceMood, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, splitState, massLabel, roomCode, direction, playerName, socketURL, applyFoodUpdate, shareURL, interpolate, drawPickle } from './arena-core.mjs';
 
 const $ = id => document.getElementById(id);
 const canvas = $('arena'), ctx = canvas.getContext('2d'), map = $('minimap').getContext('2d');
 const preview = $('preview').getContext('2d'), reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const storageKey = 'little-dill.arena.v1';
-let settings = { name: 'Dilly', brine: 'classic', outfit: 'sprout', sound: false, best: 0 };
+let settings = { name: 'Dilly', brine: 'classic', outfit: 'sprout', variety: 'dill', sound: false, best: 0 };
 try { const saved = JSON.parse(localStorage.getItem(storageKey)); if (saved && typeof saved === 'object') settings = { ...settings, ...saved }; } catch { /* Storage is optional, including private browsing. */ }
 settings.name = playerName(settings.name); settings.brine = BRINES.includes(settings.brine) ? settings.brine : 'classic';
 settings.outfit = OUTFITS.includes(settings.outfit) ? settings.outfit : 'sprout'; settings.best = Number.isFinite(settings.best) ? Math.max(0, Math.floor(settings.best)) : 0;
 settings.sound = settings.sound === true;
+const pickVariety = brine => { const pair = Object.keys(VARIETIES).filter(id => VARIETIES[id].brine === brine); return pair[Math.floor(Math.random() * pair.length)]; };
+if (VARIETIES[varietyOf(settings)].brine !== settings.brine || varietyOf(settings) !== settings.variety) settings.variety = pickVariety(settings.brine);
 const save = () => { try { localStorage.setItem(storageKey, JSON.stringify(settings)); } catch { /* Play without persistence. */ } };
 let requestedRoom = roomCode(new URL(location.href).searchParams.get('room'));
-let socket = null, generation = 0, ownID = null, state = null, previous = new Map(), arrived = 0, lastPacket = 0;
+let socket = null, generation = 0, ownID = null, state = null, previous = new Map(), ateAt = new Map(), arrived = 0, lastPacket = 0;
 let phase = 'lobby', overlayMode = '', sequence = 0, inputTimer = null, connectTimer = null, toastTimer = null;
 let movement = { x: 0, y: 0 }, pointer = null, keys = new Set(), stickPointer = null, ownPrevious = null;
 let width = innerWidth, height = innerHeight, camera = { x: 1200, y: 900 }, zoom = 1, lastFrame = performance.now();
@@ -42,7 +44,7 @@ function refreshLobby() {
   $('public-room').hidden = !requestedRoom;
   if (requestedRoom) $('room-code').value = requestedRoom;
 }
-document.querySelectorAll('.brine').forEach(button => button.addEventListener('click', () => { settings.name = playerName($('name').value); settings.brine = button.dataset.brine; save(); refreshLobby(); }));
+document.querySelectorAll('.brine').forEach(button => button.addEventListener('click', () => { settings.name = playerName($('name').value); settings.brine = button.dataset.brine; settings.variety = pickVariety(settings.brine); save(); refreshLobby(); }));
 $('outfit').addEventListener('change', () => { settings.outfit = $('outfit').value; save(); });
 $('name').addEventListener('change', () => { settings.name = playerName($('name').value); save(); });
 $('join-form').addEventListener('submit', event => { event.preventDefault(); join(requestedRoom); });
@@ -79,7 +81,7 @@ function join(room) {
   // Dismiss Safari’s keyboard before measuring the live viewport. Resize events
   // keep following it while the keyboard and browser chrome finish animating.
   document.activeElement?.blur();
-  stopSocket(); requestedRoom = roomCode(room); ownID = null; state = null; previous.clear(); ownPrevious = null; sequence = 0; leaderboardSignature = ''; zoom = 1;
+  stopSocket(); requestedRoom = roomCode(room); ownID = null; state = null; previous.clear(); ateAt.clear(); ownPrevious = null; sequence = 0; leaderboardSignature = ''; zoom = 1;
   phase = 'joining'; $('lobby').hidden = true; $('game').hidden = false; document.body.style.overflow = 'hidden';
   $('room-badge').hidden = !requestedRoom; $('room-badge').textContent = requestedRoom ? `FRIEND ROOM · ${requestedRoom}` : '';
   $('population').textContent = 'Finding your garden…'; $('mass').textContent = '25'; $('rank').textContent = '—'; $('best').textContent = '25'; $('leaders').replaceChildren(); $('protection').hidden = true;
@@ -100,6 +102,7 @@ function join(room) {
     previous = new Map((state?.players || []).map(player => [player.id, player]));
     packet.food = applyFoodUpdate(state?.food || [], packet);
     state = packet; arrived = performance.now();
+    for (const player of packet.players) if (player.mass > (previous.get(player.id)?.mass ?? Infinity) + .5) ateAt.set(player.id, arrived);
     if (phase === 'joining') { clearTimeout(connectTimer); phase = 'playing'; hideOverlay(); sound('join'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); }
     if (ownPrevious?.alive && !own.alive) { clearMovement(); sound('death'); overlay('dead', 'A delicious little disaster.', `${own.eatenBy || 'Another dill'} got the last crunch. Your next big moment starts small.`); }
     if (ownPrevious && !ownPrevious.alive && own.alive) { hideOverlay(); sound('respawn'); }
@@ -250,10 +253,13 @@ function render(now) {
         ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
         if (bonus) { ctx.strokeStyle = '#F1C9B459'; ctx.lineWidth = 2 / zoom; ctx.beginPath(); ctx.arc(x, y, r + 2 / zoom, 0, Math.PI * 2); ctx.stroke(); }
       }
-      const visiblePlayers = [];
+      const visiblePlayers = [], latest = new Map(state.players.map(player => [player.id, player]));
       for (const p of cells.sort((a, b) => a.mass - b.mass)) {
         const r = radius(p.mass); if (p.x + r < left - 60 || p.x - r > right + 60 || p.y + r < top - 60 || p.y - r > bottom + 60) continue;
-        drawPickle(ctx, p, p.x, p.y, r, reducedMotion.matches ? 0 : now / 1000, p.ownerID === ownID, zoom);
+        const before = previous.get(p.ownerID), after = latest.get(p.ownerID);
+        const heading = before && after ? direction((after.x - before.x) / 4, (after.y - before.y) / 4) : { x: 0, y: 0 };
+        const mood = pieceMood(p, cells, (now - (ateAt.get(p.ownerID) ?? -Infinity)) / 1000);
+        drawPickle(ctx, { ...p, mood, lookX: heading.x, lookY: heading.y }, p.x, p.y, r, reducedMotion.matches ? 0 : now / 1000, p.ownerID === ownID, zoom);
         visiblePlayers.push(p);
       }
       ctx.restore(); drawLabels(visiblePlayers); drawMap(cells, own); steer();

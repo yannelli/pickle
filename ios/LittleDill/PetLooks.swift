@@ -228,7 +228,7 @@ enum PickleArtist {
             p.move(to: CGPoint(x: 30.7, y: 0.3)); p.addLine(to: CGPoint(x: 24.3, y: 6.7))
             c.stroke(p, with: .color(ink), style: StrokeStyle(lineWidth: 3, lineCap: .round))
         }
-        if look.baby {
+        if look.baby && pose.mouth != .chew {
             let pacifier = Path(ellipseIn: CGRect(x: 9, y: 14, width: 14, height: 8))
             c.fill(pacifier, with: .color(Color(hex: look.variety.light)))
             c.stroke(pacifier, with: .color(ink), lineWidth: 2)

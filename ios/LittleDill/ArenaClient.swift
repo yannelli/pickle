@@ -32,7 +32,39 @@ struct ArenaCell: Decodable, Identifiable {
     let x: Double
     let y: Double
     let mass: Double
+    var drain: Double? = nil
     var radius: Double { ArenaPlayer.radius(for:mass) }
+    var draining: Bool { (drain ?? 0) > 0 }
+}
+enum ArenaGadget: String, CaseIterable {
+    case slicer, shaker, grater
+    /// Bundled web audio loops keep each gadget's stroke rhythm.
+    var drainSound: DillSound { switch self {case .slicer: .slicer; case .shaker: .shaker; case .grater: .grater} }
+}
+/// A kitchen gadget field: cells overlapping it slow down and leak mass.
+struct ArenaHazard: Decodable, Identifiable {
+    let id: String
+    let x: Double
+    let y: Double
+    let r: Double
+    var kind: String? = nil
+    private enum CodingKeys: String, CodingKey { case id, x, y, r, kind }
+    init(id:String,x:Double,y:Double,r:Double,kind:String? = nil) {self.id = id; self.x = x; self.y = y; self.r = r; self.kind = kind}
+    init(from decoder:Decoder) throws {
+        let c = try decoder.container(keyedBy:CodingKeys.self)
+        x = try c.decode(Double.self,forKey:.x); y = try c.decode(Double.self,forKey:.y); r = try c.decode(Double.self,forKey:.r)
+        id = (try? c.decode(String.self,forKey:.id)) ?? (try? c.decode(Int.self,forKey:.id)).map(String.init) ?? "\(x),\(y)"
+        kind = try? c.decode(String.self,forKey:.kind)
+    }
+    /// Matches `hazardKind` in arena-web/arena-core.mjs: an unknown or missing kind falls back by list position.
+    func gadget(index:Int) -> ArenaGadget { ArenaGadget(rawValue:kind ?? "") ?? ArenaGadget.allCases[index % ArenaGadget.allCases.count] }
+    func touches(_ cell:ArenaCell) -> Bool { hypot(cell.x-x,cell.y-y) < r + cell.radius }
+    /// The gadget draining a cell: the field whose edge is closest, like `hazardFor` on the web.
+    static func draining(_ cell:ArenaCell,in hazards:[ArenaHazard]) -> ArenaGadget? {
+        let edge = {(h:ArenaHazard) in hypot(cell.x-h.x,cell.y-h.y) - h.r}
+        guard let index = hazards.indices.min(by:{edge(hazards[$0]) < edge(hazards[$1])}) else {return nil}
+        return hazards[index].gadget(index:index)
+    }
 }
 struct ArenaCamera {
     let center: CGPoint
@@ -51,6 +83,7 @@ struct ArenaPlayer: Decodable, Identifiable {
     let name: String
     @ServerLook var brine: Brine
     @ServerLook var outfit: Outfit
+    let variety: String?
     let bot: Bool
     let x: Double
     let y: Double
@@ -63,7 +96,7 @@ struct ArenaPlayer: Decodable, Identifiable {
     let cooldown: Double
     let respawn: Double
     let eatenBy: String
-    let cells: [ArenaCell]?
+    var cells: [ArenaCell]?
     let splitCooldown: Double?
     let merge: Double?
     var pieces: [ArenaCell] {
@@ -71,10 +104,13 @@ struct ArenaPlayer: Decodable, Identifiable {
         return cells ?? [ArenaCell(id:id,x:x,y:y,mass:mass)]
     }
     var isCucumber: Bool {pieces.count > 1}
-    var canSplit: Bool { cells != nil && alive && pieces.count < 4 && (splitCooldown ?? 0) <= 0 && pieces.contains {$0.mass >= 60} }
+    /// Older servers send no variety, so fall back to the brine's first variety like the web client.
+    var look: PickleVariety {PickleVariety.all.first {$0.id == variety} ?? PickleVariety.first(brine:brine.rawValue)}
+    var canSplit: Bool { cells != nil && alive && pieces.count < 8 && (splitCooldown ?? 0) <= 0 && pieces.contains {$0.mass >= 60} }
     var splitHint: String {
+        guard alive else {return "Respawn to split"}
         guard cells != nil else {return "Rejoin to split"}
-        if pieces.count >= 4 {return "4 cucumbers max"}
+        if pieces.count >= 8 {return "8 cucumbers max"}
         if let splitCooldown, splitCooldown > 0 {return "Ready in \(Int(ceil(splitCooldown)))s"}
         return pieces.contains {$0.mass >= 60} ? "Launch a half" : isCucumber ? "One cucumber needs 60" : "One pickle needs 60"
     }
@@ -101,6 +137,12 @@ struct ArenaPlayer: Decodable, Identifiable {
         let zoom = min(cameraZoom(mass:mass,width:width,height:height),width * 0.72 / max(1,right-left),height * 0.54 / max(1,bottom-top))
         return ArenaCamera(center:CGPoint(x:(left+right)/2,y:(top+bottom)/2),zoom:zoom)
     }
+    /// Log-space exponential ease: 7/s while zooming out, 2.5/s while zooming in.
+    static func easeZoom(current:Double,target:Double,dt:Double) -> Double {
+        guard current.isFinite, current > 0, target.isFinite, target > 0 else {return target}
+        let rate = target < current ? 7.0 : 2.5
+        return exp(log(current) + (log(target) - log(current)) * (1 - exp(-rate * max(0,dt))))
+    }
 }
 struct ArenaSnapshot: Decodable {
     static let maximumMessageSize = 524288
@@ -114,6 +156,7 @@ struct ArenaSnapshot: Decodable {
     let food: [[Double]]?
     let foodAdded: [[Double]]?
     let foodRemoved: [Int]?
+    var hazards: [ArenaHazard]? = nil
     var population: Int { humans + bots }
     func supports(playerID:String) -> Bool {
         players.count <= 64 && width > 0 && height > 0 && players.contains {$0.id == playerID}
@@ -125,6 +168,15 @@ struct ArenaSnapshot: Decodable {
         for id in foodRemoved ?? [] {inventory.removeValue(forKey:Double(id))}
         for pellet in foodAdded ?? [] where pellet.count == 4 {inventory[pellet[0]] = pellet}
         return inventory.values.sorted {$0[0] < $1[0]}
+    }
+    /// First-seen times of spit pellets (value 4) that land near a device; ids missing from `food` are dropped.
+    static func spitArrivals(food:[[Double]],hazards:[ArenaHazard],seen:[Double:Date],at time:Date) -> [Double:Date] {
+        var arrivals:[Double:Date] = [:]
+        for pellet in food where pellet.count == 4 && pellet[3] == 4 {
+            if let first = seen[pellet[0]] {arrivals[pellet[0]] = first}
+            else if hazards.contains(where:{hypot(pellet[1]-$0.x,pellet[2]-$0.y) <= $0.r + 200}) {arrivals[pellet[0]] = time}
+        }
+        return arrivals
     }
 }
 private struct ArenaHeader: Decodable {
@@ -145,6 +197,7 @@ private struct ArenaHeader: Decodable {
     @Published private(set) var errorMessage = ""
     @Published private(set) var receivedAt = Date()
     @Published private(set) var ping = 0
+    private(set) var spitAt: [Double:Date] = [:]
     private var socket: URLSessionWebSocketTask?
     private var receiveTask: Task<Void,Never>?
     private var inputTask: Task<Void,Never>?
@@ -159,9 +212,9 @@ private struct ArenaHeader: Decodable {
     var rank: Int { ((snapshot?.players.filter(\.alive).sorted {$0.mass > $1.mass}.firstIndex {$0.id == playerID}) ?? 0) + 1 }
 
     func connect(pet:PetState,room requestedRoom:String?) {
-        stop(); status = .connecting; errorMessage = ""; playerID = ""; snapshot = nil; previous = nil; food = []
+        stop(); status = .connecting; errorMessage = ""; playerID = ""; snapshot = nil; previous = nil; food = []; spitAt = [:]
         guard var url = URLComponents(string:ArenaLaunch.server), url.scheme == "wss", url.host != nil else { fail("The arena server address is not configured."); return }
-        var query = [URLQueryItem(name:"name",value:pet.name),URLQueryItem(name:"brine",value:pet.brine.rawValue),URLQueryItem(name:"outfit",value:pet.outfit.rawValue),URLQueryItem(name:"foodDeltas",value:"1")]
+        var query = [URLQueryItem(name:"name",value:pet.name),URLQueryItem(name:"brine",value:pet.brine.rawValue),URLQueryItem(name:"outfit",value:pet.outfit.rawValue),URLQueryItem(name:"variety",value:pet.life.variety),URLQueryItem(name:"foodDeltas",value:"1")]
         if let requestedRoom { guard ArenaLaunch.validRoom(requestedRoom) else {fail("That room code isn’t valid."); return}; query.append(URLQueryItem(name:"room",value:requestedRoom)) }
         url.queryItems = query
         guard let endpoint = url.url else {fail("Couldn’t open the arena address."); return}
@@ -196,8 +249,12 @@ private struct ArenaHeader: Decodable {
         case "state":
             guard !playerID.isEmpty, let next = try? JSONDecoder().decode(ArenaSnapshot.self,from:data), next.supports(playerID:playerID) else {fail("This arena sent an unsupported game state."); return}
             guard snapshot == nil || next.tick >= snapshot!.tick else {return}
+            let joining = snapshot == nil
             previous = snapshot; snapshot = next; receivedAt = Date()
-            if let food = next.updatedFood(from:self.food) {self.food = food}
+            if let food = next.updatedFood(from:self.food) {
+                self.food = food
+                spitAt = ArenaSnapshot.spitArrivals(food:food,hazards:next.hazards ?? [],seen:spitAt,at:joining ? .distantPast : receivedAt)
+            }
             if status == .connecting { status = .playing; timeoutTask?.cancel(); startInputs() }
         case "pong": ping = min(9999,Int(Date().timeIntervalSince(pingAt) * 1000))
         default: break
