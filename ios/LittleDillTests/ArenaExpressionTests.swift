@@ -2,11 +2,12 @@ import XCTest
 @testable import LittleDill
 
 final class ArenaExpressionTests:XCTestCase {
-    private func player(_ hurt:Double? = nil) throws -> ArenaPlayer {
+    private func player(_ hurt:Double? = nil,tear:Double? = nil) throws -> ArenaPlayer {
         var value:[String:Any] = ["id":"dill","name":"Dill","brine":"classic","outfit":"original","bot":false,
                                  "x":0,"y":0,"mass":100,"best":100,"kills":0,"alive":true,"shield":0,
                                  "dash":0,"cooldown":0,"respawn":0,"eatenBy":""]
         if let hurt {value["hurt"] = hurt}
+        if let tear {value["tear"] = tear}
         return try JSONDecoder().decode(ArenaPlayer.self,from:JSONSerialization.data(withJSONObject:value))
     }
 
@@ -16,6 +17,17 @@ final class ArenaExpressionTests:XCTestCase {
         XCTAssertEqual(ArenaCanvas.mood(calm,cell:calm.pieces[0],pieces:[]),.calm)
         XCTAssertEqual(ArenaCanvas.mood(legacy,cell:legacy.pieces[0],pieces:[]),.calm)
         XCTAssertNil(legacy.hurt)
+        XCTAssertNil(legacy.tear)
+    }
+
+    func testTearGlidesOnceAndReduceMotionKeepsItStill() throws {
+        let sad = try player(15,tear:1.4)
+        XCTAssertEqual(sad.tear,1.4)
+        XCTAssertEqual(ArenaTear.pose(remaining:1.4,reduceMotion:false)?.offset,0)
+        XCTAssertEqual(ArenaTear.pose(remaining:0.7,reduceMotion:false)?.offset,1.05)
+        XCTAssertEqual(ArenaTear.pose(remaining:0.7,reduceMotion:false)?.alpha,0.425)
+        XCTAssertEqual(ArenaTear.pose(remaining:0.7,reduceMotion:true)?.offset,0)
+        XCTAssertNil(ArenaTear.pose(remaining:0,reduceMotion:false))
     }
 
     func testDensePickupsFadeAndRestResetWithoutAccumulatingSounds() {

@@ -100,6 +100,7 @@ struct ArenaPlayer: Decodable, Identifiable {
     let splitCooldown: Double?
     let merge: Double?
     let hurt: Double?
+    let tear: Double?
     static let eatOverlap = 0.6
     var pieces: [ArenaCell] {
         guard alive else {return []}

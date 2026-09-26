@@ -37,7 +37,7 @@ Read [README.md](README.md) for player behavior and deployment targets, [ios/REA
 - Eating requires at least 1.22 times the prey's mass and center distance below `hunterRadius - 0.6 * preyRadius`. Membrane deformation is visual; danger outlines use the server geometry.
 - The slicer, shaker, and grater halve movement speed. Gadget draining stops at 500 mass per piece. Touching pieces over 2,500 mass split with a two-second gadget cooldown, within the eight-piece cap.
 - Gadget leakage is separate from passive decay above 300 mass. Preserve mass accounting and the per-piece drain floor across multiple pieces.
-- Keep six variety smiles and the brief sad expression after nonfatal piece loss on both clients.
+- Keep six variety smiles and 15-second sadness after nonfatal piece loss on both clients. Roll the 25% tear chance on the server once per loss; both clients draw one small tear from its remaining timer.
 - Bots have bounded perception and distinct risk profiles. Public bot spawns use weighted masses up to 5,000 and one hard role; crew bots start small. Gadget routes retain their encounter state; rare crossings roll once per encounter.
 - New optional snapshot fields need defaults for older clients. Keep protocol 1, full-food snapshots, and `foodDeltas=1` compatibility unless a protocol migration is requested.
 
@@ -46,6 +46,7 @@ Read [README.md](README.md) for player behavior and deployment targets, [ios/REA
 - Unexpected disconnects hold runs outside combat for 30 seconds. Resume tokens are secret credentials; player IDs do not authorize recovery.
 - Preserve one-second Durable Object checkpoints, paused timers, room identity, monotonic ticks, expiry, and explicit-leave revocation. Active sessions have no fixed age limit.
 - Preserve crew join rate limiting, name validation, per-IP connection limits, socket input budgets, and trusted proxy-header checks.
+- Keep the 18 wardrobe IDs accepted by the server and rendered on both arena clients. Native coin ownership remains local.
 - Native save additions need optional fields or decoding defaults. Preserve the `hop` score key used by Countertop escape.
 - Browser `.dill` imports retain the `native` extras through reload and export, including iOS circuit progress. Shared arcade bests merge without discarding native-only fields.
 - Reset removes the native recovery copy as well as active progress. Resume credentials stay out of pet backups.

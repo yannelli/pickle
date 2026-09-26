@@ -35,17 +35,33 @@ enum ArenaSmile: String, CaseIterable {
             path.addQuadCurve(to:CGPoint(x:0.18,y:0.23),control:CGPoint(x:0.09,y:0.38))
             c.stroke(path,with:ink,style:stroke)
         case .grin:
-            path.move(to:CGPoint(x:-0.19,y:0.2)); path.addLine(to:CGPoint(x:0.19,y:0.2))
+            path.move(to:CGPoint(x:-0.19,y:0.2)); path.addQuadCurve(to:CGPoint(x:0.19,y:0.2),control:CGPoint(x:0,y:0.17))
             path.addQuadCurve(to:CGPoint(x:0,y:0.4),control:CGPoint(x:0.13,y:0.43))
             path.addQuadCurve(to:CGPoint(x:-0.19,y:0.2),control:CGPoint(x:-0.13,y:0.43))
             c.fill(path,with:ink)
-            c.fill(Path(CGRect(x:-0.13,y:0.205,width:0.26,height:0.055)),with:.color(Color(hex:0xF8F6ED)))
+            var teeth = Path()
+            teeth.move(to:CGPoint(x:-0.16,y:0.212))
+            teeth.addQuadCurve(to:CGPoint(x:0.16,y:0.212),control:CGPoint(x:0,y:0.193))
+            teeth.addQuadCurve(to:CGPoint(x:0.12,y:0.275),control:CGPoint(x:0.155,y:0.27))
+            teeth.addQuadCurve(to:CGPoint(x:0.04,y:0.27),control:CGPoint(x:0.08,y:0.292))
+            teeth.addQuadCurve(to:CGPoint(x:-0.04,y:0.27),control:CGPoint(x:0,y:0.3))
+            teeth.addQuadCurve(to:CGPoint(x:-0.12,y:0.275),control:CGPoint(x:-0.08,y:0.292))
+            teeth.addQuadCurve(to:CGPoint(x:-0.16,y:0.212),control:CGPoint(x:-0.155,y:0.27))
+            c.fill(teeth,with:.color(Color(hex:0xF8F6ED)))
         case .crooked:
             path.move(to:CGPoint(x:-0.16,y:0.16))
             path.addQuadCurve(to:CGPoint(x:0.13,y:0.28),control:CGPoint(x:-0.05,y:0.39))
             path.move(to:CGPoint(x:-0.195,y:0.175)); path.addLine(to:CGPoint(x:-0.135,y:0.15))
             c.stroke(path,with:ink,style:stroke)
         }
+    }
+}
+
+enum ArenaTear {
+    static func pose(remaining:Double,reduceMotion:Bool) -> (offset:Double,alpha:Double)? {
+        guard remaining > 0 else {return nil}
+        let progress = max(0,min(1,1 - remaining / 1.4))
+        return (reduceMotion ? 0 : progress * 2.1,reduceMotion ? 0.7 : 0.85 * (1 - progress))
     }
 }
 

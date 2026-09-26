@@ -1,8 +1,9 @@
-import { EAT_OVERLAP, drawSmile } from './arena-expression.mjs';
+import { WARDROBE_IDS, drawWardrobe } from './arena-wardrobe.mjs';
+import { EAT_OVERLAP, drawSmile, tearPose } from './arena-expression.mjs';
 export { EAT_OVERLAP, SMILES, skinSmile, pickupCue } from './arena-expression.mjs';
 
 export const BRINES = ['classic', 'garlic', 'spicy'];
-export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party'];
+export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party', ...WARDROBE_IDS];
 // Pet varieties, matching PickleVariety in the iOS app.
 export const VARIETIES = {
   dill: { brine: 'classic', color: '#78954B', light: '#A1B56B', dark: '#527637', shape: 'long' },
@@ -180,7 +181,7 @@ export function interpolate(previous, next, alpha) {
   return result;
 }
 // Drawn in world coordinates; screenScale keeps outlines and shields native-sized.
-export function drawPickle(ctx, p, x, y, size, time = 0, own = false, screenScale = 1) {
+export function drawPickle(ctx, p, x, y, size, time = 0, own = false, screenScale = 1, reduceMotion = false) {
   const ink = '#263E31', peach = '#F1C9B4';
   // Live split pieces are round pickle cross-sections until actually regrouped.
   const sliced = p.sliced === true || Array.isArray(p.cells) && p.cells.length > 1;
@@ -230,6 +231,13 @@ export function drawPickle(ctx, p, x, y, size, time = 0, own = false, screenScal
     else if (mood === 'sad') { ctx.ellipse(ex, ey + eye * .25, eye, eye * .95, 0, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.moveTo(ex - side * eye * .9, ey - eye * 1.5); ctx.lineTo(ex + side * eye, ey - eye * .8); ctx.stroke(); }
     else if (mood === 'calm' && blinking(p.ownerID || p.id, time)) { ctx.moveTo(ex - eye, ey); ctx.lineTo(ex + eye, ey); ctx.stroke(); }
     else { ctx.ellipse(ex + lookX, ey + lookY, eye * 1.1, eye * (mood === 'dash' ? .55 : 1.35), 0, 0, Math.PI * 2); ctx.fill(); }
+    const tear = side === 1 && mood === 'sad' && (!sliced || p.cells?.[0]?.id === p.id) ? tearPose(p.tear, reduceMotion) : null;
+    if (tear) {
+      const tx = ex + eye * .8, ty = ey + eye * (1.15 + tear.offset), width = eye * .34, height = eye * .55;
+      ctx.save(); ctx.globalAlpha *= tear.alpha; ctx.fillStyle = '#A9DCE5'; ctx.beginPath();
+      ctx.moveTo(tx, ty - height); ctx.quadraticCurveTo(tx + width, ty, tx, ty + height);
+      ctx.quadraticCurveTo(tx - width, ty, tx, ty - height); ctx.fill(); ctx.restore();
+    }
   }
   ctx.fillStyle = ink; ctx.beginPath();
   if (mood === 'dash') { ctx.moveTo(-size * .12, size * .26); ctx.lineTo(size * .12, size * .26); ctx.stroke(); }
@@ -237,7 +245,10 @@ export function drawPickle(ctx, p, x, y, size, time = 0, own = false, screenScal
   else if (mood === 'sad') { ctx.moveTo(-size * .13, size * .32); ctx.quadraticCurveTo(0, size * .14, size * .13, size * .32); ctx.stroke(); }
   else { ctx.lineWidth = Math.max(pixel, size * .035); drawSmile(ctx, varietyOf(p), size); }
   // Monochrome accessories share the native SF Symbol silhouette family.
-  if (p.outfit && p.outfit !== 'original') {
+  if (WARDROBE_IDS.includes(p.outfit)) {
+    ctx.save(); ctx.translate(0, -halfHeight); ctx.scale(halfWidth / 28, halfWidth / 28);
+    drawWardrobe(ctx, p.outfit); ctx.restore();
+  } else if (p.outfit && p.outfit !== 'original') {
     ctx.save(); ctx.translate(0, -halfHeight - size * .055); ctx.scale(size * .56 / 24, size * .45 / 24);
     ctx.fillStyle = ink; ctx.strokeStyle = ink; ctx.lineWidth = 2; ctx.lineJoin = 'round';
     if (p.outfit === 'sprout') {

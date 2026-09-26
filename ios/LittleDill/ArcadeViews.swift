@@ -462,16 +462,18 @@ struct ArcadeSheet: View {
         for cue in cues {
             switch cue {
             case .shuffle: store.sound(.dash)
-            case .good: store.sound(.crunch); store.feedback(.medium)
+            case .good:
+                store.sound(.crunch)
+                if engine?.game != .hop { store.feedback(.medium) }
             case .miss: store.sound(.pop); store.feedback(.rigid)
             case .select: store.feedback(.light)
             case let .note(pad): store.sound(Self.noteSounds[pad]); store.feedback(.light)
-            case .hop: store.sound(.hop); store.feedback(.medium)
-            case .landing: store.feedback(.soft)
-            case .ding: store.sound(.ding); store.feedback(.light)
-            case .streak: store.sound(.ding); store.feedback(.heavy)
+            case .hop: store.sound(.hop)
+            case .landing: break
+            case .ding: store.sound(.ding)
+            case .streak: store.sound(.ding); store.feedback(.light)
             case .chop: store.sound(.chop); store.feedback(.light)
-            case .bonk: store.sound(.boing); store.feedback(.heavy)
+            case .bonk: store.sound(.boing); store.feedback(engine?.game == .hop ? .medium : .heavy)
             case .fling: store.sound(.dash); store.feedback(.medium)
             case .splash: store.sound(.splash); store.feedback(.medium)
             case .clank: store.sound(.clank); store.feedback(.rigid)
@@ -484,7 +486,7 @@ struct ArcadeSheet: View {
         guard let game = engine, gained == nil else { return }
         gained = store.finishArcade(game: game.game.rawValue, score: game.score, completed: true)
         store.sound(game.score > 0 ? .win : .pet)
-        store.feedback(game.score > 0 ? .medium : .soft)
+        if game.game != .hop { store.feedback(game.score > 0 ? .medium : .soft) }
     }
 }
 

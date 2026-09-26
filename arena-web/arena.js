@@ -486,7 +486,7 @@ function render(now) {
         const before = previous.get(p.ownerID), after = latest.get(p.ownerID);
         const heading = before && after ? direction((after.x - before.x) / 4, (after.y - before.y) / 4) : { x: 0, y: 0 };
         p.lookX = heading.x; p.lookY = heading.y; p.danger = danger.get(cellKey(p.ownerID, p.id)) || 0; p.outline = membraneOutline(shape, m);
-        drawPickle(ctx, p, p.x, p.y, r, time, p.ownerID === ownID, zoom);
+        drawPickle(ctx, p, p.x, p.y, r, time, p.ownerID === ownID, zoom, reducedMotion.matches);
         visiblePlayers.push(p);
       }
       ctx.restore(); drawLabels(visiblePlayers); drawMap(cells, own); steer();

@@ -17,15 +17,73 @@ enum Brine: String, Codable, CaseIterable, Identifiable {
 
 enum Outfit: String, Codable, CaseIterable, Identifiable {
     case original, sprout, bow, shades, crown, party
+    case beanie, beret, headphones, sunhat, chef, cowboy
+    case pirate, mushroom, wizard, rainhat, halo, helmet
     var id: String { rawValue }
     var title: String {
-        switch self { case .original: return "Au naturel"; case .sprout: return "Plant parent"; case .bow: return "Sweet thing"; case .shades: return "Off duty"; case .crown: return "Big dill"; case .party: return "Party pickle" }
+        switch self {
+        case .original: return "Au naturel"
+        case .sprout: return "Plant parent"
+        case .bow: return "Sweet thing"
+        case .shades: return "Off duty"
+        case .crown: return "Big dill"
+        case .party: return "Party pickle"
+        case .beanie: return "Cozy knit"
+        case .beret: return "Art house"
+        case .headphones: return "In my zone"
+        case .sunhat: return "Sunny side"
+        case .chef: return "Little chef"
+        case .cowboy: return "Wild west"
+        case .pirate: return "Captain crunch"
+        case .mushroom: return "Forest friend"
+        case .wizard: return "Spellbound"
+        case .rainhat: return "Rainy day"
+        case .halo: return "Sweet angel"
+        case .helmet: return "Space cadet"
+        }
     }
     var symbol: String {
-        switch self { case .original: return "heart"; case .sprout: return "leaf.fill"; case .bow: return "gift.fill"; case .shades: return "sunglasses.fill"; case .crown: return "crown.fill"; case .party: return "party.popper.fill" }
+        switch self {
+        case .original: return "heart"
+        case .sprout: return "leaf.fill"
+        case .bow: return "gift.fill"
+        case .shades: return "sunglasses.fill"
+        case .crown: return "crown.fill"
+        case .party: return "party.popper.fill"
+        case .beanie: return "snowflake"
+        case .beret: return "paintpalette.fill"
+        case .headphones: return "headphones"
+        case .sunhat: return "sun.max.fill"
+        case .chef: return "fork.knife"
+        case .cowboy: return "star.fill"
+        case .pirate: return "sailboat.fill"
+        case .mushroom: return "leaf.circle.fill"
+        case .wizard: return "sparkles"
+        case .rainhat: return "cloud.rain.fill"
+        case .halo: return "circle.dashed"
+        case .helmet: return "moon.stars.fill"
+        }
     }
     var cost: Int {
-        switch self { case .original, .sprout: return 0; case .bow: return 30; case .shades: return 50; case .crown: return 90; case .party: return 120 }
+        switch self {
+        case .original, .sprout: return 0
+        case .bow: return 30
+        case .shades: return 50
+        case .crown: return 90
+        case .party: return 120
+        case .beanie: return 35
+        case .beret: return 45
+        case .headphones: return 55
+        case .sunhat: return 60
+        case .chef: return 65
+        case .cowboy: return 80
+        case .pirate: return 90
+        case .mushroom: return 95
+        case .wizard: return 110
+        case .rainhat: return 70
+        case .halo: return 130
+        case .helmet: return 140
+        }
     }
 }
 

@@ -113,7 +113,7 @@ enum PickleArtist {
 
     static func drawPickle(_ c: GraphicsContext, f: PickleFrame, look: PickleLook, pose: PicklePose, time: Double) {
         let skin = look.sick ? Color(hex: 0x8BA46A) : Color(hex: look.variety.color)
-        let sprout = look.accessories && look.outfit == .sprout && !PetArt.hatIDs.contains(look.hat ?? "")
+        let sprout = look.accessories && look.outfit == .sprout
         var clipped = c
         if look.bites > 0 { clipped.clip(to: biteClip(f, bites: look.bites)) }
         let outline = bodyPath(CGRect(x: -1.5, y: -1.5, width: f.w + 3, height: f.h + 3), f.radii)
@@ -302,11 +302,12 @@ enum PickleArtist {
         let vibe = look.vibe?.rawValue ?? ""
         let vibeFace = PetArt.worn(vibe + ".face")
         let lookHat = look.hat.map { PetArt.hatIDs.contains($0) } ?? false
-        let lookGlasses = look.hat != nil && !lookHat
+        let outfitHat = look.outfit != .original && look.outfit != .shades
         if sprout { drawSprout(hat, look: look) }
-        if !lookHat { drawOutfit(hat, outfit: look.outfit) }
-        if look.outfit == .shades && vibeFace.isEmpty && !lookGlasses { drawParts(PetArt.face("sunglasses"), in: face, accent: ink) }
-        if let id = look.hat { drawParts(lookHat ? PetArt.hat(id) : PetArt.face(id), in: lookHat ? hat : face, accent: accent) }
+        if outfitHat { drawOutfit(hat, outfit: look.outfit) }
+        else if lookHat, let id = look.hat { drawParts(PetArt.hat(id), in: hat, accent: accent) }
+        if look.outfit == .shades { drawParts(PetArt.face("sunglasses"), in: face, accent: ink) }
+        else if let id = look.hat, !lookHat { drawParts(PetArt.face(id), in: face, accent: accent) }
         if look.elder != nil && lookHat && vibeFace.isEmpty && look.outfit != .shades { drawParts(PetArt.face("readers"), in: face, accent: accent) }
         drawParts(vibeFace, in: face, accent: accent)
         drawParts(PetArt.worn(vibe + ".held"), in: held, accent: accent)
@@ -345,6 +346,9 @@ enum PickleArtist {
             c.fill(Path(ellipseIn: CGRect(x: 2, y: -6, width: 6, height: 6)), with: .color(DillTheme.cream))
             let pom = Path(ellipseIn: CGRect(x: -4.5, y: -35.5, width: 9, height: 9))
             c.fill(pom, with: .color(DillTheme.lime)); c.stroke(pom, with: .color(ink), style: thin)
+        case .beanie, .beret, .headphones, .sunhat, .chef, .cowboy,
+             .pirate, .mushroom, .wizard, .rainhat, .halo, .helmet:
+            WardrobeArt.draw(c, outfit: outfit)
         }
     }
 

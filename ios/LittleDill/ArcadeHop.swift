@@ -10,7 +10,7 @@ enum HopRules {
 }
 
 struct HopObstacle: Equatable {
-    enum Kind: Equatable { case salt, fork, pepper, spoon }
+    enum Kind: CaseIterable, Equatable { case salt, fork, pepper, spoon }
     let kind: Kind
     var x: Double
     var passed = false
@@ -53,12 +53,15 @@ struct HopRun: ArcadePlay {
     private(set) var streak = 0
     private(set) var lastLanding = -1.0
     private(set) var lastCollect = -1.0
+    let scenerySeed: UInt64
     private var crashTime = 0.0
     private var queuedUntil = -1.0
-    private var spawned = 1
     private var rng: ArcadeRNG
 
-    init(seed: UInt64) { rng = ArcadeRNG(seed: seed) }
+    init(seed: UInt64) {
+        scenerySeed = seed
+        rng = ArcadeRNG(seed: seed)
+    }
 
     var isFinished: Bool { finishMessage != nil }
     func meta(best: Int) -> String { "\(score) PTS · BEST \(best)" }
@@ -144,8 +147,17 @@ struct HopRun: ArcadePlay {
         }
         obstacles.removeAll { $0.x + $0.width < -50 }
         if !crashed, let last = obstacles.last, last.x < ArcadeWorld.width - 148 {
-            let gap = Double.random(in: (last.kind == .fork ? 225.0 : 190.0)...250, using: &rng)
-            obstacles.append(makeObstacle(at: last.x + gap))
+            var next = makeObstacle(after: last.kind)
+            let tall = last.height > 40 || next.height > 40
+            let rhythm = Int.random(in: 0..<5, using: &rng)
+            let gap: Double
+            switch rhythm {
+            case 0, 1: gap = Double.random(in: (tall ? 218.0 : 170.0)...(tall ? 240.0 : 193.0), using: &rng)
+            case 2, 3: gap = Double.random(in: 211...254, using: &rng)
+            default: gap = Double.random(in: 275...320, using: &rng)
+            }
+            next.x = last.x + gap
+            obstacles.append(next)
         }
         return cues
     }
@@ -157,19 +169,13 @@ struct HopRun: ArcadePlay {
             && y + 19 > HopRules.ground - obstacle.height + 3
     }
 
-    private mutating func makeObstacle(at x: Double) -> HopObstacle {
-        let roll = Double.random(in: 0..<1, using: &rng)
-        let kind: HopObstacle.Kind
-        switch spawned % 6 {
-        case 2: kind = .spoon
-        case 4: kind = .pepper
-        default: kind = roll < 0.47 ? .fork : .salt
-        }
-        let hasDill = spawned % 3 != 0
-        let offset = spawned % 2 == 0 ? -60.0 : 0.0
-        let dillY = offset < 0 ? 390.0 : 350.0
-        let obstacle = HopObstacle(kind: kind, x: x, hasDill: hasDill, dillOffset: offset, dillY: dillY)
-        spawned += 1
+    private mutating func makeObstacle(after previous: HopObstacle.Kind) -> HopObstacle {
+        let choices = HopObstacle.Kind.allCases.filter { $0 != previous }
+        let kind = choices[Int.random(in: 0..<choices.count, using: &rng)]
+        let hasDill = Int.random(in: 0..<4, using: &rng) != 0
+        let offset = [-72.0, -48.0, 0.0][Int.random(in: 0..<3, using: &rng)]
+        let dillY = offset < 0 ? 385.0 : 350.0
+        let obstacle = HopObstacle(kind: kind, x: 0, hasDill: hasDill, dillOffset: offset, dillY: dillY)
         return obstacle
     }
 }
@@ -201,7 +207,7 @@ struct HopBoard: View {
     private func draw(_ c: GraphicsContext,height:Double) {
         let w = ArcadeWorld.width
         c.fill(Path(CGRect(x: 0, y: 0, width: w, height: height)), with: .color(Color(hex: 0xF6F0DD)))
-        HopScenery.draw(c, height: height, distance: run.distance, reduceMotion: reduceMotion)
+        HopScenery.draw(c, height: height, distance: run.distance, seed: run.scenerySeed, reduceMotion: reduceMotion)
         var play = c
         play.translateBy(x:0,y:height - ArcadeWorld.height)
         drawJar(play)
@@ -216,8 +222,6 @@ struct HopBoard: View {
             if obstacle.hasDill { drawDill(play, obstacle) }
         }
         drawPickle(play)
-        let zone = ["PANTRY", "SINK", "STOVE"][Int(run.distance / HopRules.zoneLength) % 3]
-        ArcadeArt.caption(c, zone, at: CGPoint(x: 292, y: 31), size: 12)
         if run.started {
             ArcadeArt.score(c, run.score, at: CGPoint(x: w / 2, y: 30), anchor: .center)
             if run.streak >= 2 {

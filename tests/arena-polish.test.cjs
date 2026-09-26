@@ -28,6 +28,31 @@ test('every skin draws a distinct mouth and unknown skins keep the default', asy
   assert.equal(skinSmile('unreleased'), skinSmile('dill'));
 });
 
+test('chili upper teeth follow the grin curve', async () => {
+  const { drawSmile } = await import('../arena-web/arena-expression.mjs');
+  const calls=[], ctx=new Proxy({lineWidth:1},{get:(target,key)=>key in target?target[key]:(...args)=>calls.push([key,...args]),set:(target,key,value)=>(target[key]=value,true)});
+  drawSmile(ctx,'chili',60);
+  assert.equal(calls.filter(([name])=>name==='fillRect').length,0);
+  assert.ok(calls.filter(([name])=>name==='quadraticCurveTo').length>=7);
+});
+
+test('one small tear glides and fades, with a still Reduce Motion pose', async () => {
+  const { tearPose } = await import('../arena-web/arena-expression.mjs');
+  const { drawPickle, flattenCells } = await import('../arena-web/arena-core.mjs');
+  assert.equal(tearPose(undefined),null);assert.equal(tearPose(0),null);
+  assert.deepEqual(tearPose(1.4),{offset:0,alpha:.85});
+  assert.deepEqual(tearPose(.7),{offset:1.05,alpha:.425});
+  assert.deepEqual(tearPose(.7,true),tearPose(1.4,true));
+  const draws=[];
+  const ctx=new Proxy({lineWidth:1,globalAlpha:1},{get:(target,key)=>key==='fill'?()=>draws.push([target.fillStyle,target.globalAlpha]):key in target?target[key]:()=>{},set:(target,key,value)=>(target[key]=value,true)});
+  drawPickle(ctx,{variety:'chili',alive:true,hurt:15,tear:1.4},0,0,50);
+  assert.equal(draws.filter(([color])=>color==='#A9DCE5').length,1);
+  draws.length=0;
+  const owner={id:'owner',variety:'chili',alive:true,hurt:15,tear:1.4,mass:120,cells:[{id:'a',x:0,y:0,mass:60},{id:'b',x:100,y:0,mass:60}]};
+  for(const piece of flattenCells([owner])) drawPickle(ctx,piece,0,0,50);
+  assert.equal(draws.filter(([color])=>color==='#A9DCE5').length,1);
+});
+
 test('dense food collection stays quiet and does not queue delayed pickup sounds', async () => {
   const { pickupCue } = await import('../arena-web/arena-expression.mjs');
   const heard = [];

@@ -20,6 +20,7 @@ final class ArcadeActionTests: XCTestCase {
         var cues: [ArcadeCue] = []
         XCTAssertEqual(run.hop(), [.hop])
         var seenKinds = Set<String>()
+        var gaps: [Double] = []
         for _ in 0..<(60 * 15) {
             let next = run.obstacles.first { !$0.passed }
             if let next, next.x < 150, run.y >= HopRules.restY, run.vy >= 0 {
@@ -27,6 +28,7 @@ final class ArcadeActionTests: XCTestCase {
             }
             cues += run.advance(by: 1.0 / 60)
             for obstacle in run.obstacles { seenKinds.insert(String(describing: obstacle.kind)) }
+            for pair in zip(run.obstacles, run.obstacles.dropFirst()) { gaps.append(pair.1.x - pair.0.x) }
             if run.crashed { break }
         }
         XCTAssertFalse(run.crashed, "score \(run.score)")
@@ -37,9 +39,20 @@ final class ArcadeActionTests: XCTestCase {
         XCTAssertTrue(cues.contains(.good))
         XCTAssertTrue(cues.contains(.streak))
         XCTAssertTrue(cues.contains(.landing))
-        for pair in zip(run.obstacles, run.obstacles.dropFirst()) {
-            XCTAssertGreaterThanOrEqual(pair.1.x - pair.0.x, 189.9)
+        XCTAssertGreaterThanOrEqual(gaps.min() ?? 0, 169.9)
+        XCTAssertLessThan(gaps.min() ?? 0, 200)
+        XCTAssertGreaterThan(gaps.max() ?? 0, 270)
+    }
+
+    func testHopScenesVaryWithoutAdjacentRepeats() {
+        let scenes = (0..<40).map { HopScenery.scene(seed: 3, index: $0) }
+        XCTAssertEqual(scenes, (0..<40).map { HopScenery.scene(seed: 3, index: $0) })
+        XCTAssertEqual(Set(scenes.map { String(describing: $0.kind) }).count, 5)
+        XCTAssertGreaterThan(Set(scenes.map { "\($0.kind)-\($0.variant)" }).count, 10)
+        for (left, right) in zip(scenes, scenes.dropFirst()) {
+            XCTAssertNotEqual(left.kind, right.kind)
         }
+        XCTAssertNotEqual(scenes, (0..<40).map { HopScenery.scene(seed: 19, index: $0) })
     }
 
     func testHopBuffersATapJustBeforeLanding() {

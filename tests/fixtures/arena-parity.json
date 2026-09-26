@@ -1,5 +1,5 @@
 {
-"rules": {"maxCells":8,"splitMinMass":60,"splitCooldown":1,"mergeSeconds":12,"reconnectGraceSeconds":30,"hazardRadius":150,"hazardSlow":0.5,"leakFloor":500,"eatOverlap":0.6,"hazardSplitMass":2500,"hazardSplitCooldown":2},
+"rules": {"maxCells":8,"splitMinMass":60,"splitCooldown":1,"mergeSeconds":12,"reconnectGraceSeconds":30,"hazardRadius":150,"hazardSlow":0.5,"leakFloor":500,"eatOverlap":0.6,"hazardSplitMass":2500,"hazardSplitCooldown":2,"hurtSeconds":15,"tearSeconds":1.4},
 "splits": [
   {"name":"whole","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":60,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60}]},"enabled":true},
   {"name":"just too small","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":59.9,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":59.9}]},"enabled":false},

@@ -557,7 +557,7 @@ struct ArenaCanvas: View {
                 var piece = context
                 piece.translateBy(x:position.x,y:position.y)
                 ArenaCanvas.drawPiece(piece,player:p,r:r,own:p.id == me.id,mood:ArenaCanvas.mood(p,cell:cell,pieces:pieces),gaze:gaze,time:time,
-                                      danger:danger[body.key] ?? 0,outline:body.outline(scale:zoom))
+                                      danger:danger[body.key] ?? 0,outline:body.outline(scale:zoom),reduceMotion:still,showTear:p.pieces.first?.id == cell.id)
                 let label = p.id == me.id ? "you" : p.name
                 context.draw(Text(label).font(.system(size:11,weight:p.id == me.id ? .bold : .medium,design:.rounded)).foregroundStyle(DillTheme.ink),at:CGPoint(x:position.x,y:position.y+r+14))
             }
@@ -783,7 +783,7 @@ struct ArenaCanvas: View {
 
     /// One piece at the context origin, matching `drawPickle` in arena-web/arena-core.mjs.
     /// `outline` holds membrane points in the piece's rotated frame; without it the undeformed shape is drawn.
-    static func drawPiece(_ context:GraphicsContext,player p:ArenaPlayer,r:Double,own:Bool,mood:Mood,gaze:CGVector,time:Double,danger:Double = 0,outline:[CGPoint]? = nil) {
+    static func drawPiece(_ context:GraphicsContext,player p:ArenaPlayer,r:Double,own:Bool,mood:Mood,gaze:CGVector,time:Double,danger:Double = 0,outline:[CGPoint]? = nil,reduceMotion:Bool = false,showTear:Bool = true) {
         let ink = DillTheme.ink, variety = p.look, cucumber = p.isCucumber
         let shape = ArenaShape(p,r:r), halfWidth = shape.hw, halfHeight = shape.hh
         var c = context
@@ -835,6 +835,15 @@ struct ArenaCanvas: View {
                 c.fill(Path(ellipseIn:CGRect(x:ex+lookX-eye*1.1,y:ey+lookY-eye*tall,width:eye*2.2,height:eye*tall*2)),with:.color(ink))
             }
             c.stroke(stroke,with:.color(ink),style:line)
+            if side == 1, showTear, mood == .sad, let tear = ArenaTear.pose(remaining:p.tear ?? 0,reduceMotion:reduceMotion) {
+                let tx = ex + eye*0.8, ty = ey + eye*(1.15 + tear.offset)
+                let width = eye*0.34, height = eye*0.55
+                var drop = Path()
+                drop.move(to:CGPoint(x:tx,y:ty-height))
+                drop.addQuadCurve(to:CGPoint(x:tx,y:ty+height),control:CGPoint(x:tx+width,y:ty))
+                drop.addQuadCurve(to:CGPoint(x:tx,y:ty-height),control:CGPoint(x:tx-width,y:ty))
+                c.fill(drop,with:.color(Color(hex:0xA9DCE5).opacity(tear.alpha)))
+            }
         }
         switch mood {
         case .dash:
@@ -849,7 +858,12 @@ struct ArenaCanvas: View {
         case .calm:
             ArenaSmile(variety:variety.id).draw(c,r:r,lineWidth:max(1,r*0.035))
         }
-        if p.outfit != .original {
+        if WardrobeArt.newOutfits.contains(p.outfit) {
+            var hat = c
+            hat.translateBy(x:0,y:-halfHeight)
+            hat.scaleBy(x:halfWidth/28,y:halfWidth/28)
+            WardrobeArt.draw(hat,outfit:p.outfit)
+        } else if p.outfit != .original {
             let symbol = c.resolve(Image(systemName:p.outfit.symbol).resizable())
             c.draw(symbol,in:CGRect(x:-r*0.28,y:-halfHeight-r*0.28,width:r*0.56,height:r*0.45))
         }

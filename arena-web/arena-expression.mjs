@@ -1,6 +1,11 @@
 export const EAT_OVERLAP = .6;
 export const SMILES = Object.freeze({ dill: 'smile', gherkin: 'beam', garlic: 'smirk', butter: 'dimples', chili: 'grin', pepper: 'crooked' });
 export const skinSmile = variety => SMILES[variety] || SMILES.dill;
+export function tearPose(remaining, reduceMotion = false) {
+  if (!(remaining > 0)) return null;
+  const progress = Math.max(0, Math.min(1, 1 - remaining / 1.4));
+  return { offset: reduceMotion ? 0 : progress * 2.1, alpha: reduceMotion ? .7 : .85 * (1 - progress) };
+}
 
 export function pickupCue(previous, now) {
   const streak = previous && now - previous.at <= 1 ? Math.min(5, previous.streak + 1) : 0;
@@ -23,9 +28,13 @@ export function drawSmile(ctx, variety, size) {
       ctx.moveTo(-.18, .23); ctx.quadraticCurveTo(-.09, .38, 0, .23);
       ctx.quadraticCurveTo(.09, .38, .18, .23); ctx.stroke(); break;
     case 'grin':
-      ctx.moveTo(-.19, .2); ctx.lineTo(.19, .2); ctx.quadraticCurveTo(.13, .43, 0, .4);
-      ctx.quadraticCurveTo(-.13, .43, -.19, .2); ctx.fill();
-      ctx.save(); ctx.fillStyle = '#F8F6ED'; ctx.fillRect(-.13, .205, .26, .055); ctx.restore(); break;
+      ctx.moveTo(-.19, .2); ctx.quadraticCurveTo(0, .17, .19, .2);
+      ctx.quadraticCurveTo(.13, .43, 0, .4); ctx.quadraticCurveTo(-.13, .43, -.19, .2); ctx.fill();
+      ctx.save(); ctx.fillStyle = '#F8F6ED'; ctx.beginPath();
+      ctx.moveTo(-.16, .212); ctx.quadraticCurveTo(0, .193, .16, .212);
+      ctx.quadraticCurveTo(.155, .27, .12, .275); ctx.quadraticCurveTo(.08, .292, .04, .27);
+      ctx.quadraticCurveTo(0, .3, -.04, .27); ctx.quadraticCurveTo(-.08, .292, -.12, .275);
+      ctx.quadraticCurveTo(-.155, .27, -.16, .212); ctx.fill(); ctx.restore(); break;
     case 'crooked':
       ctx.moveTo(-.16, .16); ctx.quadraticCurveTo(-.05, .39, .13, .28); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(-.195, .175); ctx.lineTo(-.135, .15); ctx.stroke(); break;
