@@ -9,6 +9,7 @@ import SwiftUI
     /// Bites taken during an open "eat the pickle" prompt; nil when no prompt is open.
     @Published private(set) var snackBites: Int?
     @Published private(set) var arcadeActive = false
+    private var activeCircuit: (game: ArcadeGame, day: String)?
     @Published private var previousPet: PetState?
     var canUndoRestore: Bool { previousPet != nil }
     private var snackUntil: Date?
@@ -50,7 +51,7 @@ import SwiftUI
     private func sync(at time: Date) {
         let before = PetLife.stage(pet.life, now: pet.life.updatedAt)
         pet.refresh(at: time)
-        if pet.life.dead { arcadeActive = false; snackBites = nil; snackUntil = nil }
+        if pet.life.dead { arcadeActive = false; activeCircuit = nil; snackBites = nil; snackUntil = nil }
         let after = PetLife.stage(pet.life, now: PetLife.ms(time))
         if after != before && pet.life.phase == .living && !pet.life.dead { speech = "look at you grow. hello, \(after.rawValue)!" }
     }
@@ -94,14 +95,25 @@ import SwiftUI
     }
     /// Spends 6 energy to enter an arcade game, like the web startGame().
     func startArcade() -> Bool {
-        guard snackBites == nil else { return false }
+        guard snackBites == nil, !arcadeActive else { return false }
         let time = now
         sync(at: time)
         guard pet.startArcade(at: time) else {
             if pet.adopted && !pet.life.dead && !pet.life.sleeping { speech = "a little nap first! games need 6 energy." }
             return false
         }
-        arcadeActive = true; save(); return true
+        arcadeActive = true; activeCircuit = nil; save(); return true
+    }
+    var circuitToday: ArcadeCircuit {
+        let day = DailyChallenge.today(now)
+        if let progress = pet.arcadeCircuit, progress.day == day { return progress }
+        return ArcadeCircuit(day: day)
+    }
+    func startCircuit(game: ArcadeGame) -> String? {
+        let day = DailyChallenge.today(now)
+        guard ArcadeCircuit.games.contains(game), startArcade() else { return nil }
+        activeCircuit = (game, day)
+        return day
     }
     /// Returns the happiness gained. `completed == false` leaves the game without a reward, like the web endGame().
     @discardableResult func finishArcade(game: String, score: Int, completed: Bool) -> Int {
@@ -109,7 +121,16 @@ import SwiftUI
         sync(at: time)
         guard arcadeActive else { return 0 }
         arcadeActive = false
+        let circuit = activeCircuit
+        activeCircuit = nil
+        let eligible = completed && pet.adopted && !pet.life.dead
         let added = pet.finishArcade(game: game, score: score, completed: completed, at: time)
+        if eligible, let circuit, circuit.game.rawValue == game,
+           pet.arcadeCircuit.map({ $0.day <= circuit.day }) ?? true {
+            var progress = pet.arcadeCircuit.flatMap { $0.day == circuit.day ? $0 : nil } ?? ArcadeCircuit(day: circuit.day)
+            progress.record(game: circuit.game, score: score)
+            pet.arcadeCircuit = progress
+        }
         save(); return added
     }
     /// Opens the web "are you going to EAT me?!" prompt without biting.
@@ -151,7 +172,7 @@ import SwiftUI
     /// Starts a new egg after death. Coins, outfits and other native progress stay.
     func restart() {
         guard pet.life.dead else { return }
-        arcadeActive = false; snackBites = nil; snackUntil = nil; previousPet = nil
+        arcadeActive = false; activeCircuit = nil; snackBites = nil; snackUntil = nil; previousPet = nil
         pet.life = PetLife.fresh(now: PetLife.ms(now)); pet.lastPetAt = nil
         speech = "a fresh start. a brand-new little dill."
         save()
@@ -182,7 +203,7 @@ import SwiftUI
         return true
     }
     private func replace(with state: PetState, at time: Date) {
-        arcadeActive = false; snackBites = nil; snackUntil = nil; speech = nil
+        arcadeActive = false; activeCircuit = nil; snackBites = nil; snackUntil = nil; speech = nil
         pet = state; pet.lastPetAt = nil
         sync(at: time); save()
     }
@@ -197,8 +218,9 @@ import SwiftUI
     func setSounds(_ enabled: Bool) { pet.soundEnabled = enabled; save(); if !enabled {DillAudio.shared.stop()} }
     func sound(_ cue:DillSound) {if pet.sounds {DillAudio.shared.play(cue)}}
     func reset() {
-        arcadeActive = false; snackBites = nil; snackUntil = nil; previousPet = nil; speech = nil
+        arcadeActive = false; activeCircuit = nil; snackBites = nil; snackUntil = nil; previousPet = nil; speech = nil
         defaults.removeObject(forKey: recoveryKey)
+        defaults.removeObject(forKey: ArenaResume.key)
         pet = PetState(now: now); save()
     }
     func feedback(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .light) {

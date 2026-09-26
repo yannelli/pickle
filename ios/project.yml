@@ -29,7 +29,10 @@ targets:
   LittleDillTests:
     type: bundle.unit-test
     platform: iOS
-    sources: [LittleDillTests]
+    sources:
+      - LittleDillTests
+      - path: ../tests/fixtures/arena-parity.json
+        buildPhase: resources
     dependencies:
       - target: LittleDill
     settings:

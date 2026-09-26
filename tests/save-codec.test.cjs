@@ -43,6 +43,30 @@ test('each export has a fresh IV and ciphertext', async () => {
   for (const key of ['iv', 'data']) assert.notEqual(first[key], second[key]);
 });
 
+test('native progress survives iOS to web to iOS with a separate snapshot', async () => {
+  const native = { coins: 42, outfit: 'crown', unlocked: ['crown'], arcade: { hop: 12, hunt: 3 },
+    arcadeCircuit: { day: '2026-09-25', scores: { hop: 12, chop: 30, toss: 8 } } };
+  const first = saves.encode(pet, native);
+  native.coins = 0;
+  const imported = await saves.decode(await first);
+  assert.equal(imported.native.coins, 42);
+  imported.pet.fullness = 95;
+  const exported = await saves.decode(await saves.encode(imported.pet, imported.native));
+  assert.equal(exported.pet.fullness, 95);
+  assert.deepEqual(exported.native, imported.native);
+  assert.equal(exported.native.arcadeCircuit.scores.toss, 8);
+});
+
+test('plain web backups omit native defaults and oversized extras remain readable or fail', async () => {
+  assert.equal(Object.hasOwn(await saves.decode(await saves.encode(pet)), 'native'), false);
+  const extras = { coins: 40, scores: Array(500).fill({ d: '2026-09-25', s: 100, t: 1800000000000 }), rewardedDays: Array(100).fill('2026-09-25') };
+  const compact = await saves.decode(await saves.encode(pet, extras));
+  assert.equal(compact.native.coins, 40);
+  assert.deepEqual(compact.native.scores, []);
+  assert.equal(compact.native.rewardedDays.length, 7);
+  await assert.rejects(saves.encode(pet, { custom: 'a'.repeat(5000) }), /download could not/);
+});
+
 test('altered ciphertext or IV fail authentication', async () => {
   const raw = await backup();
   for (const field of ['data', 'iv']) {

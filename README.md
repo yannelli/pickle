@@ -2,7 +2,7 @@
 
 # little dill.
 
-Raise a pickle pet in your browser.
+Raise a pickle pet in your browser or on iPhone and iPad.
 
 Open `index.html` to play, or serve this folder with any static web server. Progress saves in your browser.
 
@@ -40,6 +40,24 @@ The app automatically migrates old local saves and encrypted v1 backups to a sep
 - Do not eat your pickle. Type a certain three-letter word or hold your pickle down for a moment, and the app asks you to reconsider. Twice.
 - Games pause while the page is hidden or a save preview is open. **Esc**, Games, or Back ends the current game without a completion reward.
 
+Feeding rotates through carrot, strawberry, broccoli, apple, and cheese on web and iOS. Successful feeds advance the sequence, which is remembered on that device; refused feeds leave it unchanged.
+
+The native arcade also has three full-screen action games: Countertop escape (cross pantry, sink, and stove sections with varied kitchen obstacles and dill streaks), Cuke chop (slice cucumbers while sparing your pickle), and Jar toss (aim for a brine jar). Its Daily Circuit combines seeded runs of those games into a 300-point score with medals. Native arena controls include swappable thumbstick placement, cooldown indicators, and distinct haptic cues. See the [iOS guide](ios/README.md) for controls and native features.
+
+## Brine Royale
+
+Play at [arena.littledill.app](https://arena.littledill.app) or enter from the iOS app. Both clients share public gardens and private crew rooms, with the server deciding movement, mass, eating, and gadget effects.
+
+- Split pieces of at least 60 mass, up to eight pieces, with a one-second split cooldown and a 12-second regroup timer. Dash requires 35 mass and costs 5 mass.
+- A hunter needs at least 1.22 times the prey's mass. Eating requires the prey's center to cross `hunterRadius - 0.6 * preyRadius`. Red body outlines indicate nearby threats; the drawn membrane is cosmetic.
+- Three kitchen gadgets, a slicer, salt shaker, and grater, slow touching pieces to half speed and spit leaked mass back into the garden. Gadget draining stops at 500 mass per piece. Touching pieces over 2,500 mass split automatically, subject to the eight-piece limit and a two-second gadget split cooldown.
+- Six varieties have distinct shapes, colors, and smiles. Losing a piece briefly makes the survivor sad. Zoom eases between sizes, and the outline dents at contacts.
+- Public gardens include bots at varied starting masses up to 5,000, with larger starts less common, and one harder opponent. Bots vary in awareness and risk-taking. Gadget encounters use committed routes, curiosity, retreat, and rare crossings.
+- Gadget sounds follow the same synthesis and timing on both platforms. Four shared pickup clips rotate at a quieter, limited cadence; losing a piece or being eaten uses a crunch.
+- Reconnect within 30 seconds to recover the same run, pieces, mass, and paused timers. One-second Durable Object checkpoints support server restart recovery. Explicitly leaving ends recovery; there is no fixed session-length limit.
+
+The rule source is `server/arena-engine.mjs`. Web/native parity checks share `tests/fixtures/arena-parity.json`; run them with the test commands below. The arena requires a connection; pet care and native solo games work offline.
+
 ## Push reminders
 
 Reminders are off by default. The app requests permission after you press **Enable reminders**. The Push API and a Cloudflare Durable Object alarm deliver reminders even when the app is closed.
@@ -65,6 +83,7 @@ Audio starts after a tap or keypress. The browser remembers the separate **Music
 - **Download save:** click to create an encrypted `.dill` file without a password or account. Keep the file to move your progress between browsers or devices.
 - **Import save:** select the file, check the saved age, condition and stats, then choose **Restore this pickle**. The current pickle stays intact until confirmation. **Undo import** restores it during the same page visit.
 - The app processes files on the device without uploading them. Imports account for elapsed time the same way local restores do. They preserve the name, variety, and hatch/growth timestamps. If storage is blocked, file backups still work when browser encryption is available.
+- iOS backups also carry native coins, outfits, scores, and settings. The browser preserves those fields through import, local reload, and export, so a round trip back to iOS keeps native progress. Shared arcade bests are merged on export.
 
 Backup files use browser-native [AES-256-GCM authenticated encryption](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt#supported_algorithms) with a fresh random IV for every export. Imports reject unsupported formats, invalid progress, oversized files and altered encrypted contents.
 
@@ -126,7 +145,8 @@ The `CREW_JOINS` rate limit in `wrangler.arena.jsonc` allows 10 crew-room joins 
 ```sh
 node --test tests/*.test.cjs
 npx wrangler deploy --dry-run
+npx wrangler deploy --dry-run --config wrangler.arena.jsonc
 npx wrangler dev
 ```
 
-Tests cover daily care, weekend absences, continuous neglect, indefinite life with daily care, all elder boundaries, all varieties, migration and encrypted saves, arcade rewards, audio lifecycle, VAPID signature verification, time zones/DST, reminder deduplication, cancellation, expired subscriptions, and API input boundaries. To check push delivery, deploy over HTTPS, enable reminders from a supported browser or Home Screen app, and press **Send a test**.
+Tests cover pet care and feeding variety, life stages, encrypted save round trips, arcade rewards, audio lifecycle, arena splits and gadgets, bot behavior, reconnect/checkpoint recovery, web/native parity, reminder scheduling, and API input boundaries. Native and explicit WebSocket integration commands are in [ios/README.md](ios/README.md#verification). To check push delivery, deploy over HTTPS, enable reminders from a supported browser or Home Screen app, and press **Send a test**.

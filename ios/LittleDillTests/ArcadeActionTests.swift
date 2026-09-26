@@ -12,23 +12,62 @@ final class ArcadeActionTests: XCTestCase {
         XCTAssertEqual(Set(ArcadeGame.allCases.map(\.rawValue)), Set(PetState.arcadeGames))
     }
 
-    func testHopWaitsForTheFirstTapThenScoresForks() {
+    func testHopWaitsForTheFirstTapThenClearsCountertopObstacles() {
         var run = HopRun(seed: 3)
         _ = run.advance(by: 2)
         XCTAssertFalse(run.started)
-        XCTAssertEqual(run.forks.first?.x, ArcadeWorld.width + 60)
+        XCTAssertEqual(run.obstacles.first?.x, HopRules.firstX)
         var cues: [ArcadeCue] = []
-        var lastTap = -1.0
         XCTAssertEqual(run.hop(), [.hop])
-        for _ in 0..<(60 * 12) {
-            let next = run.forks.first { $0.x + HopRules.forkWidth > HopRules.pickleX - HopRules.radius }
-            let target = (next?.gapY ?? 270) + 22
-            if run.y > target, run.time - lastTap > 0.12 { cues += run.hop(); lastTap = run.time }
+        var seenKinds = Set<String>()
+        for _ in 0..<(60 * 15) {
+            let next = run.obstacles.first { !$0.passed }
+            if let next, next.x < 150, run.y >= HopRules.restY, run.vy >= 0 {
+                cues += run.hop()
+            }
             cues += run.advance(by: 1.0 / 60)
+            for obstacle in run.obstacles { seenKinds.insert(String(describing: obstacle.kind)) }
+            if run.crashed { break }
         }
         XCTAssertFalse(run.crashed, "score \(run.score)")
-        XCTAssertGreaterThanOrEqual(run.score, 5)
+        XCTAssertGreaterThanOrEqual(run.cleared, 10)
+        XCTAssertGreaterThan(run.distance, HopRules.zoneLength * 2)
+        XCTAssertEqual(seenKinds, Set(["salt", "fork", "pepper", "spoon"]))
         XCTAssertTrue(cues.contains(.ding))
+        XCTAssertTrue(cues.contains(.good))
+        XCTAssertTrue(cues.contains(.streak))
+        XCTAssertTrue(cues.contains(.landing))
+        for pair in zip(run.obstacles, run.obstacles.dropFirst()) {
+            XCTAssertGreaterThanOrEqual(pair.1.x - pair.0.x, 189.9)
+        }
+    }
+
+    func testHopBuffersATapJustBeforeLanding() {
+        var run = HopRun(seed: 3)
+        XCTAssertEqual(run.hop(), [.hop])
+        _ = run.advance(by: 0.68)
+        XCTAssertLessThan(run.y, HopRules.restY)
+        XCTAssertEqual(run.hop(), [])
+        let cues = run.advance(by: 0.18)
+        XCTAssertTrue(cues.contains(.hop))
+        XCTAssertGreaterThan(run.lastHop, 0.68)
+        XCTAssertLessThan(run.y, HopRules.restY)
+    }
+
+    func testHopSameSeedProducesSameRun() {
+        var a = HopRun(seed: 19)
+        var b = HopRun(seed: 19)
+        XCTAssertEqual(a.hop(), b.hop())
+        for _ in 0..<360 {
+            let next = a.obstacles.first { !$0.passed }
+            if let next, next.x < 150, a.y >= HopRules.restY, a.vy >= 0 {
+                XCTAssertEqual(a.hop(), b.hop())
+            }
+            XCTAssertEqual(a.advance(by: 1.0 / 60), b.advance(by: 1.0 / 60))
+            XCTAssertEqual(a.obstacles, b.obstacles)
+        }
+        XCTAssertEqual(a.score, b.score)
+        XCTAssertGreaterThan(a.cleared, 2)
     }
 
     func testHopEndsAfterOneBump() {
@@ -38,7 +77,7 @@ final class ArcadeActionTests: XCTestCase {
         for _ in 0..<(60 * 4) { cues += run.advance(by: 1.0 / 60) }
         XCTAssertTrue(run.crashed)
         XCTAssertTrue(run.isFinished)
-        XCTAssertEqual(cues.filter { $0 == .miss }.count, 1)
+        XCTAssertEqual(cues.filter { $0 == .bonk }.count, 1)
         XCTAssertEqual(cues.last, .finished)
         XCTAssertEqual(run.hop(), [])
     }

@@ -45,7 +45,7 @@
     <footer class="site-footer"><a href="https://littledill.app">Meet your pocket pickle <span>↗</span></a><span>Free to play. No download. All dill.</span></footer>
   </main>
   <section id="game" class="game" aria-label="Brine Royale arena" hidden>
-    <canvas id="arena" aria-label="Live multiplayer garden. Move with arrow keys, W A S D, your mouse, or the touch joystick. Press Space to dash or E to split. Split pieces regroup automatically."></canvas>
+    <canvas id="arena" aria-label="Live multiplayer garden. Move with arrow keys, W A S D, your mouse, or the touch joystick. Press Space to dash or E to split. Split slices regroup automatically."></canvas>
     <div class="game-top">
     <header class="game-header"><div class="game-brand"><span class="eyebrow">LITTLE DILL</span><strong>Brine Royale<span>.</span></strong><span id="population">Finding your garden…</span></div><div class="game-actions"><button id="invite" class="icon-button" aria-label="Invite friends" title="Invite friends"><svg><use href="#share-icon"/></svg></button><button class="icon-button sound-toggle" aria-label="Turn sound on" aria-pressed="false" title="Sound off"><svg><use href="#sound-icon"/></svg><span class="mute-line"></span></button><button id="leave" class="icon-button" aria-label="Leave arena" title="Leave arena"><svg><use href="#close-icon"/></svg></button></div></header>
     <div class="game-stats">
@@ -60,8 +60,8 @@
       <div id="joystick" class="joystick" role="group" aria-label="Touch movement joystick"><span class="joystick-cross"></span><span id="stick" class="stick"></span></div>
       <p class="desktop-hint"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>or move your mouse <i>·</i> <kbd>SPACE</kbd> dash <i>·</i> <kbd>E</kbd> split</p>
       <div class="ability-group" role="group" aria-label="Pickle abilities">
-        <div class="piece-status"><strong id="cell-count">1 / 4 pieces</strong><span id="merge-note">60 mass per piece to split</span></div>
-        <button id="split" class="dash-button split-button" aria-label="Split, needs 60 mass in one piece" aria-describedby="split-note" disabled><svg aria-hidden="true"><circle cx="6" cy="9" r="4"/><circle cx="18" cy="15" r="4"/><path d="m10 3 4 3-4 3m4 6-4 3 4 3"/></svg><strong>SPLIT</strong><span id="split-note">35 more mass</span></button>
+        <div class="piece-status"><strong id="cell-count">1 / 8 slices</strong><span id="merge-note">60 mass per slice to split</span></div>
+        <button id="split" class="dash-button split-button" aria-label="Split, needs 60 mass in one slice" aria-describedby="split-note" disabled><svg aria-hidden="true"><circle cx="6" cy="9" r="4"/><circle cx="18" cy="15" r="4"/><path d="m10 3 4 3-4 3m4 6-4 3 4 3"/></svg><strong>SPLIT</strong><span id="split-note">35 more mass</span></button>
         <button id="dash" class="dash-button" aria-label="Dash, costs 5 mass" aria-describedby="dash-note"><svg aria-hidden="true"><use href="#bolt-icon"/></svg><strong>DASH</strong><span id="dash-note">35 mass to unlock</span></button>
       </div>
     </div>

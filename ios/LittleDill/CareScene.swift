@@ -2,12 +2,14 @@ import SwiftUI
 
 struct CarePerformance {
     let action: Care
+    let food: FeedFood?
     let started = Date()
+    init(action: Care, food: FeedFood? = nil) { self.action = action; self.food = food }
     var duration: Double {switch action {case .feed:return 3.8; case .pet:return 4; case .wash:return 5; case .nap:return 6}}
     var caption: String {switch action {case .feed:return "NOM NOM NOM"; case .pet:return "ABSOLUTELY ADORED"; case .wash:return "SQUEAKY CLEAN CLUB"; case .nap:return "DO NOT DISTURB"}}
 }
 
-/// Feed timing shared by the pickle's pose and the carrot, so each chomp lands on the carrot.
+/// Feed timing shared by the pickle's pose and food, so each chomp lands on the food.
 struct FeedBeat {
     static let arrive = 0.5, bite = 0.55, bites = 4, chomp = 0.4
     static let gulp = arrive + bite * Double(bites)
@@ -18,7 +20,7 @@ struct FeedBeat {
     var phase: Double { beat - floor(beat) }
     var chewing: Bool { biting && phase >= FeedBeat.chomp }
     var eaten: Int { t < FeedBeat.arrive ? 0 : min(FeedBeat.bites, Int(floor(beat - FeedBeat.chomp)) + 1) }
-    /// 0 while the carrot waits at the lips, 1 when it is pushed into the mouth.
+    /// 0 while food waits at the lips, 1 when it is pushed into the mouth.
     var push: Double { biting && !chewing ? Ease.inOut(phase / FeedBeat.chomp) : 0 }
     var squash: Double { chewing ? max(0, 1 - (phase - FeedBeat.chomp) / 0.3) : 0 }
     var mouthOpen: Double {
@@ -57,7 +59,7 @@ struct CareScene: View {
         let dead = pet.life.dead, eaten = pet.life.eaten == true, messy = pet.life.hygiene < 40
         let headTop = -(PickleFrame(look: look).h + 6) * CareScene.unit - 22
         ZStack {
-            CareScenery(action: scenery, time: sceneTime, foreground: false, reduceMotion: reduceMotion)
+            CareScenery(action: scenery, time: sceneTime, foreground: false, reduceMotion: reduceMotion, food: performance?.food ?? .carrot)
             Canvas { context, size in
                 var ground = context
                 ground.translateBy(x: size.width / 2, y: size.height / 2 + CareScene.groundOffset)
@@ -71,7 +73,7 @@ struct CareScene: View {
                 PickleArtist.draw(body, look: look, pose: pose, time: time)
                 if let effect { CareScene.drawEffect(ground, effect: effect, now: current, top: headTop, still: reduceMotion) }
             }
-            CareScenery(action: scenery, time: sceneTime, foreground: true, reduceMotion: reduceMotion, mouth: mouth)
+            CareScenery(action: scenery, time: sceneTime, foreground: true, reduceMotion: reduceMotion, mouth: mouth, food: performance?.food ?? .carrot)
         }.frame(height: 260).frame(maxWidth: .infinity).clipped()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(label(mood))
@@ -165,7 +167,7 @@ struct CareScene: View {
         return pose
     }
 
-    /// The mouth's scene position, following the pose's squash and hop so the carrot meets it.
+    /// The mouth's scene position, following the pose's squash and hop so the food meets it.
     static func mouth(look: PickleLook, pose: PicklePose) -> CGPoint {
         let f = PickleFrame(look: look), round = look.variety.shape == .round
         var t = CGAffineTransform(translationX: 0, y: groundOffset).scaledBy(x: unit * (round ? 1.18 : 1), y: unit * (round ? 0.87 : 1))
@@ -241,6 +243,7 @@ private struct CareScenery: View {
     let foreground: Bool
     let reduceMotion: Bool
     var mouth = CGPoint.zero
+    let food: FeedFood
     private var ink: Color {DillTheme.ink}
     var body: some View {
         Canvas { context,size in
@@ -271,16 +274,16 @@ private struct CareScenery: View {
                     shape(Path(roundedRect:CGRect(x:-109,y:52,width:58,height:22),cornerRadius:9),DillTheme.peach)
                     for i in 0..<3 {oval(-101+Double(i)*15,46,15,12,DillTheme.lime,outline:true)}
                 } else {
-                    // The carrot tip rests at the lips, gets pushed in, and loses a chunk on every chomp.
-                    let beat = FeedBeat(t:time), tilt = -14 - beat.squash*6
+                    // The food's near end rests at the lips and loses a chunk on every chomp.
+                    let beat = FeedBeat(t:time), tilt = food == .carrot ? -14 - beat.squash*6 : 14 - beat.squash*3
                     let swoop = 1 - Ease.springy(min(1,time/FeedBeat.arrive))
                     if beat.eaten < FeedBeat.bites {
                         let eaten = CGFloat(beat.eaten)*FeedBeat.chunk
-                        var carrot = context
-                        carrot.translateBy(x:mouth.x + 150*swoop,y:mouth.y - 80*swoop)
-                        carrot.rotate(by:.degrees(tilt + 50*swoop))
-                        carrot.translateBy(x:FeedBeat.rest - FeedBeat.chunk*beat.push - eaten,y:0)
-                        CareScenery.drawCarrot(carrot,eaten:eaten)
+                        var morsel = context
+                        morsel.translateBy(x:mouth.x + 150*swoop,y:mouth.y - 80*swoop)
+                        morsel.rotate(by:.degrees(tilt + 50*swoop))
+                        morsel.translateBy(x:FeedBeat.rest - FeedBeat.chunk*beat.push - eaten,y:0)
+                        food.draw(morsel,eaten:eaten)
                     }
                     if !reduceMotion {
                         let lips = CGPoint(x:mouth.x + cos(tilt * .pi/180)*4,y:mouth.y + sin(tilt * .pi/180)*4)
@@ -291,7 +294,7 @@ private struct CareScenery: View {
                             for i in 0..<6 {
                                 let angle = (-130 + Double(i)*30 + Double(k)*9) * .pi/180, speed = 70 + Double((i*37 + k*11)%50), side = 4 + Double(i%3)
                                 let x = lips.x + cos(angle)*speed*age, y = lips.y + sin(angle)*speed*age + 260*age*age
-                                let color = k == FeedBeat.bites-1 && i%2 == 0 ? Color(hex:0x7FA35A) : i%3 == 0 ? Color(hex:0xF8C58E) : Color(hex:0xED9C53)
+                                let color = i%3 == 0 ? Color(hex:0xFFE5B1) : food.crumb
                                 let bit = Path(roundedRect:CGRect(x:x - side/2,y:y - side/2,width:side,height:side),cornerRadius:1.2)
                                 bits.fill(bit,with:.color(color)); bits.stroke(bit,with:.color(ink),lineWidth:1)
                             }
@@ -373,51 +376,4 @@ private struct CareScenery: View {
         }.accessibilityHidden(true)
     }
 
-    static let carrotLength: CGFloat = 58
-
-    /// Half-width `x` points from the tip, solved from the upper quad curve in `drawCarrot`.
-    static func carrotHalfWidth(_ x: CGFloat) -> CGFloat {
-        let s = (sqrt(0.81 + 0.4 * min(1, max(0, x) / carrotLength)) - 0.9) / 0.2
-        return 20 * s * (1 - s) + 11 * s * s
-    }
-
-    /// A carrot lying along +x with its tip at the origin. `eaten` points are bitten off the tip.
-    static func drawCarrot(_ context: GraphicsContext, eaten: CGFloat) {
-        let ink = DillTheme.ink, length = carrotLength, flesh = Color(hex: 0xF8C58E)
-        var c = context
-        var marks = Path()
-        if eaten > 0 {
-            let r: CGFloat = 3.2, count = Int((2 * (carrotHalfWidth(eaten) + r) / 5.5).rounded(.up))
-            for i in 0..<count { marks.addEllipse(in: CGRect(x: eaten - r, y: (CGFloat(i) - CGFloat(count - 1) / 2) * 5.5 - r, width: 2 * r, height: 2 * r)) }
-            c.clip(to: Path(CGRect(x: eaten, y: -40, width: 120, height: 80)))
-            c.clip(to: marks, options: .inverse)
-        }
-        for angle in [-34.0, 0, 34] {
-            var leaf = c
-            leaf.translateBy(x: length + 2, y: 0); leaf.rotate(by: .degrees(angle))
-            var p = Path(); p.move(to: .zero)
-            p.addQuadCurve(to: CGPoint(x: 18, y: 0), control: CGPoint(x: 9, y: -8))
-            p.addQuadCurve(to: .zero, control: CGPoint(x: 9, y: 8))
-            leaf.fill(p, with: .color(Color(hex: 0x7FA35A))); leaf.stroke(p, with: .color(ink), lineWidth: 2)
-        }
-        var body = Path(); body.move(to: .zero)
-        body.addQuadCurve(to: CGPoint(x: length, y: -11), control: CGPoint(x: length * 0.45, y: -10))
-        body.addQuadCurve(to: CGPoint(x: length, y: 11), control: CGPoint(x: length + 9, y: 0))
-        body.addQuadCurve(to: .zero, control: CGPoint(x: length * 0.45, y: 10))
-        c.fill(body, with: .color(Color(hex: 0xED9C53)))
-        var shine = Path(); shine.move(to: CGPoint(x: 26, y: -4.5)); shine.addQuadCurve(to: CGPoint(x: 52, y: -6.5), control: CGPoint(x: 40, y: -8))
-        c.stroke(shine, with: .color(flesh), style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-        for (x, side) in [(CGFloat(18), CGFloat(1)), (31, -1), (44, 1)] {
-            let w = carrotHalfWidth(x)
-            var ridge = Path(); ridge.move(to: CGPoint(x: x, y: side * w))
-            ridge.addQuadCurve(to: CGPoint(x: x + 2, y: side * w * 0.3), control: CGPoint(x: x - 1.5, y: side * w * 0.65))
-            c.stroke(ridge, with: .color(Color(hex: 0xC46A2C)), style: StrokeStyle(lineWidth: 2, lineCap: .round))
-        }
-        if eaten > 0 {
-            var bite = c; bite.clip(to: body)
-            bite.stroke(marks, with: .color(flesh), lineWidth: 9)
-            bite.stroke(marks, with: .color(ink), lineWidth: 4)
-        }
-        c.stroke(body, with: .color(ink), style: StrokeStyle(lineWidth: 2.5, lineJoin: .round))
-    }
 }

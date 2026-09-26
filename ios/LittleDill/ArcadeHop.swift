@@ -1,56 +1,77 @@
 import SwiftUI
 
 enum HopRules {
-    static let ground = 540.0, pickleX = 100.0, radius = 15.0, start = 270.0
-    static let gravity = 1500.0, hopSpeed = -470.0, maxFall = 780.0
-    static let forkWidth = 64.0, spacing = 215.0, heartRadius = 16.0
-    static func speed(score: Int) -> Double { min(235, 150 + Double(score) * 3) }
-    static func gap(score: Int) -> Double { max(140, 192 - Double(score) * 2.5) }
+    static let ground = 482.0, pickleX = 90.0, restY = 458.0
+    static let gravity = 1600.0, jumpSpeed = -610.0, maxFall = 820.0
+    static let firstX = ArcadeWorld.width + 72
+    static let landingBuffer = 0.12
+    static let zoneLength = 840.0
+    static func speed(cleared: Int) -> Double { min(228, 174 + Double(cleared) * 3) }
 }
 
-struct HopFork: Equatable {
+struct HopObstacle: Equatable {
+    enum Kind: Equatable { case salt, fork, pepper, spoon }
+    let kind: Kind
     var x: Double
-    let gapY: Double
-    let gap: Double
     var passed = false
-    /// A bonus heart halfway to the next fork.
-    var heartY: Double?
-    var top: Double { gapY - gap / 2 }
-    var bottom: Double { gapY + gap / 2 }
-    var heartX: Double { x + HopRules.forkWidth / 2 + HopRules.spacing / 2 }
+    var hasDill: Bool
+    var dillOffset = 0.0
+    var dillY = 350.0
+    var width: Double {
+        switch kind {
+        case .salt: return 42
+        case .fork: return 36
+        case .pepper: return 39
+        case .spoon: return 59
+        }
+    }
+    var height: Double {
+        switch kind {
+        case .salt: return 25
+        case .fork: return 59
+        case .pepper: return 47
+        case .spoon: return 23
+        }
+    }
+    var dillX: Double { x + width / 2 + dillOffset }
 }
 
-/// Pickle hop: tap to hop through the gaps between forks and jars. One bump ends the run.
 struct HopRun: ArcadePlay {
     let game = ArcadeGame.hop
     private(set) var score = 0
-    private(set) var message = "tap anywhere to hop"
+    private(set) var message = "the jar is open. tap to jump!"
     private(set) var finishMessage: String?
-    private(set) var y = HopRules.start
+    private(set) var y = HopRules.restY
     private(set) var vy = 0.0
-    private(set) var forks: [HopFork] = []
+    private(set) var obstacles = [HopObstacle(kind: .salt, x: HopRules.firstX, hasDill: false)]
     private(set) var started = false
     private(set) var crashed = false
     private(set) var time = 0.0
     private(set) var lastHop = -1.0
     private(set) var distance = 0.0
+    private(set) var cleared = 0
+    private(set) var streak = 0
+    private(set) var lastLanding = -1.0
+    private(set) var lastCollect = -1.0
     private var crashTime = 0.0
+    private var queuedUntil = -1.0
+    private var spawned = 1
     private var rng: ArcadeRNG
 
-    init(seed: UInt64) {
-        rng = ArcadeRNG(seed: seed)
-        forks = [makeFork(at: ArcadeWorld.width + 60, after: HopRules.start)]
-    }
+    init(seed: UInt64) { rng = ArcadeRNG(seed: seed) }
 
     var isFinished: Bool { finishMessage != nil }
     func meta(best: Int) -> String { "\(score) PTS · BEST \(best)" }
 
     mutating func hop() -> [ArcadeCue] {
         guard !crashed, !isFinished else { return [] }
-        if !started { started = true; message = "hop through the gaps. grab the hearts!" }
-        vy = HopRules.hopSpeed
-        lastHop = time
-        return [.hop]
+        if !started {
+            started = true
+            message = "jump the kitchen clutter · grab dill!"
+        }
+        if y >= HopRules.restY - 0.5, vy >= 0 { return jump() }
+        queuedUntil = time + HopRules.landingBuffer
+        return []
     }
 
     mutating func advance(by seconds: Double) -> [ArcadeCue] {
@@ -64,72 +85,92 @@ struct HopRun: ArcadePlay {
         return cues
     }
 
+    private mutating func jump() -> [ArcadeCue] {
+        vy = HopRules.jumpSpeed
+        lastHop = time
+        queuedUntil = -1
+        return [.hop]
+    }
+
     private mutating func step(_ dt: Double) -> [ArcadeCue] {
         time += dt
-        guard started else { y = HopRules.start + sin(time * 4) * 10; return [] }
+        guard started else { return [] }
         vy = min(HopRules.maxFall, vy + HopRules.gravity * dt)
-        y = min(HopRules.ground - HopRules.radius, y + vy * dt)
+        y = min(HopRules.restY, y + vy * dt)
         if crashed {
             crashTime += dt
-            guard crashTime > 0.9 else { return [] }
-            switch score {
-            case 0: finishMessage = "bonk! one more hop?"
-            case 1: finishMessage = "1 point. every hop counts."
-            default: finishMessage = "\(score) points. what a hopper!"
+            if crashTime > 0.8 {
+                finishMessage = score == 0 ? "back to the jar?" : "\(score) points · try another escape!"
+                message = finishMessage ?? ""
+                return [.finished]
             }
-            message = finishMessage ?? ""
-            return [.finished]
+            return []
         }
-        if y < HopRules.radius { y = HopRules.radius; vy = max(0, vy) }
-        let move = HopRules.speed(score: score) * dt
-        distance += move
         var cues: [ArcadeCue] = []
-        for index in forks.indices {
-            forks[index].x -= move
-            let fork = forks[index]
-            if !fork.passed, fork.x + HopRules.forkWidth < HopRules.pickleX - HopRules.radius {
-                forks[index].passed = true
+        if y >= HopRules.restY, vy > 0 {
+            vy = 0
+            lastLanding = time
+            cues.append(.landing)
+            if queuedUntil >= time { cues += jump() }
+        }
+        let move = HopRules.speed(cleared: cleared) * dt
+        distance += move
+        for index in obstacles.indices {
+            obstacles[index].x -= move
+            let obstacle = obstacles[index]
+            if hits(obstacle) {
+                crashed = true
+                vy = -205
+                streak = 0
+                message = "bonk!"
+                cues.append(.bonk)
+                break
+            }
+            if obstacle.hasDill, hypot(obstacle.dillX - HopRules.pickleX, obstacle.dillY - y) < 24 {
+                obstacles[index].hasDill = false
+                lastCollect = time
+                streak += 1
+                let bonus = streak % 3 == 0 ? 4 : 2
+                score += bonus
+                message = streak % 3 == 0 ? "dill streak! +4" : "dill sprig! +2"
+                cues.append(streak % 3 == 0 ? .streak : .good)
+            }
+            if !obstacle.passed, obstacle.x + obstacle.width < HopRules.pickleX - 14 {
+                obstacles[index].passed = true
+                cleared += 1
                 score += 1
                 cues.append(.ding)
             }
-            if let heartY = fork.heartY, hypot(fork.heartX - HopRules.pickleX, heartY - y) < HopRules.radius + HopRules.heartRadius {
-                forks[index].heartY = nil
-                score += 1
-                message = "heart! +1"
-                cues.append(.good)
-            }
         }
-        forks.removeAll { $0.heartX < -40 }
-        if let last = forks.last, last.x < ArcadeWorld.width + 60 - HopRules.spacing {
-            forks.append(makeFork(at: last.x + HopRules.spacing, after: last.gapY))
-        }
-        if y + HopRules.radius >= HopRules.ground || forks.contains(where: hits) {
-            crashed = true
-            vy = -260
-            message = "bonk!"
-            cues.append(.miss)
+        obstacles.removeAll { $0.x + $0.width < -50 }
+        if !crashed, let last = obstacles.last, last.x < ArcadeWorld.width - 148 {
+            let gap = Double.random(in: (last.kind == .fork ? 225.0 : 190.0)...250, using: &rng)
+            obstacles.append(makeObstacle(at: last.x + gap))
         }
         return cues
     }
 
-    private func hits(_ fork: HopFork) -> Bool {
-        func touches(_ top: Double, _ bottom: Double) -> Bool {
-            let x = min(max(HopRules.pickleX, fork.x), fork.x + HopRules.forkWidth)
-            let y = min(max(self.y, top), bottom)
-            return hypot(HopRules.pickleX - x, self.y - y) < HopRules.radius
-        }
-        return touches(-200, fork.top) || touches(fork.bottom, HopRules.ground)
+    private func hits(_ obstacle: HopObstacle) -> Bool {
+        let inset = obstacle.kind == .salt || obstacle.kind == .spoon ? 7.0 : 4.0
+        let left = obstacle.x + inset, right = obstacle.x + obstacle.width - inset
+        return HopRules.pickleX + 13 > left && HopRules.pickleX - 13 < right
+            && y + 19 > HopRules.ground - obstacle.height + 3
     }
 
-    private mutating func makeFork(at x: Double, after previous: Double) -> HopFork {
-        let gap = HopRules.gap(score: score)
-        let low = max(120, previous - 190), high = min(HopRules.ground - 120, previous + 190)
-        let gapY = Double.random(in: low...high, using: &rng)
-        var heart: Double?
-        if score >= 2, Double.random(in: 0..<1, using: &rng) < 0.35 {
-            heart = min(HopRules.ground - 60, max(60, gapY + Double.random(in: -120...120, using: &rng)))
+    private mutating func makeObstacle(at x: Double) -> HopObstacle {
+        let roll = Double.random(in: 0..<1, using: &rng)
+        let kind: HopObstacle.Kind
+        switch spawned % 6 {
+        case 2: kind = .spoon
+        case 4: kind = .pepper
+        default: kind = roll < 0.47 ? .fork : .salt
         }
-        return HopFork(x: x, gapY: gapY, gap: gap, heartY: heart)
+        let hasDill = spawned % 3 != 0
+        let offset = spawned % 2 == 0 ? -60.0 : 0.0
+        let dillY = offset < 0 ? 390.0 : 350.0
+        let obstacle = HopObstacle(kind: kind, x: x, hasDill: hasDill, dillOffset: offset, dillY: dillY)
+        spawned += 1
+        return obstacle
     }
 }
 
@@ -140,103 +181,201 @@ struct HopBoard: View {
     let hop: () -> Void
 
     var body: some View {
-        GeometryReader { proxy in
-            let world = ArcadeWorld(proxy.size)
-            Canvas { context, _ in draw(world.context(context)) }
-                .frame(width: ArcadeWorld.width * world.scale, height: ArcadeWorld.height * world.scale)
-                .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-                .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+        Canvas { context, size in
+            let scale = size.width / ArcadeWorld.width
+            var world = context
+            world.scaleBy(x:scale,y:scale)
+            draw(world,height:size.height / scale)
         }
+        .clipShape(RoundedRectangle(cornerRadius:24,style:.continuous))
         .contentShape(Rectangle())
         .modifier(TouchDown(action: hop))
         .accessibilityElement()
-        .accessibilityLabel("Pickle hop board")
+        .accessibilityLabel("Countertop escape. Tap to jump over kitchen obstacles. Collect dill sprigs for streaks.")
         .accessibilityValue("\(run.score) points")
         .accessibilityAddTraits(.allowsDirectInteraction)
-        .accessibilityAction(named: "Hop", hop)
+        .accessibilityAction(named: "Jump", hop)
         .accessibilityIdentifier("arcade.hop.board")
     }
 
-    private func draw(_ c: GraphicsContext) {
-        let w = ArcadeWorld.width, ground = HopRules.ground
-        c.fill(Path(CGRect(x: 0, y: 0, width: w, height: ArcadeWorld.height)),
-               with: .linearGradient(Gradient(colors: [DillTheme.cream, DillTheme.sage]), startPoint: .zero, endPoint: CGPoint(x: 0, y: ground)))
-        let drift = reduceMotion ? 0 : run.distance
-        for n in 0..<4 {
-            let raw = (Double(n) * 130 - drift * 0.08).truncatingRemainder(dividingBy: 520)
-            let x = (raw < 0 ? raw + 520 : raw) - 80
-            let y = 70 + Double(n % 2) * 70
-            for (dx, r) in [(0.0, 18.0), (20, 24), (42, 16)] {
-                c.fill(Path(ellipseIn: CGRect(x: x + dx - r, y: y - r, width: r * 2, height: r * 1.6)), with: .color(.white.opacity(0.75)))
+    private func draw(_ c: GraphicsContext,height:Double) {
+        let w = ArcadeWorld.width
+        c.fill(Path(CGRect(x: 0, y: 0, width: w, height: height)), with: .color(Color(hex: 0xF6F0DD)))
+        HopScenery.draw(c, height: height, distance: run.distance, reduceMotion: reduceMotion)
+        var play = c
+        play.translateBy(x:0,y:height - ArcadeWorld.height)
+        drawJar(play)
+        drawCounter(play)
+        for obstacle in run.obstacles {
+            switch obstacle.kind {
+            case .salt: drawSalt(play, obstacle)
+            case .fork: drawFork(play, obstacle)
+            case .pepper: drawPepper(play, obstacle)
+            case .spoon: drawSpoon(play, obstacle)
             }
+            if obstacle.hasDill { drawDill(play, obstacle) }
         }
-        let hill = (drift * 0.3).truncatingRemainder(dividingBy: 120)
-        for n in 0..<5 {
-            let x = Double(n) * 120 - hill
-            c.fill(Path(ellipseIn: CGRect(x: x - 20, y: ground - 60, width: 160, height: 120)), with: .color(Color(hex: 0xD9E5BE)))
-        }
-        for fork in run.forks {
-            drawFork(c, fork)
-            drawJar(c, fork)
-            if let heartY = fork.heartY {
-                ArcadeArt.heart(c, at: CGPoint(x: fork.heartX, y: heartY + sin(run.time * 3) * 4), size: HopRules.heartRadius * 2)
-            }
-        }
-        c.fill(Path(CGRect(x: 0, y: ground, width: w, height: ArcadeWorld.height - ground)), with: .color(ArcadeArt.wood))
-        c.fill(Path(CGRect(x: 0, y: ground, width: w, height: 4)), with: .color(ArcadeArt.ink))
-        let stripe = drift.truncatingRemainder(dividingBy: 36)
-        for n in 0..<12 {
-            var line = Path()
-            let x = Double(n) * 36 - stripe
-            line.move(to: CGPoint(x: x, y: ground + 10)); line.addLine(to: CGPoint(x: x - 18, y: ArcadeWorld.height))
-            c.stroke(line, with: .color(ArcadeArt.grain), lineWidth: 3)
-        }
-        drawPickle(c)
+        drawPickle(play)
+        let zone = ["PANTRY", "SINK", "STOVE"][Int(run.distance / HopRules.zoneLength) % 3]
+        ArcadeArt.caption(c, zone, at: CGPoint(x: 292, y: 31), size: 12)
         if run.started {
-            ArcadeArt.score(c, run.score, at: CGPoint(x: w / 2, y: 44), anchor: .center)
+            ArcadeArt.score(c, run.score, at: CGPoint(x: w / 2, y: 30), anchor: .center)
+            if run.streak >= 2 {
+                ArcadeArt.caption(c, "\(run.streak) sprigs", at: CGPoint(x: 61, y: 31), size: 12)
+            }
         } else {
-            ArcadeArt.caption(c, "tap to hop", at: CGPoint(x: w / 2, y: HopRules.start + 70 + sin(run.time * 5) * 3), size: 22)
+            c.draw(Text("the great pickle escape")
+                .font(.system(size: 21, weight: .black, design: .rounded))
+                .foregroundStyle(ArcadeArt.ink), at: CGPoint(x: w / 2, y: max(212,(height + 60) / 2 - 20)))
+            ArcadeArt.caption(c, "tap to jump", at: CGPoint(x: w / 2, y: max(245,(height + 60) / 2 + 13)), size: 16)
         }
     }
 
-    private func drawFork(_ c: GraphicsContext, _ fork: HopFork) {
-        let x = fork.x, w = HopRules.forkWidth, tip = fork.top
-        let handle = Path(roundedRect: CGRect(x: x + w / 2 - 11, y: -20, width: 22, height: tip - 40), cornerRadius: 10)
-        var head = Path(roundedRect: CGRect(x: x, y: tip - 72, width: w, height: 28), cornerRadius: 12)
-        for n in 0..<4 {
-            head.addRoundedRect(in: CGRect(x: x + 3 + Double(n) * 15.3, y: tip - 56, width: 11, height: 56), cornerSize: CGSize(width: 5.5, height: 5.5))
-        }
-        for path in [handle, head] {
-            c.fill(path, with: .color(ArcadeArt.steel))
-            c.stroke(path, with: .color(ArcadeArt.ink), lineWidth: 2.5)
-        }
-        c.fill(Path(roundedRect: CGRect(x: x + w / 2 - 5, y: -10, width: 4, height: tip - 90), cornerRadius: 2), with: .color(.white.opacity(0.7)))
+    private func drawJar(_ c: GraphicsContext) {
+        let x = 18 - run.distance
+        guard x > -100 else { return }
+        let glass = Path(roundedRect: CGRect(x: x, y: 356, width: 78, height: 123), cornerRadius: 17)
+        c.fill(glass, with: .color(Color(hex: 0xD6EAB7).opacity(0.68)))
+        c.stroke(glass, with: .color(ArcadeArt.ink), lineWidth: 3)
+        let rim = Path(ellipseIn: CGRect(x: x - 3, y: 347, width: 84, height: 20))
+        c.fill(rim, with: .color(Color(hex: 0xF4F8DC)))
+        c.stroke(rim, with: .color(ArcadeArt.ink), lineWidth: 3)
+        c.fill(Path(ellipseIn: CGRect(x: x + 8, y: 352, width: 62, height: 9)), with: .color(Color(hex: 0xA8C874)))
+        c.fill(Path(roundedRect: CGRect(x: x + 10, y: 376, width: 58, height: 62), cornerRadius: 8), with: .color(Color(hex: 0xFFF9DE)))
+        c.draw(Text("DILL")
+            .font(.system(size: 15, weight: .black, design: .rounded))
+            .foregroundStyle(ArcadeArt.ink), at: CGPoint(x: x + 39, y: 407))
+        c.stroke(Path(roundedRect: CGRect(x: x + 9, y: 361, width: 10, height: 78), cornerRadius: 5), with: .color(.white.opacity(0.8)), lineWidth: 3)
     }
 
-    private func drawJar(_ c: GraphicsContext, _ fork: HopFork) {
-        let x = fork.x, w = HopRules.forkWidth, top = fork.bottom
-        let body = Path(roundedRect: CGRect(x: x + 2, y: top + 10, width: w - 4, height: HopRules.ground - top), cornerRadius: 12)
-        c.fill(body, with: .color(ArcadeArt.brine.opacity(0.8)))
-        c.fill(Path(CGRect(x: x + 8, y: top + 34, width: w - 16, height: 3)), with: .color(.white.opacity(0.6)))
-        c.fill(Path(ellipseIn: CGRect(x: x + 14, y: top + 50, width: 14, height: 40)), with: .color(Color(hex: 0x7FA24A)))
-        c.fill(Path(ellipseIn: CGRect(x: x + 34, y: top + 64, width: 14, height: 44)), with: .color(Color(hex: 0x6E9440)))
-        c.stroke(body, with: .color(ArcadeArt.ink), lineWidth: 3)
-        c.fill(Path(roundedRect: CGRect(x: x - 3, y: top, width: w + 6, height: 14), cornerRadius: 5), with: .color(ArcadeArt.ink))
+    private func drawCounter(_ c: GraphicsContext) {
+        c.fill(Path(CGRect(x: 0, y: HopRules.ground, width: 360, height: 98)), with: .color(Color(hex: 0xE7CBA0)))
+        c.fill(Path(CGRect(x: 0, y: HopRules.ground - 8, width: 360, height: 11)), with: .color(Color(hex: 0xF7DEA9)))
+        c.stroke(Path(CGRect(x: 0, y: HopRules.ground - 8, width: 360, height: 12)), with: .color(ArcadeArt.ink), lineWidth: 3)
+        let shift = reduceMotion ? 0 : run.distance.truncatingRemainder(dividingBy: 82)
+        for n in 0..<6 {
+            let x = Double(n) * 82 - shift
+            var grain = Path()
+            grain.move(to: CGPoint(x: x, y: 518))
+            grain.addCurve(to: CGPoint(x: x + 59, y: 518), control1: CGPoint(x: x + 16, y: 510), control2: CGPoint(x: x + 36, y: 526))
+            c.stroke(grain, with: .color(ArcadeArt.grain), lineWidth: 2)
+            c.fill(Path(ellipseIn: CGRect(x: x + 26, y: 548, width: 16, height: 5)), with: .color(ArcadeArt.grain))
+        }
+    }
+
+    private func drawSalt(_ c: GraphicsContext, _ obstacle: HopObstacle) {
+        let x = obstacle.x, y = HopRules.ground
+        var mound = Path()
+        mound.move(to: CGPoint(x: x, y: y))
+        mound.addQuadCurve(to: CGPoint(x: x + 42, y: y), control: CGPoint(x: x + 20, y: y - 51))
+        mound.closeSubpath()
+        c.fill(mound, with: .color(Color(hex: 0xFFFDF0)))
+        c.stroke(mound, with: .color(ArcadeArt.ink), lineWidth: 3)
+        for (dx, dy) in [(12.0, -10.0), (22, -17), (30, -8)] {
+            c.fill(Path(ellipseIn: CGRect(x: x + dx, y: y + dy, width: 3, height: 3)), with: .color(Color(hex: 0xC9C5B2)))
+        }
+    }
+
+    private func drawFork(_ c: GraphicsContext, _ obstacle: HopObstacle) {
+        let x = obstacle.x, y = HopRules.ground
+        var shape = Path()
+        shape.move(to: CGPoint(x: x + 16, y: y))
+        shape.addQuadCurve(to: CGPoint(x: x + 13, y: y - 4), control: CGPoint(x: x + 13, y: y))
+        shape.addLine(to: CGPoint(x: x + 13, y: y - 30))
+        shape.addCurve(to: CGPoint(x: x + 2, y: y - 43), control1: CGPoint(x: x + 13, y: y - 36), control2: CGPoint(x: x + 3, y: y - 37))
+        for start in [2.0, 11.0, 20.0, 29.0] {
+            shape.addLine(to: CGPoint(x: x + start, y: y - 57))
+            shape.addQuadCurve(to: CGPoint(x: x + start + 4, y: y - 57), control: CGPoint(x: x + start + 2, y: y - 61))
+            if start < 29 {
+                shape.addLine(to: CGPoint(x: x + start + 5, y: y - 44))
+                shape.addQuadCurve(to: CGPoint(x: x + start + 9, y: y - 44), control: CGPoint(x: x + start + 7, y: y - 41))
+            }
+        }
+        shape.addLine(to: CGPoint(x: x + 33, y: y - 43))
+        shape.addCurve(to: CGPoint(x: x + 22, y: y - 30), control1: CGPoint(x: x + 33, y: y - 37), control2: CGPoint(x: x + 22, y: y - 36))
+        shape.addLine(to: CGPoint(x: x + 22, y: y - 4))
+        shape.addQuadCurve(to: CGPoint(x: x + 19, y: y), control: CGPoint(x: x + 22, y: y))
+        shape.closeSubpath()
+        c.fill(shape, with: .color(ArcadeArt.steel))
+        c.stroke(shape, with: .color(ArcadeArt.ink), style: StrokeStyle(lineWidth: 2.5, lineJoin: .round))
+        var gleam = Path()
+        gleam.move(to: CGPoint(x: x + 17, y: y - 5))
+        gleam.addLine(to: CGPoint(x: x + 17, y: y - 28))
+        gleam.addQuadCurve(to: CGPoint(x: x + 11, y: y - 38), control: CGPoint(x: x + 17, y: y - 34))
+        c.stroke(gleam, with: .color(.white.opacity(0.78)), style: StrokeStyle(lineWidth: 1.5, lineCap: .round))
+    }
+
+    private func drawPepper(_ c: GraphicsContext, _ obstacle: HopObstacle) {
+        let x = obstacle.x, y = HopRules.ground
+        let body = Path(roundedRect: CGRect(x: x + 4, y: y - 38, width: 31, height: 38), cornerRadius: 9)
+        c.fill(body, with: .color(Color(hex: 0xA45842)))
+        c.stroke(body, with: .color(ArcadeArt.ink), lineWidth: 2.5)
+        c.fill(Path(roundedRect: CGRect(x: x + 7, y: y - 47, width: 25, height: 13), cornerRadius: 5), with: .color(Color(hex: 0xD4D7CF)))
+        c.stroke(Path(roundedRect: CGRect(x: x + 7, y: y - 47, width: 25, height: 13), cornerRadius: 5), with: .color(ArcadeArt.ink), lineWidth: 2)
+        c.fill(Path(roundedRect: CGRect(x: x + 10, y: y - 26, width: 19, height: 14), cornerRadius: 3), with: .color(Color(hex: 0xF6E6CA)))
+        c.draw(Text("P").font(.system(size: 10, weight: .black, design: .rounded)).foregroundStyle(ArcadeArt.ink), at: CGPoint(x: x + 19.5, y: y - 19))
+        for dx in [14.0, 20.0, 26.0] {
+            c.fill(Path(ellipseIn: CGRect(x: x + dx, y: y - 43, width: 2.5, height: 2.5)), with: .color(ArcadeArt.ink))
+        }
+    }
+
+    private func drawSpoon(_ c: GraphicsContext, _ obstacle: HopObstacle) {
+        let x = obstacle.x, y = HopRules.ground
+        var spoon = Path()
+        spoon.move(to: CGPoint(x: x + 22, y: y - 10))
+        spoon.addLine(to: CGPoint(x: x + 56, y: y - 4))
+        spoon.addQuadCurve(to: CGPoint(x: x + 56, y: y - 1), control: CGPoint(x: x + 61, y: y - 2))
+        spoon.addLine(to: CGPoint(x: x + 21, y: y - 6))
+        spoon.closeSubpath()
+        c.fill(spoon, with: .color(ArcadeArt.steel))
+        c.stroke(spoon, with: .color(ArcadeArt.ink), lineWidth: 2)
+        let bowl = Path(ellipseIn: CGRect(x: x, y: y - 23, width: 30, height: 19))
+        c.fill(bowl, with: .color(ArcadeArt.steel))
+        c.stroke(bowl, with: .color(ArcadeArt.ink), lineWidth: 2.5)
+        c.stroke(Path(ellipseIn: CGRect(x: x + 5, y: y - 19, width: 17, height: 9)), with: .color(.white.opacity(0.75)), lineWidth: 1.5)
+    }
+
+    private func drawDill(_ c: GraphicsContext, _ obstacle: HopObstacle) {
+        let x = obstacle.dillX, y = obstacle.dillY
+        let stem = Path { p in p.move(to: CGPoint(x: x, y: y + 12)); p.addLine(to: CGPoint(x: x, y: y - 12)) }
+        c.stroke(stem, with: .color(Color(hex: 0x397547)), style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+        for side in [-1.0, 1.0] {
+            for level in 0..<3 {
+                let dy = Double(level) * 7 - 9
+                let leaf = Path(ellipseIn: CGRect(x: x + side * 9 - 5, y: y + dy - 4, width: 10, height: 6))
+                c.fill(leaf, with: .color(Color(hex: 0x5E9F55)))
+                c.stroke(leaf, with: .color(Color(hex: 0x397547)), lineWidth: 1)
+            }
+        }
     }
 
     private func drawPickle(_ c: GraphicsContext) {
         var pose = PicklePose()
-        let flap = max(0, 1 - (run.time - run.lastHop) / 0.22)
-        pose.armLeft = -10 + 80 * flap
-        pose.armRight = 10 - 80 * flap
+        let airborne = run.y < HopRules.restY - 1
+        let stride = reduceMotion ? 0 : sin(run.time * 17) * 18
+        pose.armLeft = airborne ? -65 : -12 + stride
+        pose.armRight = airborne ? 65 : 12 - stride
         if run.crashed {
             pose.eyes = .sickX; pose.mouth = .scaredO
-        } else if run.vy > 450 {
-            pose.eyes = .wide; pose.mouth = .scaredO
-        } else if flap > 0 {
+        } else if airborne {
             pose.eyes = .happy; pose.mouth = .grin
         }
-        let tilt = run.started ? min(75, max(-25, run.vy / 12)) : 0
-        ArcadeArt.pet(c, look: look, pose: pose, at: CGPoint(x: HopRules.pickleX, y: run.y), height: 50, angle: .degrees(tilt))
+        let shadowWidth = max(18, 39 - (HopRules.restY - run.y) * 0.18)
+        c.fill(Path(ellipseIn: CGRect(x: HopRules.pickleX - shadowWidth / 2, y: HopRules.ground - 4, width: shadowWidth, height: 7)), with: .color(ArcadeArt.ink.opacity(0.2)))
+        if !reduceMotion, run.time - run.lastLanding < 0.18 {
+            let progress = (run.time - run.lastLanding) / 0.18
+            let width = 28 + progress * 24
+            c.stroke(Path(ellipseIn: CGRect(x: HopRules.pickleX - width / 2, y: HopRules.ground - 6, width: width, height: 9)), with: .color(Color(hex: 0xFFF1B5).opacity(1 - progress)), lineWidth: 3)
+        }
+        let tilt = reduceMotion ? 0 : (airborne ? max(-14, min(12, run.vy / 24)) : 0)
+        let landing = !reduceMotion && run.time - run.lastLanding < 0.09
+        ArcadeArt.pet(c, look: look, pose: pose, at: CGPoint(x: HopRules.pickleX, y: run.y + (landing ? 3 : 0)), height: landing ? 49 : 54, angle: .degrees(tilt))
+        if !reduceMotion, run.time - run.lastCollect < 0.3 {
+            let progress = (run.time - run.lastCollect) / 0.3
+            for side in [-1.0, 1.0] {
+                let x = HopRules.pickleX + side * (27 + progress * 15)
+                c.fill(Path(ellipseIn: CGRect(x: x - 3, y: run.y - 24 - progress * 12, width: 6, height: 6)), with: .color(Color(hex: 0xF7D26A).opacity(1 - progress)))
+            }
+        }
     }
 }

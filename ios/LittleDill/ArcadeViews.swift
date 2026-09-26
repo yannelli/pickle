@@ -10,6 +10,7 @@ struct ArcadeSheet: View {
     @State private var gained: Int?
     @State private var notice: String?
     @State private var lastFrame: Date?
+    @State private var circuitDay: String?
 
     private static let noteSounds: [DillSound] = [.pop, .dash, .respawn]
     private static let heart = Color(hex: 0xC8553D)
@@ -102,6 +103,9 @@ struct ArcadeSheet: View {
     private var menu: some View {
         VStack(spacing: 20) {
             PageHeading(eyebrow: "Pick your kind of pickle play", title: "The dill\narcade.", detail: "6 energy per game · 10–34 happy ♥ for every finished round.")
+            ArcadeCircuitCard(circuit: store.circuitToday, canPlay: canPlay && store.pet.energy >= 6) {
+                start($0, circuit: true)
+            }
             VStack(spacing: 12) {
                 ForEach(ArcadeGame.allCases) { game in gameCard(game) }
             }
@@ -148,7 +152,7 @@ struct ArcadeSheet: View {
     private func playing(_ game: any ArcadePlay) -> some View {
         VStack(spacing: 18) {
             VStack(spacing: 8) {
-                Text(game.game.title).font(DillTheme.display(38)).tracking(-1)
+                Text(game.game.title).font(DillTheme.display(game.game.isClassic ? 38 : 27)).tracking(-1).lineLimit(1).minimumScaleFactor(0.8)
                 Text(game.meta(best: best(game.game)))
                     .font(.system(size: 10, weight: .bold, design: .monospaced)).tracking(1.5)
                     .foregroundStyle(DillTheme.muted)
@@ -347,7 +351,8 @@ struct ArcadeSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("arcade.result")
             Text("Best \(best(game.game))").font(.system(size: 11, weight: .bold, design: .monospaced)).foregroundStyle(DillTheme.muted)
-            Button { start(game.game) } label: { Label("Play again", systemImage: "arrow.clockwise") }
+            circuitResult
+            Button { start(game.game, circuit: circuitDay != nil) } label: { Label("Play again", systemImage: "arrow.clockwise") }
                 .buttonStyle(DillButton())
                 .accessibilityIdentifier("arcade.again")
             HStack(spacing: 12) {
@@ -368,16 +373,42 @@ struct ArcadeSheet: View {
 
     private func best(_ game: ArcadeGame) -> Int { store.pet.arcadeRecords[game.rawValue] ?? 0 }
 
-    private func start(_ game: ArcadeGame) {
+    @ViewBuilder private var circuitResult: some View {
+        if let day = circuitDay {
+            let progress = store.pet.arcadeCircuit.flatMap { $0.day == day ? $0 : nil } ?? ArcadeCircuit(day: day)
+            Text("Daily circuit · \(progress.total)/300")
+                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .accessibilityIdentifier("arcade.circuit.result")
+            if let next = progress.nextGame {
+                Button { start(next, circuit: true) } label: {
+                    Label("Next: \(next.title)", systemImage: "arrow.right")
+                }
+                .buttonStyle(DillButton())
+                .accessibilityIdentifier("arcade.circuit.next")
+            } else {
+                if let medal = progress.medal { Text("\(medal) circuit") }
+                ShareLink(item: "My little dill daily circuit: \(progress.total)/300 on \(day)\(progress.medal.map { " · \($0)" } ?? "")") {
+                    Label("Share circuit score", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(DillButton(light: true))
+                .accessibilityIdentifier("arcade.circuit.share")
+            }
+        }
+    }
+
+    private func start(_ game: ArcadeGame, circuit: Bool = false) {
         abandon()
         notice = nil
-        guard store.startArcade() else {
+        let day = circuit ? store.startCircuit(game: game) : (store.startArcade() ? "" : nil)
+        guard let day else {
             notice = menuStatus ?? "a little nap first! games need 6 energy."
             store.feedback(.rigid)
             return
         }
+        circuitDay = circuit ? day : nil
         lastFrame = nil
-        engine = game.play(reduceMotion: reduceMotion)
+        engine = circuit ? game.play(reduceMotion: reduceMotion, seed: ArcadeCircuit.seed(day: day, game: game))
+                         : game.play(reduceMotion: reduceMotion)
         store.sound(.respawn)
         store.feedback(.medium)
     }
@@ -391,6 +422,7 @@ struct ArcadeSheet: View {
     private func abandon() {
         guard let game = engine else { return }
         engine = nil
+        circuitDay = nil
         gained = nil
         lastFrame = nil
         if !game.isFinished {
@@ -434,8 +466,10 @@ struct ArcadeSheet: View {
             case .miss: store.sound(.pop); store.feedback(.rigid)
             case .select: store.feedback(.light)
             case let .note(pad): store.sound(Self.noteSounds[pad]); store.feedback(.light)
-            case .hop: store.sound(.hop); store.feedback(.light)
-            case .ding: store.sound(.ding)
+            case .hop: store.sound(.hop); store.feedback(.medium)
+            case .landing: store.feedback(.soft)
+            case .ding: store.sound(.ding); store.feedback(.light)
+            case .streak: store.sound(.ding); store.feedback(.heavy)
             case .chop: store.sound(.chop); store.feedback(.light)
             case .bonk: store.sound(.boing); store.feedback(.heavy)
             case .fling: store.sound(.dash); store.feedback(.medium)

@@ -10,8 +10,10 @@ struct ArenaView: View {
     @State private var leave = false
     @State private var showScores = false
     @State private var stick = CGSize.zero
-    @State private var away = false
-    @State private var nibbleAt = Date.distantPast
+    @State private var pickups = ArenaPickupCadence()
+    @State private var tactile = ArenaFeedback()
+    @State private var feedbackEvents = ArenaFeedbackEvents()
+    @AppStorage("little-dill.arena-controls-swapped",store:ArenaResume.defaults) private var controlsSwapped = false
     var body: some View {
         GeometryReader { geometry in
             let compact = geometry.size.height < 430
@@ -24,52 +26,95 @@ struct ArenaView: View {
                 }
                 VStack(spacing:0) {
                     topBar
-                    if client.status == .playing, let me = client.me {
+                    if let me = client.me {
                         scoreBar(me,compact:compact)
                         Spacer(minLength:0)
-                        if me.alive {controls(me,compact:compact)}
+                        if me.alive {
+                            ArenaControls(me:me,compact:compact,swapped:controlsSwapped,stick:$stick,
+                                          steer:client.steer,split:client.split,dash:client.dash,
+                                          swap:{controlsSwapped.toggle()},feedback:tactile.play)
+                                .disabled(client.status != .playing)
+                        }
                     } else {Spacer()}
                 }
-                if client.status == .disconnected || away {disconnectedCard}
-                else if client.status == .connecting {connectionCard}
+                if client.status == .connecting {connectionCard}
+                else if client.status == .reconnecting {reconnectingCard}
+                else if client.status == .disconnected {disconnectedCard}
                 else if let me = client.me, !me.alive {respawnCard(me)}
             }
         }.foregroundStyle(DillTheme.ink)
             .statusBarHidden()
             .persistentSystemOverlays(.hidden)
             .onAppear {client.connect(pet:store.pet,room:launch.room)}
-            .onDisappear {saveBest(); client.stop(); DillAudio.shared.stop()}
+            .onDisappear {saveBest(); client.suspend(); DillAudio.shared.stop(); tactile.enabled = false; feedbackEvents.reset()}
+            .onChange(of:client.status) {_,status in
+                if status == .reconnecting || status == .disconnected {saveBest(); stick = .zero}
+                updateGadgetSound(); updateHaptics()
+                if status == .playing {tactile.prepare()}
+            }
             .onChange(of:client.me?.alive) { old,alive in
-                if old == true && alive == false {saveBest(); store.feedback(.heavy); store.sound(.eaten)}
+                if old == true && alive == false {saveBest(); tactile.stop(); tactile.play(.eaten); store.sound(.eaten)}
                 if old == false && alive == true {store.sound(.respawn)}
             }
             .onChange(of:client.receivedAt) {_,_ in listen()}
-            .onChange(of:client.status) {_,_ in updateGadgetSound()}
             .onChange(of:store.pet.sounds) {_,_ in updateGadgetSound()}
-            .onChange(of:client.me?.dash) {old,dash in if let old, let dash, dash > old + 0.2 {store.sound(.dash)} }
+            .onChange(of:store.pet.haptics) {_,_ in updateHaptics()}
+            .onChange(of:client.me?.dash) {old,dash in
+                if let old, let dash, dash > old + 0.2 {store.sound(.dash); tactile.play(.dash)}
+            }
             .onChange(of:client.me?.splitCooldown) {old,cooldown in
-                if let old, let cooldown, cooldown > old + 0.3 {store.sound(.slice)}
+                if let old, let cooldown, cooldown > old + 0.3 {store.sound(.slice); tactile.play(.split)}
             }
             .onChange(of:scenePhase) { _,phase in
-                if phase == .background {saveBest(); client.stop(); away = true; stick = .zero}
-                updateGadgetSound()
+                if phase == .background {saveBest(); client.suspend(); stick = .zero; DillAudio.shared.stop()}
+                if phase == .active {client.resumeIfNeeded()}
+                if phase != .active {stick = .zero; client.steer(.zero)}
+                updateGadgetSound(); updateHaptics()
             }
             .confirmationDialog("Leave the garden?",isPresented:$leave,titleVisibility:.visible) {
-                Button("Leave arena",role:.destructive) {saveBest(); client.stop(); dismiss()}
+                Button("Leave arena",role:.destructive) {saveBest(); client.leave(); dismiss()}
                 Button("Keep growing",role:.cancel) {}
-            } message: {Text("Your personal best stays saved. Rejoining starts a fresh pickle.")}
+            } message: {Text("Leaving ends this run. Your personal best stays saved.")}
             .interactiveDismissDisabled()
     }
     /// Sounds from one snapshot to the next while alive; death and respawn are handled by the `alive` change.
     private func listen() {
-        updateGadgetSound()
-        guard let previous = client.previous, let snapshot = client.snapshot,
-              let before = previous.players.first(where:{$0.id == client.playerID}), let after = client.me, before.alive, after.alive else {return}
-        let time = Date()
-        let lostPiece = !Set(before.pieces.map(\.id)).isSubset(of:after.pieces.map(\.id))
-        if lostPiece && after.mass < before.mass - 1 {store.feedback(.heavy); store.sound(.eaten)}
-        else if after.kills > before.kills || Self.ateAPiece(before:previous,after:snapshot,playerID:client.playerID) {store.sound(.gulp)}
-        else if after.mass >= before.mass + 2 && time.timeIntervalSince(nibbleAt) >= 0.12 {nibbleAt = time; store.sound(.nibble)}
+        updateGadgetSound(); updateHaptics()
+        guard let snapshot = client.snapshot else {feedbackEvents.reset(); return}
+        let at = client.receivedAt.timeIntervalSinceReferenceDate
+        let gadget = Self.drainingGadget(player:client.me,hazards:snapshot.hazards ?? [],enabled:tactile.enabled)
+        let oldGadget = Self.drainingGadget(player:client.previous?.players.first(where:{$0.id == client.playerID}),
+                                            hazards:client.previous?.hazards ?? [],enabled:tactile.enabled)
+        if oldGadget != gadget {tactile.cancelGadgetPulses()}
+        if let cue = feedbackEvents.gadgetCue(gadget,at:at,active:tactile.enabled) {tactile.play(cue)}
+        guard let previous = client.previous,
+              let before = previous.players.first(where:{$0.id == client.playerID}), let after = client.me, before.alive, after.alive else {
+            _ = feedbackEvents.observe(before:nil,after:snapshot,playerID:client.playerID,at:at,active:tactile.enabled,combat:false)
+            return
+        }
+        let regrouped = Self.regrouped(before:before,after:after)
+        let hurt = Self.wasHit(before:before,after:after,regrouped:regrouped)
+        let bite = after.kills > before.kills || Self.ateAPiece(before:previous,after:snapshot,playerID:client.playerID)
+        if regrouped {tactile.play(.regroup)}
+        if after.pieces.count > before.pieces.count && (after.splitCooldown ?? 0) <= (before.splitCooldown ?? 0) + 0.3 {
+            store.sound(.slice); tactile.play(.split)
+        }
+        if hurt {
+            tactile.play(.eaten); store.sound(.eaten)
+        }
+        else if bite {store.sound(.gulp); tactile.play(.bite)}
+        else if after.mass >= before.mass + 2, store.pet.sounds, scenePhase == .active,
+                let cue = pickups.next(at:Date().timeIntervalSinceReferenceDate) {
+            DillAudio.shared.play(cue.sound,volume:Float(cue.volume))
+        }
+        for cue in feedbackEvents.observe(before:previous,after:snapshot,playerID:client.playerID,
+                                          at:at,active:tactile.enabled,combat:hurt || bite) {tactile.play(cue)}
+        if before.cooldown > 0 && after.cooldown <= 0 && after.mass >= 35 ||
+            (before.splitCooldown ?? 0) > 0 && after.canSplit {tactile.play(.ready)}
+    }
+    private func updateHaptics() {
+        tactile.enabled = store.pet.haptics && scenePhase == .active && client.status == .playing
+        if !tactile.enabled {feedbackEvents.reset()}
     }
     private func updateGadgetSound() {
         let gadget = Self.drainingGadget(player:client.me,hazards:client.snapshot?.hazards ?? [],
@@ -79,6 +124,20 @@ struct ArenaView: View {
     static func drainingGadget(player:ArenaPlayer?,hazards:[ArenaHazard],enabled:Bool) -> ArenaGadget? {
         guard enabled, let player, player.alive, let cell = player.pieces.first(where:\.draining) else {return nil}
         return ArenaHazard.draining(cell,in:hazards)
+    }
+    static func regrouped(before:ArenaPlayer,after:ArenaPlayer) -> Bool {
+        guard after.pieces.count < before.pieces.count, (before.merge ?? 0) < 0.2,
+              after.mass >= before.mass * 0.98 else {return false}
+        let surviving = Set(after.pieces.map(\.id))
+        let removedMass = before.pieces.filter {!surviving.contains($0.id)}.reduce(0) {$0 + $1.mass}
+        let oldMass = Dictionary(uniqueKeysWithValues:before.pieces.map {($0.id,$0.mass)})
+        let absorbed = after.pieces.reduce(0) {$0 + max(0,$1.mass - (oldMass[$1.id] ?? $1.mass))}
+        return removedMass > 0 && absorbed >= removedMass * 0.8
+    }
+    static func wasHit(before:ArenaPlayer,after:ArenaPlayer,regrouped:Bool) -> Bool {
+        let lostPiece = !Set(before.pieces.map(\.id)).isSubset(of:after.pieces.map(\.id))
+        return (after.hurt ?? 0) > (before.hurt ?? 0) + 0.2 ||
+            lostPiece && !regrouped && after.mass < before.mass - 1
     }
     /// An enemy piece that touched one of yours vanished while your mass rose by at least half of it.
     static func ateAPiece(before:ArenaSnapshot,after:ArenaSnapshot,playerID:String) -> Bool {
@@ -99,7 +158,7 @@ struct ArenaView: View {
                 Text("brine royale.").font(DillTheme.display(24)).tracking(-1)
                 HStack(spacing:5) {
                     Circle().fill(client.status == .playing ? Color(hex:0x5C873E) : DillTheme.muted).frame(width:5,height:5)
-                    Text(client.status == .playing ? "\(client.snapshot?.population ?? 0) in the garden" : "Finding your garden…").font(.system(size:10,weight:.medium,design:.rounded)).accessibilityIdentifier("arenaPopulation")
+                    Text(populationStatus).font(.system(size:10,weight:.medium,design:.rounded)).accessibilityIdentifier("arenaPopulation")
                 }
             }
             Spacer(minLength:0)
@@ -107,6 +166,14 @@ struct ArenaView: View {
                 ShareLink(item:"Come find me in Brine Royale! Room \(code) · \(ArenaLaunch.shareURL(room:code).absoluteString)") {Image(systemName:"person.badge.plus").font(.system(size:18)).frame(width:44,height:44).background(DillTheme.cream.opacity(0.95),in:Circle())}.accessibilityLabel("Invite a friend to room \(code)")
             } else {Image(systemName:"globe").font(.system(size:20)).frame(width:44,height:44).background(DillTheme.cream.opacity(0.95),in:Circle())}
         }.padding(.horizontal,18).padding(.top,8)
+    }
+    private var populationStatus: String {
+        switch client.status {
+        case .playing: return "\(client.snapshot?.population ?? 0) in the garden"
+        case .connecting: return "Finding your garden…"
+        case .reconnecting: return "Reconnecting to your garden…"
+        case .disconnected: return "Disconnected"
+        }
     }
     private var connectionCard: some View {
         VStack(spacing:20) {
@@ -118,12 +185,24 @@ struct ArenaView: View {
     }
     private var disconnectedCard: some View {
         VStack(spacing:20) {
-            Image(systemName:away ? "moon.zzz.fill" : "wifi.exclamationmark").font(.system(size:35))
-            Text(away ? "A little breather." : "Lost in the brine.").font(DillTheme.display(29)).multilineTextAlignment(.center)
-            Text(away ? "You left the garden while the app was in the background. Ready for a fresh spawn?" : client.errorMessage).font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
-            Button {saveBest(); away = false; client.connect(pet:store.pet,room:launch.room)} label: {Text("Jump back in")}.buttonStyle(DillButton()).accessibilityIdentifier("arenaReconnect")
-            Button("Back to my pickle") {dismiss()}.font(.subheadline.bold())
+            Image(systemName:"wifi.exclamationmark").font(.system(size:35))
+            Text("Lost in the brine.").font(DillTheme.display(29)).multilineTextAlignment(.center)
+            Text(client.errorMessage).font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
+            Button {saveBest(); client.connect(pet:store.pet,room:launch.room,fresh:true)} label: {Text("Start a fresh run")}.buttonStyle(DillButton()).accessibilityIdentifier("arenaReconnect")
+            Button("Back to my pickle") {client.leave(); dismiss()}.font(.subheadline.bold())
         }.padding(28).frame(maxWidth:350).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:30)).padding(24)
+    }
+    private var reconnectingCard: some View {
+        VStack(spacing:16) {
+            ProgressView().tint(DillTheme.ink)
+            Text("Holding your pickle.").font(DillTheme.display(28)).multilineTextAlignment(.center)
+            TimelineView(.periodic(from:.now,by:1)) { timeline in
+                let seconds = max(0,Int(ceil(client.reconnectDeadline?.timeIntervalSince(timeline.date) ?? 0)))
+                Text("Reconnecting · \(seconds)s to return").font(.subheadline.bold()).accessibilityIdentifier("arenaReconnecting")
+            }
+            Text("Your size and slices are waiting right where you left them.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
+            Button("Leave this run") {saveBest(); client.leave(); dismiss()}.font(.subheadline.bold())
+        }.padding(24).frame(maxWidth:330).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:26)).padding(24)
     }
     private func respawnCard(_ me:ArenaPlayer) -> some View {
         VStack(spacing:18) {
@@ -165,55 +244,6 @@ struct ArenaView: View {
                 }.padding(compact ? 10 : 14).background(DillTheme.cream.opacity(0.9),in:RoundedRectangle(cornerRadius:20))
             }.accessibilityLabel("Leaderboard. Rank \(client.rank). Tap to show more.")
         }.padding(.horizontal,18).padding(.top,compact ? 6 : 12)
-    }
-    private func controls(_ me:ArenaPlayer,compact:Bool) -> some View {
-        let diameter:CGFloat = compact ? 88 : 104
-        let reach:CGFloat = compact ? 28 : 34
-        return VStack(spacing:compact ? 5 : 10) {
-            HStack(alignment:.bottom,spacing:12) {
-                ZStack {
-                    Circle().fill(DillTheme.cream.opacity(0.7)).overlay(Circle().stroke(DillTheme.ink.opacity(0.15),lineWidth:1)).frame(width:diameter,height:diameter)
-                    Image(systemName:"plus").font(.system(size:35,weight:.ultraLight)).foregroundStyle(DillTheme.ink.opacity(0.2))
-                    Circle().fill(DillTheme.ink.opacity(0.9)).frame(width:44,height:44).overlay(Image(systemName:"leaf.fill").foregroundStyle(DillTheme.lime)).offset(stick)
-                }.contentShape(Circle()).gesture(DragGesture(minimumDistance:0).onChanged { value in
-                    let dx = value.location.x - diameter/2, dy = value.location.y - diameter/2
-                    let length = max(1,hypot(dx,dy)), distance = min(reach,length)
-                    stick = CGSize(width:dx / length * distance,height:dy / length * distance)
-                    client.steer(CGVector(dx:stick.width / reach,dy:stick.height / reach))
-                }.onEnded { _ in stick = .zero; client.steer(.zero) })
-                    .accessibilityElement(children:.ignore).accessibilityLabel("Steer your pickle")
-                    .accessibilityAction(named:Text("Move up")) {client.steer(CGVector(dx:0,dy:-1))}
-                    .accessibilityAction(named:Text("Move down")) {client.steer(CGVector(dx:0,dy:1))}
-                    .accessibilityAction(named:Text("Move left")) {client.steer(CGVector(dx:-1,dy:0))}
-                    .accessibilityAction(named:Text("Move right")) {client.steer(CGVector(dx:1,dy:0))}
-                    .accessibilityAction(named:Text("Stop moving")) {client.steer(.zero)}
-                    .accessibilityIdentifier("arenaJoystick")
-                Spacer(minLength:0)
-                HStack(alignment:.top,spacing:10) {
-                    VStack(spacing:5) {
-                        Button {client.split(); store.feedback(.rigid)} label: {
-                            VStack(spacing:4) {
-                                Image(systemName:"arrow.triangle.branch").font(.system(size:23,weight:.semibold))
-                                Text((me.splitCooldown ?? 0) > 0 ? "\(Int(ceil(me.splitCooldown ?? 0)))s" : "SPLIT").font(.system(size:10,weight:.black,design:.rounded))
-                            }.frame(width:68,height:68).foregroundStyle(DillTheme.ink).background(DillTheme.lime,in:Circle())
-                                .overlay(Circle().stroke(DillTheme.ink.opacity(0.15),lineWidth:2))
-                        }.disabled(!me.canSplit).opacity(me.canSplit ? 1 : 0.5).accessibilityLabel("Split your pickle").accessibilityValue(me.splitHint).accessibilityIdentifier("arenaSplit")
-                        Text(me.splitHint).font(.system(size:8,weight:.medium)).lineLimit(2).multilineTextAlignment(.center).frame(width:76,height:20)
-                    }
-                    VStack(spacing:5) {
-                        Button {client.dash(); store.feedback(.rigid)} label: {
-                            VStack(spacing:4) {
-                                Image(systemName:"bolt.fill").font(.system(size:24))
-                                Text(me.cooldown > 0 ? "\(Int(ceil(me.cooldown)))s" : "DASH").font(.system(size:10,weight:.black,design:.rounded))
-                            }.frame(width:68,height:68).foregroundStyle(DillTheme.lime).background(DillTheme.ink,in:Circle())
-                                .overlay(Circle().stroke(DillTheme.cream.opacity(0.5),lineWidth:3))
-                        }.disabled(me.cooldown > 0 || me.mass < 35).opacity(me.mass < 35 || me.cooldown > 0 ? 0.55 : 1).accessibilityIdentifier("arenaDash")
-                        Text(me.mass < 35 ? "Grow to 35" : "Costs 5 mass").font(.system(size:8,weight:.medium)).frame(width:70,height:20)
-                    }
-                }.foregroundStyle(DillTheme.muted)
-            }
-            Text(me.regroupHint).font(.system(size:compact ? 10 : 11,weight:.medium,design:.rounded)).lineLimit(1).minimumScaleFactor(0.7).padding(.horizontal,14).padding(.vertical,compact ? 5 : 7).background(DillTheme.cream.opacity(0.85),in:Capsule()).accessibilityIdentifier("arenaRegroup")
-        }.padding(.horizontal,20).padding(.bottom,compact ? 5 : 12)
     }
     private func saveBest() {if client.best > 0 {store.recordArena(best:client.best)}}
 }
@@ -537,7 +567,7 @@ struct ArenaCanvas: View {
 
     static func dot(_ center:CGPoint,_ r:Double) -> Path {Path(ellipseIn:CGRect(x:center.x-r,y:center.y-r,width:r*2,height:r*2))}
 
-    /// Hunters that could eat one of your pieces under the server rule: `mass >= 1.22 * prey` and `distance < R - 0.35 * r`, both unshielded.
+    /// Hunters that could eat one of your pieces under the server rule: `mass >= 1.22 * prey` and `distance < R - 0.6 * r`, both unshielded.
     /// Alpha drives the red outline on that hunter piece, from 0.25 at 320 world units out to 0.9 at the eat boundary.
     static func killRings(players:[ArenaPlayer],me:ArenaPlayer) -> [ArenaKillRing] {
         guard me.alive, me.shield <= 0 else {return []}
@@ -546,7 +576,7 @@ struct ArenaCanvas: View {
             for piece in hunter.pieces {
                 var closest:(gap:Double,reach:Double)?
                 for prey in me.pieces where piece.mass >= 1.22 * prey.mass {
-                    let reach = piece.radius - 0.35 * prey.radius
+                    let reach = piece.radius - ArenaPlayer.eatOverlap * prey.radius
                     let gap = hypot(piece.x-prey.x,piece.y-prey.y) - reach
                     if gap < closest?.gap ?? .infinity {closest = (gap,reach)}
                 }
@@ -735,12 +765,13 @@ struct ArenaCanvas: View {
         face(c,CGPoint(x:0,y:-24))
     }
 
-    enum Mood { case calm, dash, threatened }
+    enum Mood { case calm, dash, threatened, sad }
 
     /// Matches `pieceMood` in arena-web/arena-core.mjs; a draining cell looks threatened.
     static func mood(_ player:ArenaPlayer,cell:ArenaCell,pieces:[(ArenaPlayer,ArenaCell)]) -> Mood {
+        if (player.hurt ?? 0) > 0 && player.alive {return .sad}
         let threatened = cell.draining || player.shield <= 0 && pieces.contains {other,piece in
-            other.id != player.id && other.shield <= 0 && piece.mass >= cell.mass * 1.22 && hypot(piece.x-cell.x,piece.y-cell.y) <= piece.radius + cell.radius * 0.65 + 45
+            other.id != player.id && other.shield <= 0 && piece.mass >= cell.mass * 1.22 && hypot(piece.x-cell.x,piece.y-cell.y) <= piece.radius + cell.radius * (1 - ArenaPlayer.eatOverlap) + 45
         }
         return threatened ? .threatened : player.dash > 0 ? .dash : .calm
     }
@@ -793,6 +824,10 @@ struct ArenaCanvas: View {
             switch mood {
             case .threatened:
                 stroke.move(to:CGPoint(x:ex+side*r*0.1,y:ey-r*0.1)); stroke.addLine(to:CGPoint(x:ex-side*r*0.07,y:ey)); stroke.addLine(to:CGPoint(x:ex+side*r*0.1,y:ey+r*0.1))
+            case .sad:
+                c.fill(Path(ellipseIn:CGRect(x:ex-eye,y:ey-eye*0.7,width:eye*2,height:eye*1.9)),with:.color(ink))
+                stroke.move(to:CGPoint(x:ex-side*eye*0.9,y:ey-eye*1.5))
+                stroke.addLine(to:CGPoint(x:ex+side*eye,y:ey-eye*0.8))
             case .calm where blinking(p.id,time:time):
                 stroke.move(to:CGPoint(x:ex-eye,y:ey)); stroke.addLine(to:CGPoint(x:ex+eye,y:ey))
             case .calm,.dash:
@@ -807,9 +842,12 @@ struct ArenaCanvas: View {
             c.stroke(mouth,with:.color(ink),style:line)
         case .threatened:
             c.fill(Path(ellipseIn:CGRect(x:-r*0.055,y:r*0.28-r*0.07,width:r*0.11,height:r*0.14)),with:.color(ink))
+        case .sad:
+            var mouth = Path(); mouth.move(to:CGPoint(x:-r*0.13,y:r*0.32))
+            mouth.addQuadCurve(to:CGPoint(x:r*0.13,y:r*0.32),control:CGPoint(x:0,y:r*0.14))
+            c.stroke(mouth,with:.color(ink),style:line)
         case .calm:
-            var smile = Path(); smile.move(to:CGPoint(x:-r*0.13,y:r*0.19)); smile.addQuadCurve(to:CGPoint(x:r*0.13,y:r*0.19),control:CGPoint(x:0,y:r*0.42))
-            c.stroke(smile,with:.color(ink),style:StrokeStyle(lineWidth:max(1,r*0.035),lineCap:.round))
+            ArenaSmile(variety:variety.id).draw(c,r:r,lineWidth:max(1,r*0.035))
         }
         if p.outfit != .original {
             let symbol = c.resolve(Image(systemName:p.outfit.symbol).resizable())

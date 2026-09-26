@@ -1,0 +1,49 @@
+{
+"rules": {"maxCells":8,"splitMinMass":60,"splitCooldown":1,"mergeSeconds":12,"reconnectGraceSeconds":30,"hazardRadius":150,"hazardSlow":0.5,"leakFloor":500,"eatOverlap":0.6,"hazardSplitMass":2500,"hazardSplitCooldown":2},
+"splits": [
+  {"name":"whole","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":60,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60}]},"enabled":true},
+  {"name":"just too small","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":59.9,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":59.9}]},"enabled":false},
+  {"name":"cooldown","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":60,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0.01,"cells":[{"id":"0","x":100,"y":200,"mass":60}]},"enabled":false},
+  {"name":"two","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":90,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60},{"id":"1","x":110,"y":200,"mass":30}]},"enabled":true},
+  {"name":"four","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":240,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60},{"id":"1","x":110,"y":200,"mass":60},{"id":"2","x":120,"y":200,"mass":60},{"id":"3","x":130,"y":200,"mass":60}]},"enabled":true},
+  {"name":"seven","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":420,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60},{"id":"1","x":110,"y":200,"mass":60},{"id":"2","x":120,"y":200,"mass":60},{"id":"3","x":130,"y":200,"mass":60},{"id":"4","x":140,"y":200,"mass":60},{"id":"5","x":150,"y":200,"mass":60},{"id":"6","x":160,"y":200,"mass":60}]},"enabled":true},
+  {"name":"eight","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":480,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60},{"id":"1","x":110,"y":200,"mass":60},{"id":"2","x":120,"y":200,"mass":60},{"id":"3","x":130,"y":200,"mass":60},{"id":"4","x":140,"y":200,"mass":60},{"id":"5","x":150,"y":200,"mass":60},{"id":"6","x":160,"y":200,"mass":60},{"id":"7","x":170,"y":200,"mass":60}]},"enabled":false},
+  {"name":"combined mass not enough","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":105,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":35},{"id":"1","x":110,"y":200,"mass":35},{"id":"2","x":120,"y":200,"mass":35}]},"enabled":false},
+  {"name":"dead","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":60,"best":60,"kills":0,"alive":false,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0,"cells":[{"id":"0","x":100,"y":200,"mass":60}]},"enabled":false},
+  {"name":"legacy","player":{"id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":60,"best":60,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":"","splitCooldown":0},"enabled":false}
+],
+"radii": [
+  {"mass":0,"radius":13},
+  {"mass":25,"radius":30},
+  {"mass":60,"radius":39.336286754210434},
+  {"mass":1600,"radius":149},
+  {"mass":10000,"radius":263.3103448275862},
+  {"mass":1000000,"radius":389.8172531214529}
+],
+"zoom": [
+  {"current":0.9,"target":0.4,"dt":0.1,"result":0.5983408500191149},
+  {"current":0.4,"target":0.9,"dt":0.1,"result":0.4785887532448838},
+  {"current":0.7,"target":0.7,"dt":0.2,"result":0.7},
+  {"current":0.4,"target":0.9,"dt":0,"result":0.4}
+],
+"food": [
+  {"name":"ordered upsert and delete","before":[[1,10,20,3],[2,20,30,9]],"snapshot":{"tick":1,"time":1,"width":6000,"height":4500,"humans":0,"bots":0,"players":[],"foodRemoved":[1],"foodAdded":[[2,25,35,9],[3,40,50,4]]},"after":[[2,25,35,9],[3,40,50,4]]},
+  {"name":"full inventory replaces reconnect leftovers","before":[[1,10,20,3]],"snapshot":{"tick":1,"time":1,"width":6000,"height":4500,"humans":0,"bots":0,"players":[],"food":[[5,60,70,3]]},"after":[[5,60,70,3]]},
+  {"name":"empty inventory","before":[[1,10,20,3]],"snapshot":{"tick":1,"time":1,"width":6000,"height":4500,"humans":0,"bots":0,"players":[],"food":[]},"after":[]},
+  {"name":"no food update","before":[[1,10,20,3]],"snapshot":{"tick":1,"time":1,"width":6000,"height":4500,"humans":0,"bots":0,"players":[]},"after":[[1,10,20,3]]}
+],
+"varieties": {"dill":{"brine":"classic","color":"#78954B","light":"#A1B56B","dark":"#527637","shape":"long"},"gherkin":{"brine":"classic","color":"#709855","light":"#BAD28C","dark":"#486B37","shape":"round"},"garlic":{"brine":"garlic","color":"#98A76D","light":"#D1D99D","dark":"#617C4C","shape":"crooked"},"butter":{"brine":"garlic","color":"#B0A44D","light":"#DDCE80","dark":"#877A39","shape":"round"},"chili":{"brine":"spicy","color":"#958749","light":"#D2AF73","dark":"#6A693A","shape":"long"},"pepper":{"brine":"spicy","color":"#66875D","light":"#A7C18A","dark":"#415C3F","shape":"crooked"}},
+"gadgetPeriods": {"slicer":0.32,"shaker":0.22,"grater":0.35},
+"smiles": {"dill":"smile","gherkin":"beam","garlic":"smirk","butter":"dimples","chili":"grin","pepper":"crooked"},
+"pickups": [
+  {"time":0,"index":0,"volume":0.7},
+  {"time":0.1,"index":null},
+  {"time":0.3,"index":1,"volume":0.644},
+  {"time":0.5,"index":null},
+  {"time":0.7,"index":2,"volume":0.588},
+  {"time":1.1,"index":3,"volume":0.532},
+  {"time":1.55,"index":0,"volume":0.476},
+  {"time":2.05,"index":1,"volume":0.42},
+  {"time":3.2,"index":2,"volume":0.7}
+]
+}

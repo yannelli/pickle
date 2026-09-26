@@ -50,12 +50,24 @@
   }
   const importKey = () => root.crypto.subtle.importKey('raw', formatKey, 'AES-GCM', false, ['encrypt', 'decrypt']);
 
-  async function encode(state) {
+  function nativeExtras(value) {
+    return value && typeof value === 'object' && !Array.isArray(value) ? JSON.parse(JSON.stringify(value)) : undefined;
+  }
+
+  async function encode(state, native) {
     requireCrypto();
     const pet = validateState(state);
+    const extras = nativeExtras(native);
     const iv = root.crypto.getRandomValues(new Uint8Array(12));
     const key = await importKey();
-    const payload = encoder.encode(JSON.stringify({ version: 1, savedAt: Date.now(), pet }));
+    const record = { version: 1, savedAt: Date.now(), pet, ...(extras ? { native: extras } : {}) };
+    let payload = encoder.encode(JSON.stringify(record));
+    if (payload.length + 16 > 4096 && extras) {
+      extras.scores = [];
+      if (Array.isArray(extras.rewardedDays)) extras.rewardedDays = extras.rewardedDays.slice(-7);
+      payload = encoder.encode(JSON.stringify(record));
+    }
+    if (payload.length + 16 > 4096) throw new Error('The download could not be created. Your pickle is still here; please try again.');
     const encrypted = await root.crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: context, tagLength: 128 }, key, payload);
     return JSON.stringify({ format: FORMAT, version: 1, cipher: 'AES-256-GCM', iv: base64(iv), data: base64(new Uint8Array(encrypted)) });
   }
@@ -85,7 +97,8 @@
     if (!payload || payload.version !== 1 || !Number.isSafeInteger(payload.savedAt) || payload.savedAt < 0 || payload.savedAt > 8640000000000000) {
       throw new Error('This file contains invalid pickle progress.');
     }
-    return { savedAt: payload.savedAt, pet: validateState(payload.pet) };
+    const native = nativeExtras(payload.native);
+    return { savedAt: payload.savedAt, pet: validateState(payload.pet), ...(native ? { native } : {}) };
   }
 
   const api = Object.freeze({ encode, decode, validateState, available, MAX_FILE_BYTES });

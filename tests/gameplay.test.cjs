@@ -276,6 +276,27 @@ test('a wrong memory note stops glowing when the result is shown', () => {
   assert.ok(app.pads.every(pad => !pad.classList.contains('lit')));
 });
 
+test('browser import keeps native progress and undo restores both progress and scores', async () => {
+  let restored, exported;
+  const original = { coins: 15, arcade: { hop: 2 }, arcadeCircuit: { day: '2026-09-24', scores: { hop: 2 } } };
+  const app = client({}, { storage: { 'little-dill.native-extras.v1': JSON.stringify(original), 'little-dill.arcade.v1': JSON.stringify({ hunt: 1 }) },
+    saves: { available: () => true, MAX_FILE_BYTES: 16384, decode: async () => restored,
+      encode: async (pet, native) => { exported = JSON.parse(JSON.stringify({ pet, native })); throw Error('Captured download'); } } });
+  const native = { coins: 42, outfit: 'crown', arcade: { hunt: 3, hop: 12 }, arcadeCircuit: { day: '2026-09-25', scores: { hop: 12 } } };
+  restored = { savedAt: app.saved().updatedAt, pet: { ...app.saved(), name: 'Circuit Dill' }, native };
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change'); app.click('backup-restore');
+  assert.deepEqual(JSON.parse(app.storage.get('little-dill.native-extras.v1')), native);
+  assert.equal(JSON.parse(app.storage.get('little-dill.arcade.v1')).hunt, 3);
+  await app.get('download-save').dispatch('click');
+  assert.equal(exported.native.arcade.hop, 12);
+  assert.equal(exported.native.arcadeCircuit.day, '2026-09-25');
+  app.click('undo-import');
+  assert.deepEqual(JSON.parse(app.storage.get('little-dill.native-extras.v1')), original);
+  assert.equal(JSON.parse(app.storage.get('little-dill.arcade.v1')).hunt, 1);
+});
+
 test('planting a new pickle after an import retires the undo option', async () => {
   let restored;
   const app = client({}, { saves: { MAX_FILE_BYTES: 16384, decode: async () => restored } });

@@ -74,6 +74,7 @@ struct PetState: Codable {
     var soundEnabled: Bool?
     var arenaBest: Int?
     var arcadeRecords: [String: Int] = [:]
+    var arcadeCircuit: ArcadeCircuit?
     var lastPetAt: Int64?
 
     init(now: Date = Date()) { life = PetLife.fresh(now: PetLife.ms(now)) }
@@ -95,7 +96,7 @@ struct PetState: Codable {
     func nextCareAt(after now: Date = Date()) -> Date { Date(timeIntervalSince1970: PetLife.nextCareAt(life, now: PetLife.ms(now)) / 1000) }
 
     private enum CodingKeys: String, CodingKey {
-        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arcadeRecords
+        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arcadeRecords, arcadeCircuit
         case name, brine, adopted, birthday, food, joy, clean, energy
     }
 
@@ -115,6 +116,7 @@ struct PetState: Codable {
         soundEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundEnabled)
         arenaBest = try c.decodeIfPresent(Int.self, forKey: .arenaBest)
         arcadeRecords = try c.decodeIfPresent([String: Int].self, forKey: .arcadeRecords) ?? [:]
+        arcadeCircuit = try? c.decodeIfPresent(ArcadeCircuit.self, forKey: .arcadeCircuit)
         switch version {
         case 2: life = try c.decode(WebPet.self, forKey: .life)
         case 1:
@@ -155,6 +157,7 @@ struct PetState: Codable {
         try c.encodeIfPresent(soundEnabled, forKey: .soundEnabled)
         try c.encodeIfPresent(arenaBest, forKey: .arenaBest)
         try c.encode(arcadeRecords, forKey: .arcadeRecords)
+        try c.encodeIfPresent(arcadeCircuit, forKey: .arcadeCircuit)
     }
 
     static func migratedName(_ name: String) -> String {
@@ -310,7 +313,7 @@ struct PetState: Codable {
                           streak: streak, lastVisitDay: lastVisitDay, careDay: careDay, dailyCare: dailyCare.sorted(),
                           rewardedDays: rewardedDays.sorted(),
                           scores: scores.sorted { $0.day > $1.day }.map { DillBackup.Score(d: $0.day, s: $0.score, t: PetLife.ms($0.date)) },
-                          arenaBest: arenaBest, arcade: arcadeRecords, haptics: haptics, sounds: soundEnabled)
+                          arenaBest: arenaBest, arcade: arcadeRecords, arcadeCircuit: arcadeCircuit, haptics: haptics, sounds: soundEnabled)
     }
 
     /// Runs a save that decoded but failed `isValid` through the backup import clamps.
@@ -338,6 +341,9 @@ struct PetState: Codable {
         scores = Array(best.values.sorted { $0.d > $1.d }.prefix(90).map { ScoreEntry(day: $0.d, score: $0.s, date: PetLife.date($0.t)) })
         arenaBest = native.arenaBest.map { max(0, $0) }
         arcadeRecords = native.arcade.filter { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
+        arcadeCircuit = native.arcadeCircuit.flatMap {
+            DailyChallenge.validDay($0.day) ? ArcadeCircuit(day: $0.day, scores: $0.scores) : nil
+        }
         haptics = native.haptics
         soundEnabled = native.sounds
     }
@@ -346,7 +352,8 @@ struct PetState: Codable {
         version == 2 && (try? PetLife.validate(life)) != nil &&
         (0...Self.maxCoins).contains(coins) && (0...Self.maxStreak).contains(streak) && unlocked.contains(outfit) &&
         scores.count <= 90 && scores.allSatisfy { (0...300).contains($0.score) && DailyChallenge.validDay($0.day) } &&
-        arcadeRecords.allSatisfy { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
+        arcadeRecords.allSatisfy { Self.arcadeGames.contains($0.key) && $0.value >= 0 } &&
+        arcadeCircuit.map { DailyChallenge.validDay($0.day) } ?? true
     }
 }
 

@@ -2,7 +2,7 @@ import AVFoundation
 
 enum DillSound: String, CaseIterable {
     case feed, pet, wash, nap, dash, pop, respawn, crunch, win, eaten, gulp, nibble, slice, slicer, shaker, grater
-    case hop, ding, chop, boing, splash, clank
+    case hop, ding, chop, boing, splash, clank, nibble2, nibble3, nibble4
     var duration: Double {
         switch self {
         case .feed: return 3.4
@@ -16,7 +16,7 @@ enum DillSound: String, CaseIterable {
         case .win: return 0.8
         case .eaten: return 0.35
         case .gulp: return 0.2
-        case .nibble: return 0.06
+        case .nibble,.nibble2,.nibble3,.nibble4: return 0.11
         case .slice: return 0.15
         case .slicer: return 0.32 * 8
         case .shaker: return 0.22 * 8
@@ -33,6 +33,11 @@ enum DillSound: String, CaseIterable {
     var isGadget: Bool { self == .slicer || self == .shaker || self == .grater }
 
     func waveData() -> Data {
+        if let index = [DillSound.nibble,.nibble2,.nibble3,.nibble4].firstIndex(of:self) {
+            guard let url = Bundle.main.url(forResource:"arena-pickup-\(index)",withExtension:"wav"),
+                  let data = try? Data(contentsOf:url) else {return Data()}
+            return data
+        }
         if isGadget {
             guard let url = Bundle.main.url(forResource:"arena-\(rawValue)",withExtension:"wav"),
                   let data = try? Data(contentsOf:url) else {return Data()}
@@ -98,7 +103,7 @@ enum DillSound: String, CaseIterable {
                 }
                 sample += tone(t,0,0.3,120,-65 / 0.3) * 0.5
             case .gulp: sample = tone(t,0,0.2,300,-900) * 0.42 + tone(t,0,0.2,600,-1800) * 0.08 + click(t,0.002,0.006,high) * 0.9
-            case .nibble: sample = tone(t,0,0.06,700,200 / 0.06) * 0.2
+            case .nibble,.nibble2,.nibble3,.nibble4: break
             case .slice:
                 sample = click(t,0,0.006,high + hush) + click(t,0.04,0.006,high + hush) * 0.8
                 sample += tone(t,0.012,0.138,900,-400 / 0.138) * 0.26
@@ -161,13 +166,13 @@ private struct Band {
     private static let performances: Set<DillSound> = [.feed,.pet,.wash,.nap]
     /// The clip starts after the queued session change, so a stop followed by a play can't deactivate the new clip.
     /// Clips overlap on up to four voices; `stop()` silences them all and drops clips still waiting to start.
-    func play(_ sound:DillSound) {
+    func play(_ sound:DillSound,volume:Float = 0.7) {
         let data = clips[sound] ?? sound.waveData(); clips[sound] = data
         let current = generation, activate = !sessionActive
         sessionActive = true
         sessionQueue.async {
             if activate { Self.setSession(active:true) }
-            Task { @MainActor in if self.generation == current { self.start(sound,data) } }
+            Task { @MainActor in if self.generation == current { self.start(sound,data,volume:volume) } }
         }
     }
     func stop() {
@@ -199,7 +204,7 @@ private struct Band {
             }
         }
     }
-    private func start(_ sound:DillSound,_ data:Data) {
+    private func start(_ sound:DillSound,_ data:Data,volume:Float) {
         guard let player = try? AVAudioPlayer(data:data) else {return}
         // A care performance replaces the one already playing instead of layering over it.
         let replacing = Self.performances.contains(sound)
@@ -209,7 +214,7 @@ private struct Band {
             return done
         }
         if voices.count >= Self.voiceLimit {voices.removeFirst().player.stop()}
-        player.volume = 0.7; player.prepareToPlay(); player.play()
+        player.volume = max(0,min(1,volume)); player.prepareToPlay(); player.play()
         voices.append((sound,player))
     }
     nonisolated private static func setSession(active:Bool) {

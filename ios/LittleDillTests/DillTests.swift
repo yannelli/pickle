@@ -264,7 +264,7 @@ final class DillTests: XCTestCase {
         }
         let me = try player("you",[["id":"a","x":1000.0,"y":1000.0,"mass":100.0],["id":"b","x":1000.0,"y":3000.0,"mass":900.0]])
         let small = ArenaPlayer.radius(for:100), hunterRadius = ArenaPlayer.radius(for:400)
-        let reach = hunterRadius - 0.35 * small
+        let reach = hunterRadius - 0.6 * small
         let near = try player("near",[["id":"h","x":1200.0,"y":1000.0,"mass":400.0]])
         let far = try player("far",[["id":"h","x":1000.0 + reach + 330,"y":1000.0,"mass":400.0]])
         let shielded = try player("safe",[["id":"h","x":1200.0,"y":1000.0,"mass":400.0]],shield:3)
@@ -279,11 +279,11 @@ final class DillTests: XCTestCase {
         XCTAssertEqual(ArenaCanvas.killRings(players:[inside],me:me).first?.alpha ?? 0,0.9,accuracy:1e-9)
         XCTAssertEqual(ArenaCanvas.killRings(players:[near],me:try player("you",[["id":"a","x":1000.0,"y":1000.0,"mass":100.0]],shield:2)).count,0)
         let crowded = try player("you",[["id":"a","x":1000.0,"y":1000.0,"mass":100.0],["id":"b","x":1000.0,"y":1120.0,"mass":900.0]])
-        XCTAssertLessThan(hypot(0,120) - (ArenaPlayer.radius(for:900) - 0.35 * small),320,"Own piece b is within ring range of a")
+        XCTAssertLessThan(hypot(0,120) - (ArenaPlayer.radius(for:900) - 0.6 * small),320,"Own piece b is within ring range of a")
         XCTAssertTrue(ArenaCanvas.killRings(players:[crowded],me:crowded).isEmpty,"Own pieces draw no ring for each other")
         let big = try player("big",[["id":"h","x":1000.0,"y":2600.0,"mass":2000.0]])
         let bigRing = try XCTUnwrap(ArenaCanvas.killRings(players:[big],me:me).first)
-        XCTAssertEqual(bigRing.radius,ArenaPlayer.radius(for:2000) - 0.35 * ArenaPlayer.radius(for:900),accuracy:1e-9,"The ring follows the piece with the smallest gap")
+        XCTAssertEqual(bigRing.radius,ArenaPlayer.radius(for:2000) - 0.6 * ArenaPlayer.radius(for:900),accuracy:1e-9,"The ring follows the piece with the smallest gap")
     }
     func testArenaMembranesDentWherePiecesPressOrReachAWallAndRelaxWhenFree() throws {
         let capsule = ArenaShape(hw:80,hh:100)

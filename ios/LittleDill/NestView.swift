@@ -8,6 +8,7 @@ struct NestView: View {
     var revealCare: () -> Void = {}
     @StateObject private var stage = PetStage()
     @State private var performance: CarePerformance?
+    @AppStorage("little-dill.food-turn.v1",store:ArenaResume.defaults) private var successfulFeeds = 0
     @State private var reactionTask: Task<Void,Never>?
     @State private var arcade = false
     @State private var joyBeforeArcade = 0.0
@@ -122,8 +123,14 @@ struct NestView: View {
         guard result.applied else { stage.play(.wiggle); store.feedback(.rigid); return }
         store.feedback()
         stage.happyUntil = Date().addingTimeInterval(5)
-        if action == .feed { stage.pop("+\(Int((life.fullness - before).rounded())) food") } else { stage.pop("✧ squeaky clean ✧") }
-        perform(action)
+        if action == .feed {
+            stage.pop("+\(Int((life.fullness - before).rounded())) food")
+            perform(action, food: FeedFood.at(successfulFeeds))
+            successfulFeeds = (successfulFeeds + 1) % FeedFood.allCases.count
+        } else {
+            stage.pop("✧ squeaky clean ✧")
+            perform(action)
+        }
     }
 
     private func pet(performing: Bool) {
@@ -189,11 +196,12 @@ struct NestView: View {
 
     private func restart() {
         stopPerformance(); stage.reset()
+        successfulFeeds = 0
         store.restart(); store.sound(.respawn); store.feedback(.medium)
     }
 
-    private func perform(_ action: Care) {
-        let next = CarePerformance(action:action)
+    private func perform(_ action: Care, food: FeedFood? = nil) {
+        let next = CarePerformance(action:action, food:food)
         performance = next
         store.sound(DillSound(rawValue:action.rawValue)!)
         revealCare()

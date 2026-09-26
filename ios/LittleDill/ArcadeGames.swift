@@ -16,7 +16,7 @@ enum ArcadeGame: String, CaseIterable, Identifiable {
         case .hunt: return "Heart hunt"
         case .memory: return "Dill says"
         case .brineCatch: return "Brine catch"
-        case .hop: return "Pickle hop"
+        case .hop: return "Countertop escape"
         case .chop: return "Cuke chop"
         case .toss: return "Jar toss"
         }
@@ -26,7 +26,7 @@ enum ArcadeGame: String, CaseIterable, Identifiable {
         case .hunt: return "follow the jar"
         case .memory: return "echo the tune"
         case .brineCatch: return "catch & dodge"
-        case .hop: return "tap to hop the forks"
+        case .hop: return "escape the kitchen · collect dill"
         case .chop: return "swipe cukes · spare your pickle"
         case .toss: return "pull back · fling into brine"
         }
@@ -73,7 +73,7 @@ protocol ArcadePlay {
 
 enum ArcadeCue: Equatable {
     case shuffle, good, miss, select, finished
-    case hop, ding, chop, bonk, fling, splash, clank
+    case hop, landing, ding, streak, chop, bonk, fling, splash, clank
     case note(Int)
 }
 
