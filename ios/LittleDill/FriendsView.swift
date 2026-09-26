@@ -65,6 +65,7 @@ struct RoyaleCard: View {
                     PickleCharacter(brine:.classic,outfit:.crown,happy:true).frame(width:125,height:160).rotationEffect(.degrees(10))
                 }.frame(width:130,height:180)
             }
+            Text("Earn 1 coin per 1,000 mass collected, up to 1,000 coins daily. Resets at 00:00 UTC.").font(.system(size:11,weight:.medium)).fixedSize(horizontal:false,vertical:true)
             Button(action:play) {HStack {Text("Jump into the garden"); Image(systemName:"arrow.up.right")}}.buttonStyle(DillButton()).accessibilityIdentifier("joinArena")
             HStack(spacing:5) {Image(systemName:"person.2.fill"); Text("Up to 64 players. A whole garden to grow.")}.font(.system(size:10,weight:.medium,design:.rounded))
         }.padding(23).background(DillTheme.lime,in:RoundedRectangle(cornerRadius:28))

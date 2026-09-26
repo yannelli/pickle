@@ -1,9 +1,21 @@
 import SwiftUI
 
+private enum ClosetFilter: String, CaseIterable {
+    case all = "All", owned = "Owned", affordable = "Affordable"
+}
+
 struct ClosetView: View {
     @EnvironmentObject private var store: DillStore
     @State private var selected: Outfit?
     @State private var note: String?
+    @State private var filter = ClosetFilter.all
+    private var visibleOutfits: [Outfit] {
+        switch filter {
+        case .all: Outfit.allCases
+        case .owned: Outfit.allCases.filter { store.pet.unlocked.contains($0) }
+        case .affordable: Outfit.allCases.filter { !store.pet.unlocked.contains($0) && $0.cost <= store.pet.coins }
+        }
+    }
     var body: some View {
         VStack(spacing:24) {
             PageHeading(eyebrow:"The dill dress code",title:"Very small.\nVery well dressed.",detail:"A little personality goes a long way. Earn coins through daily care and the daily crunch.")
@@ -12,13 +24,16 @@ struct ClosetView: View {
                 VStack(alignment:.leading,spacing:8) { Eyebrow(text:"Currently serving"); Text(store.pet.outfit.title).font(DillTheme.display(24)); Text("\(store.pet.unlocked.count) of \(Outfit.allCases.count) looks collected").font(.caption).foregroundStyle(DillTheme.muted) }
                 Spacer()
             }.padding(16).background(DillTheme.sage,in:RoundedRectangle(cornerRadius:26))
+            Picker("Show looks",selection:$filter) {
+                ForEach(ClosetFilter.allCases,id:\.self) { option in Text(option.rawValue).tag(option) }
+            }.pickerStyle(.segmented)
             LazyVGrid(columns:[GridItem(.adaptive(minimum:140),spacing:14)],spacing:14) {
-                ForEach(Outfit.allCases) { outfit in
+                ForEach(visibleOutfits) { outfit in
                     let owned = store.pet.unlocked.contains(outfit)
                     let equipped = store.pet.outfit == outfit
                     Button { if owned { _ = store.equip(outfit); store.feedback() } else { selected = outfit } } label: {
                         VStack(alignment:.leading,spacing:8) {
-                            PickleCharacter(pet:store.pet,outfit:outfit,wearLook:false).frame(height:140).frame(maxWidth:.infinity)
+                            PickleCharacter(pet:store.pet,outfit:outfit).frame(height:140).frame(maxWidth:.infinity)
                             Text(outfit.title).font(.system(size:14,weight:.bold,design:.rounded))
                             HStack {
                                 Text(equipped ? "Wearing it" : owned ? "Wear this" : "✦ \(outfit.cost) coins").font(.system(size:11,weight:.medium))
@@ -30,6 +45,7 @@ struct ClosetView: View {
                     }.accessibilityLabel("\(outfit.title), \(equipped ? "wearing" : owned ? "owned" : "\(outfit.cost) coins")").accessibilityIdentifier("outfit.\(outfit.rawValue)")
                 }
             }
+            if visibleOutfits.isEmpty { Text("Keep caring for your pickle to earn the next look.").font(.subheadline).foregroundStyle(DillTheme.muted) }
             Text("No purchases. No ads. Just well-earned drip.").font(.caption).foregroundStyle(DillTheme.muted)
         }
         .alert("\(selected?.title ?? "New look")",isPresented:Binding(get:{selected != nil},set:{if !$0 { selected = nil }})) {

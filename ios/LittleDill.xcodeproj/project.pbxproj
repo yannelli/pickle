@@ -7,35 +7,77 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02A7263B3071AB5E1178D3A4 /* arena-pickup-1.wav in Resources */ = {isa = PBXBuildFile; fileRef = 6D4B0A2AD1CF122B1106AB63 /* arena-pickup-1.wav */; };
 		09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2AB56478D42F0459AD96023 /* LittleDillApp.swift */; };
+		11A2B4924156C612114CC686 /* ArenaFeedback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13CB2BDB7AC44EFF03622AB6 /* ArenaFeedback.swift */; };
 		13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365E6C0F663ED79DF2D480C4 /* FriendsView.swift */; };
+		18FBCB80DC205B29921EB949 /* ArcadeHop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */; };
 		1BC693056355D165FD855B57 /* CareScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B0F6D2E819F561B210A39D /* CareScene.swift */; };
+		1C03C52777587C828FF1AE0A /* CrossPlatformParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9A0092F7E7FCEA74B2E09C0 /* CrossPlatformParityTests.swift */; };
+		1F9F368991F311C19E05CAA0 /* ArcadeChopBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD28F4AA5AA8C7B04609510E /* ArcadeChopBoard.swift */; };
 		20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2FE43078A3B5B5644D9E83 /* GameViews.swift */; };
+		21BC0AF78364318AC21DFB23 /* ArenaRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C38CBDB8E4E40DE37C57A2B /* ArenaRecoveryTests.swift */; };
+		24CA9E9803D023D863BE0964 /* NurseryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 548B33A220B4E2700C2D20E3 /* NurseryView.swift */; };
 		307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */; };
+		30906DC4DFB352FA866B9E87 /* PickleBody.swift in Sources */ = {isa = PBXBuildFile; fileRef = D315A7FCEEC9DA244DE4AB7D /* PickleBody.swift */; };
+		316B14844A8655410DD55BF5 /* ArcadeGames.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E8CEB235B0518083AA26F0 /* ArcadeGames.swift */; };
+		33B7CB346A9678496154854F /* arena-slicer.wav in Resources */ = {isa = PBXBuildFile; fileRef = FE23CB78789E0FA747896F85 /* arena-slicer.wav */; };
+		348D0861D4DE62FD3A35AF99 /* PetArtData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832F1EEED47E489CA28DC996 /* PetArtData.swift */; };
+		34B4FCB550513CEB062C516F /* ArcadeActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BA365E1170AADE42E32A480 /* ArcadeActionTests.swift */; };
+		352D29B8DF2DDE82721BAD7C /* DillBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38B8F2975FA299D889705BF8 /* DillBackup.swift */; };
 		3631E4611129DA11F1250217 /* ArenaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A331BC7F61DEE3A77445FB4E /* ArenaView.swift */; };
+		3C6B6928D7448C9CF16A7921 /* NestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8E0471074D024AB8668C438 /* NestView.swift */; };
+		4B44F7995716B7EEB1DEC9ED /* ArenaControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8525FBBEE361B4CD825F61EC /* ArenaControls.swift */; };
+		4DB51B501DB4FB4C8105EAD0 /* ArenaExpressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A37E0F6699169D58F2E4DC5E /* ArenaExpressionTests.swift */; };
+		4DE1F54989CADDFAA87EADC8 /* NestProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */; };
 		517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6AE199A809890C135FF5CF /* DillTests.swift */; };
+		54599D64AC467AFAAC4737FE /* ArenaControlsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24EFFA7799A3CDECF9361E6 /* ArenaControlsTests.swift */; };
+		5665F5CF1C630B1AE14D7DB1 /* PickleBodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EF292F156C8F722841A7D1C /* PickleBodyTests.swift */; };
+		56F8C2300FE54183F331E631 /* FeedFoodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E880408BECBA90CD00B809E9 /* FeedFoodTests.swift */; };
+		582A9E4AEB205E6D2D7A60FA /* ArcadeCircuit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 359654D00BEBD3477F44DBEF /* ArcadeCircuit.swift */; };
+		589E54C989F5860AA3E608F0 /* WardrobeArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B2B709BAF1C004A315B36A5 /* WardrobeArt.swift */; };
+		5F6AF5B31FEF53426F092951 /* NestText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CA495131EFC009273AA7DA8 /* NestText.swift */; };
+		658D6D906536026B9B853BD3 /* ArenaResume.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A4D82527044BA884F49EE5A /* ArenaResume.swift */; };
+		6FBC3D767AFC7F4FDA2629B4 /* ArenaExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = 973772CC6332B43C2FF55A0C /* ArenaExpression.swift */; };
 		79AC77633956986EFD962D70 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */; };
+		7BA7B1B3A32F024442F76964 /* PetLooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF87E5DB22E6001365377EDF /* PetLooks.swift */; };
+		8144210ADBBEF3E68D6D6316 /* PetStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD5D78C8B6D5690D37D8EEC1 /* PetStage.swift */; };
+		82E77C18E19919F9E2AA3B59 /* ArcadeChop.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */; };
+		86829ECB2B67B80471FCA104 /* WardrobeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C18144AAFD107F75E0F814 /* WardrobeTests.swift */; };
 		87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 442704C35098D0258234BA9A /* Assets.xcassets */; };
+		8A0879F8F0B5913685CB407A /* ArenaEarnings.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE470B3A8077CAA7604E051A /* ArenaEarnings.swift */; };
+		8B5F65300CD7EF0DE6718128 /* ContinuityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8B1CEEB43D5EFC7ED47A39 /* ContinuityUITests.swift */; };
 		8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94597CBADE2648796879E08 /* CollectionViews.swift */; };
+		92388A5657106EB180EF8600 /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE2470389F37B37AE6D9D0 /* BackupViews.swift */; };
+		924DE7770F52A23604E909F0 /* arena-grater.wav in Resources */ = {isa = PBXBuildFile; fileRef = C681DCBE740415262BAE485C /* arena-grater.wav */; };
+		96102A86B6C3E427A51D7C08 /* PlayRewardIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B4A5A85FFD82992BDC6BE /* PlayRewardIntegrationTests.swift */; };
+		9DDD3CBBDC8725688B20825A /* ArcadeCircuitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7010978E8CC4FC2BDFAFE7 /* ArcadeCircuitTests.swift */; };
+		A968F609E7B05DBDBC4C63CB /* ArenaSplitParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */; };
+		B0A4B9509F1BB8F9B334BC53 /* gadget-audio.json in Resources */ = {isa = PBXBuildFile; fileRef = 781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */; };
+		B15F36B588A21167DD531D59 /* PetArtShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FA957EEAE7B7301A5D39496 /* PetArtShapes.swift */; };
+		B3FF6602CB337BEC0B7C8296 /* HopScenery.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0BA1C356D148D4CE2E96785 /* HopScenery.swift */; };
+		B9EF65799FA35794E5B8C7AA /* arena-parity.json in Resources */ = {isa = PBXBuildFile; fileRef = 81D968F8C3449CEC22F68BD0 /* arena-parity.json */; };
+		BC23AF8707B7333930B3BD90 /* arena-pickup-2.wav in Resources */ = {isa = PBXBuildFile; fileRef = CAFDFF4605FF2015B7E91004 /* arena-pickup-2.wav */; };
 		BF8CC73229925DEFF629656C /* DillModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */; };
-		3347EC2DB863D9F1DC99FFCC /* PetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26586EB4E1B8A98719B2EBEB /* PetLife.swift */; };
-		7A30C897D7D0BAA726E466B9 /* ArcadeGames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */; };
-		59E9AA9DD2794FA0372FFFC5 /* ArcadeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */; };
-		7C04635C8340D2B8A574E17D /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA44CCB9F1679B8E2838FD /* BackupViews.swift */; };
-		291846AEE3171313D1991B81 /* NestProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFD0F07127F679663DE27AE /* NestProfile.swift */; };
-		D3C317596E37E45A1883E767 /* NestText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53F10BAA6EF20557B9732032 /* NestText.swift */; };
-		E2056B072E56C7BB2D58E945 /* NestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9741297B2CB7FF393D6CC42A /* NestView.swift */; };
-		95C0AA1055AA1A89790AEDD0 /* NurseryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */; };
-		EC0B8BC0A029EFC27BDA1AB1 /* PetArtData.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */; };
-		786CC2CD22A9FD57F05D3567 /* PetArtShapes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55BEAA057A7F02E412B55408 /* PetArtShapes.swift */; };
-		528260CE3C2B3475614D5634 /* PetLooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9FBE5E55408045CF326297 /* PetLooks.swift */; };
-		353D0CA937C5CA51BAD879BA /* PetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EB4E775B4F50B7029739446 /* PetMotion.swift */; };
-		FF9266163B7A196EEFA4843F /* PetStage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A705C96686571A04E0670A3 /* PetStage.swift */; };
-		5E65D9FFF9E7018C7613B49C /* DillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FE6682233A62A0141AA1D2 /* DillStore.swift */; };
-		3FF55AB1A55A7BD1B47F31DB /* DillBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */; };
+		C3CD676CB043169CEA8A85B8 /* ArcadeToss.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */; };
+		D215CED4B7D146B18569DCE5 /* DillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7624C5DB7F330E4CB30D615E /* DillStore.swift */; };
+		D4B9CC502232E7EF2F62207F /* PlayWakeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960438BB56A75EC0642913B3 /* PlayWakeUITests.swift */; };
 		D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07138856D58D603AA5147715 /* LittleDillUITests.swift */; };
+		D803B2C63A66785E63FBF15F /* ArcadeArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9009B603D369568F09C9588 /* ArcadeArt.swift */; };
 		DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84E43162441E79C5E7EE976 /* ArenaClient.swift */; };
+		DF211320BB043480A4B69403 /* arena-pickup-0.wav in Resources */ = {isa = PBXBuildFile; fileRef = A555C19E1EC273F7D61FF0E0 /* arena-pickup-0.wav */; };
+		DF542A4AD96506ADC6A39744 /* ArcadeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1909F605020F3F7001953F /* ArcadeViews.swift */; };
+		E089736DA1A96B67C8ABFB12 /* ArenaAudioParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */; };
+		E46A4A05B5AAD9DEB61EC6D7 /* PetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24AF5B68964EA18E99630EA /* PetMotion.swift */; };
+		E58D926F4CAB48E8081F0AFA /* ArenaEarningsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED66AD0CC8B7FD13268B440 /* ArenaEarningsTests.swift */; };
+		F4F9AA76503A401F4CD0ACDB /* FeedFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6540F39435E33E35E31386EC /* FeedFood.swift */; };
+		F58B96584F3A3F07000DD3B7 /* PetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9487E60E0C2FEA26D77BBC5B /* PetLife.swift */; };
+		F60F161D0BBCE3263C541E82 /* ArenaFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEBCF3D267607EEE633DE56F /* ArenaFeedbackTests.swift */; };
+		F88E7DD3F06A615AEEF12D03 /* ArcadeTossBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4849F27E1C170BA8DC35F7F8 /* ArcadeTossBoard.swift */; };
+		FBC65563AB0BB3407FB8227D /* arena-shaker.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3DA54E77E1AD483188C987A6 /* arena-shaker.wav */; };
 		FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FDA33CEC165E433E0EB5022 /* Design.swift */; };
+		FE03FF6E3857D909DA9C9682 /* ArcadeCircuitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A716C993DB41C1F8A71BE19 /* ArcadeCircuitView.swift */; };
+		FEE73CBB018AAF2C607D9050 /* arena-pickup-3.wav in Resources */ = {isa = PBXBuildFile; fileRef = AB5BBC5F78D887B52814993A /* arena-pickup-3.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,90 +99,190 @@
 
 /* Begin PBXFileReference section */
 		07138856D58D603AA5147715 /* LittleDillUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillUITests.swift; sourceTree = "<group>"; };
+		0A716C993DB41C1F8A71BE19 /* ArcadeCircuitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeCircuitView.swift; sourceTree = "<group>"; };
+		0B2B709BAF1C004A315B36A5 /* WardrobeArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WardrobeArt.swift; sourceTree = "<group>"; };
 		0C2FE43078A3B5B5644D9E83 /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
+		13CB2BDB7AC44EFF03622AB6 /* ArenaFeedback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaFeedback.swift; sourceTree = "<group>"; };
+		1A4D82527044BA884F49EE5A /* ArenaResume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaResume.swift; sourceTree = "<group>"; };
+		1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeHop.swift; sourceTree = "<group>"; };
+		2E1909F605020F3F7001953F /* ArcadeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeViews.swift; sourceTree = "<group>"; };
+		2ED66AD0CC8B7FD13268B440 /* ArenaEarningsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaEarningsTests.swift; sourceTree = "<group>"; };
+		359654D00BEBD3477F44DBEF /* ArcadeCircuit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeCircuit.swift; sourceTree = "<group>"; };
 		365E6C0F663ED79DF2D480C4 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
+		38B8F2975FA299D889705BF8 /* DillBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillBackup.swift; sourceTree = "<group>"; };
+		3BA365E1170AADE42E32A480 /* ArcadeActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeActionTests.swift; sourceTree = "<group>"; };
+		3DA54E77E1AD483188C987A6 /* arena-shaker.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-shaker.wav"; sourceTree = "<group>"; };
+		3FA957EEAE7B7301A5D39496 /* PetArtShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtShapes.swift; sourceTree = "<group>"; };
+		43DE2470389F37B37AE6D9D0 /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
 		442704C35098D0258234BA9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4849F27E1C170BA8DC35F7F8 /* ArcadeTossBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeTossBoard.swift; sourceTree = "<group>"; };
 		4BD8988210523CD0527594C2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaSplitParityTests.swift; sourceTree = "<group>"; };
 		4E6AE199A809890C135FF5CF /* DillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillTests.swift; sourceTree = "<group>"; };
+		548B33A220B4E2700C2D20E3 /* NurseryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurseryView.swift; sourceTree = "<group>"; };
+		6540F39435E33E35E31386EC /* FeedFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFood.swift; sourceTree = "<group>"; };
 		6556B1CFDD693A8FCB63B70D /* LittleDill.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = LittleDill.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6CA495131EFC009273AA7DA8 /* NestText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestText.swift; sourceTree = "<group>"; };
+		6D4B0A2AD1CF122B1106AB63 /* arena-pickup-1.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-pickup-1.wav"; sourceTree = "<group>"; };
+		7624C5DB7F330E4CB30D615E /* DillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillStore.swift; sourceTree = "<group>"; };
+		781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "gadget-audio.json"; sourceTree = "<group>"; };
+		7C38CBDB8E4E40DE37C57A2B /* ArenaRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaRecoveryTests.swift; sourceTree = "<group>"; };
+		7E7010978E8CC4FC2BDFAFE7 /* ArcadeCircuitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeCircuitTests.swift; sourceTree = "<group>"; };
 		7FDA33CEC165E433E0EB5022 /* Design.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Design.swift; sourceTree = "<group>"; };
+		81D968F8C3449CEC22F68BD0 /* arena-parity.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "arena-parity.json"; sourceTree = "<group>"; };
+		832F1EEED47E489CA28DC996 /* PetArtData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtData.swift; sourceTree = "<group>"; };
+		839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestProfile.swift; sourceTree = "<group>"; };
+		8525FBBEE361B4CD825F61EC /* ArenaControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaControls.swift; sourceTree = "<group>"; };
+		934B4A5A85FFD82992BDC6BE /* PlayRewardIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayRewardIntegrationTests.swift; sourceTree = "<group>"; };
+		9487E60E0C2FEA26D77BBC5B /* PetLife.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLife.swift; sourceTree = "<group>"; };
+		960438BB56A75EC0642913B3 /* PlayWakeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayWakeUITests.swift; sourceTree = "<group>"; };
+		973772CC6332B43C2FF55A0C /* ArenaExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaExpression.swift; sourceTree = "<group>"; };
+		980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaAudioParityTests.swift; sourceTree = "<group>"; };
+		9EF292F156C8F722841A7D1C /* PickleBodyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickleBodyTests.swift; sourceTree = "<group>"; };
+		9F8B1CEEB43D5EFC7ED47A39 /* ContinuityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuityUITests.swift; sourceTree = "<group>"; };
 		9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillAudio.swift; sourceTree = "<group>"; };
+		A0BA1C356D148D4CE2E96785 /* HopScenery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HopScenery.swift; sourceTree = "<group>"; };
 		A331BC7F61DEE3A77445FB4E /* ArenaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaView.swift; sourceTree = "<group>"; };
+		A37E0F6699169D58F2E4DC5E /* ArenaExpressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaExpressionTests.swift; sourceTree = "<group>"; };
+		A555C19E1EC273F7D61FF0E0 /* arena-pickup-0.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-pickup-0.wav"; sourceTree = "<group>"; };
 		A6B0F6D2E819F561B210A39D /* CareScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareScene.swift; sourceTree = "<group>"; };
+		A9009B603D369568F09C9588 /* ArcadeArt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeArt.swift; sourceTree = "<group>"; };
+		AB5BBC5F78D887B52814993A /* arena-pickup-3.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-pickup-3.wav"; sourceTree = "<group>"; };
+		AF87E5DB22E6001365377EDF /* PetLooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLooks.swift; sourceTree = "<group>"; };
+		B4C18144AAFD107F75E0F814 /* WardrobeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WardrobeTests.swift; sourceTree = "<group>"; };
+		B6E8CEB235B0518083AA26F0 /* ArcadeGames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeGames.swift; sourceTree = "<group>"; };
 		B94597CBADE2648796879E08 /* CollectionViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViews.swift; sourceTree = "<group>"; };
+		BD28F4AA5AA8C7B04609510E /* ArcadeChopBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeChopBoard.swift; sourceTree = "<group>"; };
+		BD5D78C8B6D5690D37D8EEC1 /* PetStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetStage.swift; sourceTree = "<group>"; };
+		C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeToss.swift; sourceTree = "<group>"; };
+		C681DCBE740415262BAE485C /* arena-grater.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-grater.wav"; sourceTree = "<group>"; };
+		CAFDFF4605FF2015B7E91004 /* arena-pickup-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-pickup-2.wav"; sourceTree = "<group>"; };
+		CE470B3A8077CAA7604E051A /* ArenaEarnings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaEarnings.swift; sourceTree = "<group>"; };
+		D24AF5B68964EA18E99630EA /* PetMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMotion.swift; sourceTree = "<group>"; };
+		D24EFFA7799A3CDECF9361E6 /* ArenaControlsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaControlsTests.swift; sourceTree = "<group>"; };
+		D315A7FCEEC9DA244DE4AB7D /* PickleBody.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickleBody.swift; sourceTree = "<group>"; };
 		D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		D8E0471074D024AB8668C438 /* NestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestView.swift; sourceTree = "<group>"; };
 		D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillModel.swift; sourceTree = "<group>"; };
-		26586EB4E1B8A98719B2EBEB /* PetLife.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLife.swift; sourceTree = "<group>"; };
-		5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeGames.swift; sourceTree = "<group>"; };
-		A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeViews.swift; sourceTree = "<group>"; };
-		84EA44CCB9F1679B8E2838FD /* BackupViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupViews.swift; sourceTree = "<group>"; };
-		3EFD0F07127F679663DE27AE /* NestProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestProfile.swift; sourceTree = "<group>"; };
-		53F10BAA6EF20557B9732032 /* NestText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestText.swift; sourceTree = "<group>"; };
-		9741297B2CB7FF393D6CC42A /* NestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestView.swift; sourceTree = "<group>"; };
-		E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NurseryView.swift; sourceTree = "<group>"; };
-		A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtData.swift; sourceTree = "<group>"; };
-		55BEAA057A7F02E412B55408 /* PetArtShapes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtShapes.swift; sourceTree = "<group>"; };
-		4B9FBE5E55408045CF326297 /* PetLooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLooks.swift; sourceTree = "<group>"; };
-		5EB4E775B4F50B7029739446 /* PetMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMotion.swift; sourceTree = "<group>"; };
-		5A705C96686571A04E0670A3 /* PetStage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetStage.swift; sourceTree = "<group>"; };
-		11FE6682233A62A0141AA1D2 /* DillStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillStore.swift; sourceTree = "<group>"; };
-		B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillBackup.swift; sourceTree = "<group>"; };
+		D9A0092F7E7FCEA74B2E09C0 /* CrossPlatformParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossPlatformParityTests.swift; sourceTree = "<group>"; };
+		DEBCF3D267607EEE633DE56F /* ArenaFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaFeedbackTests.swift; sourceTree = "<group>"; };
+		E880408BECBA90CD00B809E9 /* FeedFoodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFoodTests.swift; sourceTree = "<group>"; };
 		EA2A451EFE0DF93D5DBFA2DE /* LittleDillUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1998A860FA7B5DB186AB6F1 /* LittleDillTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = LittleDillTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2AB56478D42F0459AD96023 /* LittleDillApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LittleDillApp.swift; sourceTree = "<group>"; };
 		F3A5C327E3985E9856200209 /* LittleDill.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LittleDill.entitlements; sourceTree = "<group>"; };
 		F84E43162441E79C5E7EE976 /* ArenaClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaClient.swift; sourceTree = "<group>"; };
+		FE23CB78789E0FA747896F85 /* arena-slicer.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-slicer.wav"; sourceTree = "<group>"; };
+		FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeChop.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		353026AD950176F9CB36E8BF /* LittleDill */ = {
 			isa = PBXGroup;
 			children = (
+				A9009B603D369568F09C9588 /* ArcadeArt.swift */,
+				FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */,
+				BD28F4AA5AA8C7B04609510E /* ArcadeChopBoard.swift */,
+				359654D00BEBD3477F44DBEF /* ArcadeCircuit.swift */,
+				0A716C993DB41C1F8A71BE19 /* ArcadeCircuitView.swift */,
+				B6E8CEB235B0518083AA26F0 /* ArcadeGames.swift */,
+				1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */,
+				C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */,
+				4849F27E1C170BA8DC35F7F8 /* ArcadeTossBoard.swift */,
+				2E1909F605020F3F7001953F /* ArcadeViews.swift */,
 				F84E43162441E79C5E7EE976 /* ArenaClient.swift */,
+				8525FBBEE361B4CD825F61EC /* ArenaControls.swift */,
+				CE470B3A8077CAA7604E051A /* ArenaEarnings.swift */,
+				973772CC6332B43C2FF55A0C /* ArenaExpression.swift */,
+				13CB2BDB7AC44EFF03622AB6 /* ArenaFeedback.swift */,
+				1A4D82527044BA884F49EE5A /* ArenaResume.swift */,
 				A331BC7F61DEE3A77445FB4E /* ArenaView.swift */,
 				442704C35098D0258234BA9A /* Assets.xcassets */,
+				43DE2470389F37B37AE6D9D0 /* BackupViews.swift */,
 				A6B0F6D2E819F561B210A39D /* CareScene.swift */,
 				B94597CBADE2648796879E08 /* CollectionViews.swift */,
 				7FDA33CEC165E433E0EB5022 /* Design.swift */,
 				9FEFB57CCD3A21201DEE2667 /* DillAudio.swift */,
+				38B8F2975FA299D889705BF8 /* DillBackup.swift */,
 				D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */,
-				26586EB4E1B8A98719B2EBEB /* PetLife.swift */,
-				5B7D731C5F1AFA819D83C2FB /* ArcadeGames.swift */,
-				A3612E5A4A46BEB830FAD750 /* ArcadeViews.swift */,
-				84EA44CCB9F1679B8E2838FD /* BackupViews.swift */,
-				3EFD0F07127F679663DE27AE /* NestProfile.swift */,
-				53F10BAA6EF20557B9732032 /* NestText.swift */,
-				9741297B2CB7FF393D6CC42A /* NestView.swift */,
-				E355EE4DC76C7E6632B1D9E6 /* NurseryView.swift */,
-				A09A79DEA56C0DA3E0E30EF9 /* PetArtData.swift */,
-				55BEAA057A7F02E412B55408 /* PetArtShapes.swift */,
-				4B9FBE5E55408045CF326297 /* PetLooks.swift */,
-				5EB4E775B4F50B7029739446 /* PetMotion.swift */,
-				5A705C96686571A04E0670A3 /* PetStage.swift */,
-				11FE6682233A62A0141AA1D2 /* DillStore.swift */,
-				B4AA48FA097FAFDC66AAFC32 /* DillBackup.swift */,
+				7624C5DB7F330E4CB30D615E /* DillStore.swift */,
+				6540F39435E33E35E31386EC /* FeedFood.swift */,
 				365E6C0F663ED79DF2D480C4 /* FriendsView.swift */,
 				0C2FE43078A3B5B5644D9E83 /* GameViews.swift */,
+				A0BA1C356D148D4CE2E96785 /* HopScenery.swift */,
 				4BD8988210523CD0527594C2 /* Info.plist */,
 				F3A5C327E3985E9856200209 /* LittleDill.entitlements */,
 				F2AB56478D42F0459AD96023 /* LittleDillApp.swift */,
+				839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */,
+				6CA495131EFC009273AA7DA8 /* NestText.swift */,
+				D8E0471074D024AB8668C438 /* NestView.swift */,
+				548B33A220B4E2700C2D20E3 /* NurseryView.swift */,
+				832F1EEED47E489CA28DC996 /* PetArtData.swift */,
+				3FA957EEAE7B7301A5D39496 /* PetArtShapes.swift */,
+				9487E60E0C2FEA26D77BBC5B /* PetLife.swift */,
+				AF87E5DB22E6001365377EDF /* PetLooks.swift */,
+				D24AF5B68964EA18E99630EA /* PetMotion.swift */,
+				BD5D78C8B6D5690D37D8EEC1 /* PetStage.swift */,
+				D315A7FCEEC9DA244DE4AB7D /* PickleBody.swift */,
 				D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */,
+				0B2B709BAF1C004A315B36A5 /* WardrobeArt.swift */,
+				799D87CA764AFE7FB4809EBA /* Audio */,
 			);
 			path = LittleDill;
+			sourceTree = "<group>";
+		};
+		4074B4C83B8543B99DDDB6BB /* fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				81D968F8C3449CEC22F68BD0 /* arena-parity.json */,
+			);
+			name = fixtures;
+			path = ../tests/fixtures;
 			sourceTree = "<group>";
 		};
 		473B30417340CCD68313A6EB /* LittleDillTests */ = {
 			isa = PBXGroup;
 			children = (
+				3BA365E1170AADE42E32A480 /* ArcadeActionTests.swift */,
+				7E7010978E8CC4FC2BDFAFE7 /* ArcadeCircuitTests.swift */,
+				980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */,
+				D24EFFA7799A3CDECF9361E6 /* ArenaControlsTests.swift */,
+				2ED66AD0CC8B7FD13268B440 /* ArenaEarningsTests.swift */,
+				A37E0F6699169D58F2E4DC5E /* ArenaExpressionTests.swift */,
+				DEBCF3D267607EEE633DE56F /* ArenaFeedbackTests.swift */,
+				7C38CBDB8E4E40DE37C57A2B /* ArenaRecoveryTests.swift */,
+				4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */,
+				D9A0092F7E7FCEA74B2E09C0 /* CrossPlatformParityTests.swift */,
 				4E6AE199A809890C135FF5CF /* DillTests.swift */,
+				E880408BECBA90CD00B809E9 /* FeedFoodTests.swift */,
+				9EF292F156C8F722841A7D1C /* PickleBodyTests.swift */,
+				934B4A5A85FFD82992BDC6BE /* PlayRewardIntegrationTests.swift */,
+				B4C18144AAFD107F75E0F814 /* WardrobeTests.swift */,
 			);
 			path = LittleDillTests;
+			sourceTree = "<group>";
+		};
+		799D87CA764AFE7FB4809EBA /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				C681DCBE740415262BAE485C /* arena-grater.wav */,
+				A555C19E1EC273F7D61FF0E0 /* arena-pickup-0.wav */,
+				6D4B0A2AD1CF122B1106AB63 /* arena-pickup-1.wav */,
+				CAFDFF4605FF2015B7E91004 /* arena-pickup-2.wav */,
+				AB5BBC5F78D887B52814993A /* arena-pickup-3.wav */,
+				3DA54E77E1AD483188C987A6 /* arena-shaker.wav */,
+				FE23CB78789E0FA747896F85 /* arena-slicer.wav */,
+				781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 		7E0C56A139D30F83F22FF856 /* LittleDillUITests */ = {
 			isa = PBXGroup;
 			children = (
+				9F8B1CEEB43D5EFC7ED47A39 /* ContinuityUITests.swift */,
 				07138856D58D603AA5147715 /* LittleDillUITests.swift */,
+				960438BB56A75EC0642913B3 /* PlayWakeUITests.swift */,
 			);
 			path = LittleDillUITests;
 			sourceTree = "<group>";
@@ -148,6 +290,7 @@
 		98EA77C112BABD16240E9D71 = {
 			isa = PBXGroup;
 			children = (
+				4074B4C83B8543B99DDDB6BB /* fixtures */,
 				353026AD950176F9CB36E8BF /* LittleDill */,
 				473B30417340CCD68313A6EB /* LittleDillTests */,
 				7E0C56A139D30F83F22FF856 /* LittleDillUITests */,
@@ -191,6 +334,7 @@
 			buildConfigurationList = BEA38C98EA4369EFE2E42572 /* Build configuration list for PBXNativeTarget "LittleDillTests" */;
 			buildPhases = (
 				CA87F8FCFBD759064D4B06CD /* Sources */,
+				50CABCE4D0C23BF8F3E0D49B /* Resources */,
 			);
 			buildRules = (
 			);
@@ -266,12 +410,28 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		50CABCE4D0C23BF8F3E0D49B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B9EF65799FA35794E5B8C7AA /* arena-parity.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A708B74FDF13C1183F7D1013 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */,
 				79AC77633956986EFD962D70 /* PrivacyInfo.xcprivacy in Resources */,
+				924DE7770F52A23604E909F0 /* arena-grater.wav in Resources */,
+				DF211320BB043480A4B69403 /* arena-pickup-0.wav in Resources */,
+				02A7263B3071AB5E1178D3A4 /* arena-pickup-1.wav in Resources */,
+				BC23AF8707B7333930B3BD90 /* arena-pickup-2.wav in Resources */,
+				FEE73CBB018AAF2C607D9050 /* arena-pickup-3.wav in Resources */,
+				FBC65563AB0BB3407FB8227D /* arena-shaker.wav in Resources */,
+				33B7CB346A9678496154854F /* arena-slicer.wav in Resources */,
+				B0A4B9509F1BB8F9B334BC53 /* gadget-audio.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -282,31 +442,48 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D803B2C63A66785E63FBF15F /* ArcadeArt.swift in Sources */,
+				82E77C18E19919F9E2AA3B59 /* ArcadeChop.swift in Sources */,
+				1F9F368991F311C19E05CAA0 /* ArcadeChopBoard.swift in Sources */,
+				582A9E4AEB205E6D2D7A60FA /* ArcadeCircuit.swift in Sources */,
+				FE03FF6E3857D909DA9C9682 /* ArcadeCircuitView.swift in Sources */,
+				316B14844A8655410DD55BF5 /* ArcadeGames.swift in Sources */,
+				18FBCB80DC205B29921EB949 /* ArcadeHop.swift in Sources */,
+				C3CD676CB043169CEA8A85B8 /* ArcadeToss.swift in Sources */,
+				F88E7DD3F06A615AEEF12D03 /* ArcadeTossBoard.swift in Sources */,
+				DF542A4AD96506ADC6A39744 /* ArcadeViews.swift in Sources */,
 				DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */,
+				4B44F7995716B7EEB1DEC9ED /* ArenaControls.swift in Sources */,
+				8A0879F8F0B5913685CB407A /* ArenaEarnings.swift in Sources */,
+				6FBC3D767AFC7F4FDA2629B4 /* ArenaExpression.swift in Sources */,
+				11A2B4924156C612114CC686 /* ArenaFeedback.swift in Sources */,
+				658D6D906536026B9B853BD3 /* ArenaResume.swift in Sources */,
 				3631E4611129DA11F1250217 /* ArenaView.swift in Sources */,
+				92388A5657106EB180EF8600 /* BackupViews.swift in Sources */,
 				1BC693056355D165FD855B57 /* CareScene.swift in Sources */,
 				8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */,
 				FDEAD20540E6ED8E4763BD1A /* Design.swift in Sources */,
 				307F33E5FFA6CD7BFBF5FFE8 /* DillAudio.swift in Sources */,
+				352D29B8DF2DDE82721BAD7C /* DillBackup.swift in Sources */,
 				BF8CC73229925DEFF629656C /* DillModel.swift in Sources */,
-				3347EC2DB863D9F1DC99FFCC /* PetLife.swift in Sources */,
-				7A30C897D7D0BAA726E466B9 /* ArcadeGames.swift in Sources */,
-				59E9AA9DD2794FA0372FFFC5 /* ArcadeViews.swift in Sources */,
-				7C04635C8340D2B8A574E17D /* BackupViews.swift in Sources */,
-				291846AEE3171313D1991B81 /* NestProfile.swift in Sources */,
-				D3C317596E37E45A1883E767 /* NestText.swift in Sources */,
-				E2056B072E56C7BB2D58E945 /* NestView.swift in Sources */,
-				95C0AA1055AA1A89790AEDD0 /* NurseryView.swift in Sources */,
-				EC0B8BC0A029EFC27BDA1AB1 /* PetArtData.swift in Sources */,
-				786CC2CD22A9FD57F05D3567 /* PetArtShapes.swift in Sources */,
-				528260CE3C2B3475614D5634 /* PetLooks.swift in Sources */,
-				353D0CA937C5CA51BAD879BA /* PetMotion.swift in Sources */,
-				FF9266163B7A196EEFA4843F /* PetStage.swift in Sources */,
-				5E65D9FFF9E7018C7613B49C /* DillStore.swift in Sources */,
-				3FF55AB1A55A7BD1B47F31DB /* DillBackup.swift in Sources */,
+				D215CED4B7D146B18569DCE5 /* DillStore.swift in Sources */,
+				F4F9AA76503A401F4CD0ACDB /* FeedFood.swift in Sources */,
 				13469B1FA37D3EBB54ED5DB8 /* FriendsView.swift in Sources */,
 				20ABE1EFEDAFBD9B3D3E63AB /* GameViews.swift in Sources */,
+				B3FF6602CB337BEC0B7C8296 /* HopScenery.swift in Sources */,
 				09D2B7BA677F5EDE15374D35 /* LittleDillApp.swift in Sources */,
+				4DE1F54989CADDFAA87EADC8 /* NestProfile.swift in Sources */,
+				5F6AF5B31FEF53426F092951 /* NestText.swift in Sources */,
+				3C6B6928D7448C9CF16A7921 /* NestView.swift in Sources */,
+				24CA9E9803D023D863BE0964 /* NurseryView.swift in Sources */,
+				348D0861D4DE62FD3A35AF99 /* PetArtData.swift in Sources */,
+				B15F36B588A21167DD531D59 /* PetArtShapes.swift in Sources */,
+				F58B96584F3A3F07000DD3B7 /* PetLife.swift in Sources */,
+				7BA7B1B3A32F024442F76964 /* PetLooks.swift in Sources */,
+				E46A4A05B5AAD9DEB61EC6D7 /* PetMotion.swift in Sources */,
+				8144210ADBBEF3E68D6D6316 /* PetStage.swift in Sources */,
+				30906DC4DFB352FA866B9E87 /* PickleBody.swift in Sources */,
+				589E54C989F5860AA3E608F0 /* WardrobeArt.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,7 +491,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B5F65300CD7EF0DE6718128 /* ContinuityUITests.swift in Sources */,
 				D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */,
+				D4B9CC502232E7EF2F62207F /* PlayWakeUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -322,7 +501,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34B4FCB550513CEB062C516F /* ArcadeActionTests.swift in Sources */,
+				9DDD3CBBDC8725688B20825A /* ArcadeCircuitTests.swift in Sources */,
+				E089736DA1A96B67C8ABFB12 /* ArenaAudioParityTests.swift in Sources */,
+				54599D64AC467AFAAC4737FE /* ArenaControlsTests.swift in Sources */,
+				E58D926F4CAB48E8081F0AFA /* ArenaEarningsTests.swift in Sources */,
+				4DB51B501DB4FB4C8105EAD0 /* ArenaExpressionTests.swift in Sources */,
+				F60F161D0BBCE3263C541E82 /* ArenaFeedbackTests.swift in Sources */,
+				21BC0AF78364318AC21DFB23 /* ArenaRecoveryTests.swift in Sources */,
+				A968F609E7B05DBDBC4C63CB /* ArenaSplitParityTests.swift in Sources */,
+				1C03C52777587C828FF1AE0A /* CrossPlatformParityTests.swift in Sources */,
 				517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */,
+				56F8C2300FE54183F331E631 /* FeedFoodTests.swift in Sources */,
+				5665F5CF1C630B1AE14D7DB1 /* PickleBodyTests.swift in Sources */,
+				96102A86B6C3E427A51D7C08 /* PlayRewardIntegrationTests.swift in Sources */,
+				86829ECB2B67B80471FCA104 /* WardrobeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

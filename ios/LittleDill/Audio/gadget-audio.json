@@ -1,0 +1,29 @@
+{
+  "sampleRate": 48000,
+  "strokeCount": 8,
+  "webSourceSHA256": "58da1d2f66bb34ce7528937688e72e6bd564e8e19882896a3e776f0cfde741c0",
+  "webCoreSHA256": "aa34f16dc190d4e0b98bc19cdf94f814680723e16324e7ea700ac6be94b5d1d2",
+  "clips": {
+    "slicer": {
+      "period": 0.32,
+      "frames": 122880,
+      "peak": 0.09425030648708344,
+      "rms": 0.009598413198085347,
+      "sha256": "0e47848595d3fbca985eb9bb642fbdfc35509c1e4e2b1b337ffdc4154498489a"
+    },
+    "shaker": {
+      "period": 0.22,
+      "frames": 84480,
+      "peak": 0.10623861104249954,
+      "rms": 0.0054735065946911994,
+      "sha256": "30a5111dba57cb9caf977dd6fb3bcc0344e08450e14f3a55cddc295e3909ca57"
+    },
+    "grater": {
+      "period": 0.35,
+      "frames": 134400,
+      "peak": 0.031294677406549454,
+      "rms": 0.0018629452041582588,
+      "sha256": "259b79c402884fc9cce7e53fb977c842128a7f6d99a63f960edfa9aadd3100a7"
+    }
+  }
+}

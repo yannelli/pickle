@@ -33,7 +33,7 @@
           <label for="name">YOUR PICKLE’S NAME</label>
           <input id="name" name="name" type="text" maxlength="18" autocomplete="nickname" placeholder="Dilly" required value="Dilly">
           <fieldset><legend>PICK YOUR BRINE</legend><div class="brines"><button type="button" class="brine selected" data-brine="classic" aria-pressed="true"><span class="swatch classic"></span>Classic</button><button type="button" class="brine" data-brine="garlic" aria-pressed="false"><span class="swatch garlic"></span>Garlic</button><button type="button" class="brine" data-brine="spicy" aria-pressed="false"><span class="swatch spicy"></span>Spicy</button></div></fieldset>
-          <label for="outfit">A LITTLE SOMETHING EXTRA</label><select id="outfit" name="outfit"><option value="sprout">Fresh little sprout</option><option value="original">The original dill</option><option value="bow">A very good bow</option><option value="shades">Too cool to crunch</option><option value="crown">Big dill royalty</option><option value="party">Life of the pickle party</option></select>
+          <label for="outfit">A LITTLE SOMETHING EXTRA</label><select id="outfit" name="outfit"><option value="sprout">Fresh little sprout</option><option value="original">The original dill</option><option value="bow">A very good bow</option><option value="shades">Too cool to crunch</option><option value="crown">Big dill royalty</option><option value="party">Life of the pickle party</option><option value="beanie">Cozy knit</option><option value="beret">Art house</option><option value="headphones">In my zone</option><option value="sunhat">Sunny side</option><option value="chef">Little chef</option><option value="cowboy">Wild west</option><option value="pirate">Captain crunch</option><option value="mushroom">Forest friend</option><option value="wizard">Spellbound</option><option value="rainhat">Rainy day</option><option value="halo">Sweet angel</option><option value="helmet">Space cadet</option></select>
           <button class="button primary play-button" id="play" type="submit"><span id="play-label">Let’s get pickled</span><svg><use href="#arrow-icon"/></svg></button>
         </form>
         <div class="friend-actions"><button id="create-room" class="button secondary">Start a friend room</button><button id="show-room" class="text-button">Got a room code?</button><button id="public-room" class="text-button" hidden>Play in the public garden instead</button></div>
@@ -45,7 +45,7 @@
     <footer class="site-footer"><a href="https://littledill.app">Meet your pocket pickle <span>↗</span></a><span>Free to play. No download. All dill.</span></footer>
   </main>
   <section id="game" class="game" aria-label="Brine Royale arena" hidden>
-    <canvas id="arena" aria-label="Live multiplayer garden. Move with arrow keys, W A S D, your mouse, or the touch joystick. Press Space to dash or E to split. Split pieces regroup automatically."></canvas>
+    <canvas id="arena" aria-label="Live multiplayer garden. Move with arrow keys, W A S D, your mouse, or the touch joystick. Press Space to dash or E to split. Split slices regroup automatically."></canvas>
     <div class="game-top">
     <header class="game-header"><div class="game-brand"><span class="eyebrow">LITTLE DILL</span><strong>Brine Royale<span>.</span></strong><span id="population">Finding your garden…</span></div><div class="game-actions"><button id="invite" class="icon-button" aria-label="Invite friends" title="Invite friends"><svg><use href="#share-icon"/></svg></button><button class="icon-button sound-toggle" aria-label="Turn sound on" aria-pressed="false" title="Sound off"><svg><use href="#sound-icon"/></svg><span class="mute-line"></span></button><button id="leave" class="icon-button" aria-label="Leave arena" title="Leave arena"><svg><use href="#close-icon"/></svg></button></div></header>
     <div class="game-stats">
@@ -60,8 +60,8 @@
       <div id="joystick" class="joystick" role="group" aria-label="Touch movement joystick"><span class="joystick-cross"></span><span id="stick" class="stick"></span></div>
       <p class="desktop-hint"><kbd>W</kbd><span><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>or move your mouse <i>·</i> <kbd>SPACE</kbd> dash <i>·</i> <kbd>E</kbd> split</p>
       <div class="ability-group" role="group" aria-label="Pickle abilities">
-        <div class="piece-status"><strong id="cell-count">1 / 4 pieces</strong><span id="merge-note">60 mass per piece to split</span></div>
-        <button id="split" class="dash-button split-button" aria-label="Split, needs 60 mass in one piece" aria-describedby="split-note" disabled><svg aria-hidden="true"><circle cx="6" cy="9" r="4"/><circle cx="18" cy="15" r="4"/><path d="m10 3 4 3-4 3m4 6-4 3 4 3"/></svg><strong>SPLIT</strong><span id="split-note">35 more mass</span></button>
+        <div class="piece-status"><strong id="cell-count">1 / 8 slices</strong><span id="merge-note">60 mass per slice to split</span></div>
+        <button id="split" class="dash-button split-button" aria-label="Split, needs 60 mass in one slice" aria-describedby="split-note" disabled><svg aria-hidden="true"><circle cx="6" cy="9" r="4"/><circle cx="18" cy="15" r="4"/><path d="m10 3 4 3-4 3m4 6-4 3 4 3"/></svg><strong>SPLIT</strong><span id="split-note">35 more mass</span></button>
         <button id="dash" class="dash-button" aria-label="Dash, costs 5 mass" aria-describedby="dash-note"><svg aria-hidden="true"><use href="#bolt-icon"/></svg><strong>DASH</strong><span id="dash-note">35 mass to unlock</span></button>
       </div>
     </div>

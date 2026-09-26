@@ -5,7 +5,7 @@ import CryptoKit
 import Crypto
 #endif
 
-// Swift port of ../../save-codec.js. Web builds read these files and ignore the `native` block.
+// Swift port of ../../save-codec.js. Web backups preserve the `native` block.
 struct DillBackupError: LocalizedError, Equatable {
     let message: String
     var errorDescription: String? { message }
@@ -56,7 +56,9 @@ enum DillBackup {
         var rewardedDays: [String] = []
         var scores: [Score] = []
         var arenaBest: Int?
+        var arenaEarnings: ArenaEarnings?
         var arcade: [String: Int] = [:]
+        var arcadeCircuit: ArcadeCircuit?
         var haptics = true
         var sounds: Bool?
     }
@@ -204,7 +206,9 @@ extension DillBackup.Native {
         rewardedDays = (try? c.decodeIfPresent([String].self, forKey: .rewardedDays)) ?? rewardedDays
         scores = (try? c.decodeIfPresent([DillBackup.Score].self, forKey: .scores)) ?? scores
         arenaBest = try? c.decodeIfPresent(Int.self, forKey: .arenaBest)
+        arenaEarnings = try? c.decodeIfPresent(ArenaEarnings.self, forKey: .arenaEarnings)
         arcade = (try? c.decodeIfPresent([String: Int].self, forKey: .arcade)) ?? arcade
+        arcadeCircuit = try? c.decodeIfPresent(ArcadeCircuit.self, forKey: .arcadeCircuit)
         haptics = (try? c.decodeIfPresent(Bool.self, forKey: .haptics)) ?? haptics
         sounds = try? c.decodeIfPresent(Bool.self, forKey: .sounds)
     }

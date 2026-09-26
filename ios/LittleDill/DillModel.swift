@@ -17,15 +17,73 @@ enum Brine: String, Codable, CaseIterable, Identifiable {
 
 enum Outfit: String, Codable, CaseIterable, Identifiable {
     case original, sprout, bow, shades, crown, party
+    case beanie, beret, headphones, sunhat, chef, cowboy
+    case pirate, mushroom, wizard, rainhat, halo, helmet
     var id: String { rawValue }
     var title: String {
-        switch self { case .original: return "Au naturel"; case .sprout: return "Plant parent"; case .bow: return "Sweet thing"; case .shades: return "Off duty"; case .crown: return "Big dill"; case .party: return "Party pickle" }
+        switch self {
+        case .original: return "Au naturel"
+        case .sprout: return "Plant parent"
+        case .bow: return "Sweet thing"
+        case .shades: return "Off duty"
+        case .crown: return "Big dill"
+        case .party: return "Party pickle"
+        case .beanie: return "Cozy knit"
+        case .beret: return "Art house"
+        case .headphones: return "In my zone"
+        case .sunhat: return "Sunny side"
+        case .chef: return "Little chef"
+        case .cowboy: return "Wild west"
+        case .pirate: return "Captain crunch"
+        case .mushroom: return "Forest friend"
+        case .wizard: return "Spellbound"
+        case .rainhat: return "Rainy day"
+        case .halo: return "Sweet angel"
+        case .helmet: return "Space cadet"
+        }
     }
     var symbol: String {
-        switch self { case .original: return "heart"; case .sprout: return "leaf.fill"; case .bow: return "gift.fill"; case .shades: return "sunglasses.fill"; case .crown: return "crown.fill"; case .party: return "party.popper.fill" }
+        switch self {
+        case .original: return "heart"
+        case .sprout: return "leaf.fill"
+        case .bow: return "gift.fill"
+        case .shades: return "sunglasses.fill"
+        case .crown: return "crown.fill"
+        case .party: return "party.popper.fill"
+        case .beanie: return "snowflake"
+        case .beret: return "paintpalette.fill"
+        case .headphones: return "headphones"
+        case .sunhat: return "sun.max.fill"
+        case .chef: return "fork.knife"
+        case .cowboy: return "star.fill"
+        case .pirate: return "sailboat.fill"
+        case .mushroom: return "leaf.circle.fill"
+        case .wizard: return "sparkles"
+        case .rainhat: return "cloud.rain.fill"
+        case .halo: return "circle.dashed"
+        case .helmet: return "moon.stars.fill"
+        }
     }
     var cost: Int {
-        switch self { case .original, .sprout: return 0; case .bow: return 30; case .shades: return 50; case .crown: return 90; case .party: return 120 }
+        switch self {
+        case .original, .sprout: return 0
+        case .bow: return 30
+        case .shades: return 50
+        case .crown: return 90
+        case .party: return 120
+        case .beanie: return 35
+        case .beret: return 45
+        case .headphones: return 55
+        case .sunhat: return 60
+        case .chef: return 65
+        case .cowboy: return 80
+        case .pirate: return 90
+        case .mushroom: return 95
+        case .wizard: return 110
+        case .rainhat: return 70
+        case .halo: return 130
+        case .helmet: return 140
+        }
     }
 }
 
@@ -55,7 +113,7 @@ struct ScoreEntry: Codable, Identifiable, Equatable {
 }
 
 struct PetState: Codable {
-    static let arcadeGames = ["hunt", "memory", "catch"]
+    static let arcadeGames = ["hunt", "memory", "catch", "hop", "chop", "toss"]
     static let nowKey = CodingUserInfoKey(rawValue: "little-dill.now")!
     static let maxCoins = 1_000_000
     static let maxStreak = 100_000
@@ -73,7 +131,9 @@ struct PetState: Codable {
     var haptics = true
     var soundEnabled: Bool?
     var arenaBest: Int?
+    var arenaEarnings: ArenaEarnings?
     var arcadeRecords: [String: Int] = [:]
+    var arcadeCircuit: ArcadeCircuit?
     var lastPetAt: Int64?
 
     init(now: Date = Date()) { life = PetLife.fresh(now: PetLife.ms(now)) }
@@ -95,7 +155,7 @@ struct PetState: Codable {
     func nextCareAt(after now: Date = Date()) -> Date { Date(timeIntervalSince1970: PetLife.nextCareAt(life, now: PetLife.ms(now)) / 1000) }
 
     private enum CodingKeys: String, CodingKey {
-        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arcadeRecords
+        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arenaEarnings, arcadeRecords, arcadeCircuit
         case name, brine, adopted, birthday, food, joy, clean, energy
     }
 
@@ -114,7 +174,9 @@ struct PetState: Codable {
         haptics = try c.decode(Bool.self, forKey: .haptics)
         soundEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundEnabled)
         arenaBest = try c.decodeIfPresent(Int.self, forKey: .arenaBest)
+        arenaEarnings = try? c.decodeIfPresent(ArenaEarnings.self, forKey: .arenaEarnings)
         arcadeRecords = try c.decodeIfPresent([String: Int].self, forKey: .arcadeRecords) ?? [:]
+        arcadeCircuit = try? c.decodeIfPresent(ArcadeCircuit.self, forKey: .arcadeCircuit)
         switch version {
         case 2: life = try c.decode(WebPet.self, forKey: .life)
         case 1:
@@ -154,7 +216,9 @@ struct PetState: Codable {
         try c.encode(haptics, forKey: .haptics)
         try c.encodeIfPresent(soundEnabled, forKey: .soundEnabled)
         try c.encodeIfPresent(arenaBest, forKey: .arenaBest)
+        try c.encodeIfPresent(arenaEarnings, forKey: .arenaEarnings)
         try c.encode(arcadeRecords, forKey: .arcadeRecords)
+        try c.encodeIfPresent(arcadeCircuit, forKey: .arcadeCircuit)
     }
 
     static func migratedName(_ name: String) -> String {
@@ -244,20 +308,38 @@ struct PetState: Codable {
         return CareResult(applied: true, coins: reward(action), message: sleeping ? "night night. don’t let the dill bugs bite." : "rise & brine, sleepyhead.")
     }
 
-    mutating func startArcade(at now: Date = Date()) -> Bool {
+    mutating func prepareArcade(at now: Date = Date()) -> Bool {
         refresh(at: now)
-        guard life.phase == .living, !life.dead, !life.sleeping, life.energy >= 6 else { return false }
+        guard life.phase == .living, !life.dead else { return false }
+        if life.sleeping {
+            life.sleeping = false
+            life.lastCareAt = PetLife.ms(now)
+        }
+        return true
+    }
+
+    mutating func startArcade(at now: Date = Date()) -> Bool {
+        guard prepareArcade(at: now), life.energy >= 6 else { return false }
         life.energy = PetLife.clamp(life.energy - 6)
         return true
     }
 
+    @discardableResult mutating func recordArena(earnedMass: Double, session: String, at now: Date = Date()) -> Int {
+        var progress = arenaEarnings ?? ArenaEarnings()
+        let earned = progress.record(session: session, earnedMass: earnedMass, day: DailyChallenge.today(now))
+        arenaEarnings = progress
+        return addCoins(earned)
+    }
+
     // Web rewards: hunt 10 + 8 per heart, memory 10 + 4 per level (34 for all five), catch 10 + 2 per point up to 34.
+    // iOS only: hop and toss 10 + 2 per point, chop 10 + 1 per two cukes, each up to 34.
     static func arcadeReward(game: String, score: Int) -> Int {
         let score = max(0, score)
         switch game {
         case "hunt": return 10 + min(3, score) * 8
         case "memory": return score >= 5 ? 34 : 10 + score * 4
-        case "catch": return 10 + min(24, score * 2)
+        case "catch", "hop", "toss": return 10 + min(24, score * 2)
+        case "chop": return 10 + min(24, score / 2)
         default: return 0
         }
     }
@@ -308,7 +390,7 @@ struct PetState: Codable {
                           streak: streak, lastVisitDay: lastVisitDay, careDay: careDay, dailyCare: dailyCare.sorted(),
                           rewardedDays: rewardedDays.sorted(),
                           scores: scores.sorted { $0.day > $1.day }.map { DillBackup.Score(d: $0.day, s: $0.score, t: PetLife.ms($0.date)) },
-                          arenaBest: arenaBest, arcade: arcadeRecords, haptics: haptics, sounds: soundEnabled)
+                          arenaBest: arenaBest, arenaEarnings: arenaEarnings, arcade: arcadeRecords, arcadeCircuit: arcadeCircuit, haptics: haptics, sounds: soundEnabled)
     }
 
     /// Runs a save that decoded but failed `isValid` through the backup import clamps.
@@ -335,7 +417,11 @@ struct PetState: Codable {
         }
         scores = Array(best.values.sorted { $0.d > $1.d }.prefix(90).map { ScoreEntry(day: $0.d, score: $0.s, date: PetLife.date($0.t)) })
         arenaBest = native.arenaBest.map { max(0, $0) }
+        arenaEarnings = native.arenaEarnings?.normalized()
         arcadeRecords = native.arcade.filter { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
+        arcadeCircuit = native.arcadeCircuit.flatMap {
+            DailyChallenge.validDay($0.day) ? ArcadeCircuit(day: $0.day, scores: $0.scores) : nil
+        }
         haptics = native.haptics
         soundEnabled = native.sounds
     }
@@ -344,7 +430,8 @@ struct PetState: Codable {
         version == 2 && (try? PetLife.validate(life)) != nil &&
         (0...Self.maxCoins).contains(coins) && (0...Self.maxStreak).contains(streak) && unlocked.contains(outfit) &&
         scores.count <= 90 && scores.allSatisfy { (0...300).contains($0.score) && DailyChallenge.validDay($0.day) } &&
-        arcadeRecords.allSatisfy { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
+        arcadeRecords.allSatisfy { Self.arcadeGames.contains($0.key) && $0.value >= 0 } &&
+        arcadeCircuit.map { DailyChallenge.validDay($0.day) } ?? true
     }
 }
 

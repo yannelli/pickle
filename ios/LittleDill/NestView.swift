@@ -8,6 +8,7 @@ struct NestView: View {
     var revealCare: () -> Void = {}
     @StateObject private var stage = PetStage()
     @State private var performance: CarePerformance?
+    @AppStorage("little-dill.food-turn.v1",store:ArenaResume.defaults) private var successfulFeeds = 0
     @State private var reactionTask: Task<Void,Never>?
     @State private var arcade = false
     @State private var joyBeforeArcade = 0.0
@@ -15,7 +16,7 @@ struct NestView: View {
     private var life: WebPet { store.pet.life }
     private var snacking: Bool { store.snackBites != nil }
     private var nowMs: Int64 { PetLife.ms(Date()) }
-    private var canPlay: Bool { store.pet.adopted && !life.dead && !life.sleeping && life.energy >= 6 && !snacking }
+    private var canPlay: Bool { store.pet.adopted && !life.dead && !snacking }
 
     var body: some View {
         VStack(spacing:22) {
@@ -37,7 +38,7 @@ struct NestView: View {
             dailyCard
             HStack { Image(systemName:"tshirt"); Text("A new look, a whole new dill.").font(.caption); Spacer(); Button("Dress up",action:closet).font(.caption.bold()) }.foregroundStyle(DillTheme.muted)
         }
-        .sheet(isPresented:$arcade,onDismiss:arcadeClosed) { ArcadeSheet().environmentObject(store) }
+        .fullScreenCover(isPresented:$arcade,onDismiss:arcadeClosed) { ArcadeSheet().environmentObject(store) }
         .onAppear {
             if let line = store.speech, PetLife.ms(Date()) - life.bornAt < 15_000 { stage.say(line,for:6) }
         }
@@ -122,8 +123,14 @@ struct NestView: View {
         guard result.applied else { stage.play(.wiggle); store.feedback(.rigid); return }
         store.feedback()
         stage.happyUntil = Date().addingTimeInterval(5)
-        if action == .feed { stage.pop("+\(Int((life.fullness - before).rounded())) food") } else { stage.pop("✧ squeaky clean ✧") }
-        perform(action)
+        if action == .feed {
+            stage.pop("+\(Int((life.fullness - before).rounded())) food")
+            perform(action, food: FeedFood.at(successfulFeeds))
+            successfulFeeds = (successfulFeeds + 1) % FeedFood.allCases.count
+        } else {
+            stage.pop("✧ squeaky clean ✧")
+            perform(action)
+        }
     }
 
     private func pet(performing: Bool) {
@@ -156,7 +163,14 @@ struct NestView: View {
     }
 
     private func openArcade() {
-        guard canPlay else { return }
+        let wasSleeping = life.sleeping
+        guard canPlay, store.prepareArcade() else { return }
+        if wasSleeping {
+            stopPerformance()
+            stage.happyUntil = .distantPast
+            stage.play(.wake)
+            stage.say("rise & brine, sleepyhead.")
+        }
         joyBeforeArcade = life.happiness
         store.feedback(); store.sound(.pop); arcade = true
     }
@@ -189,11 +203,12 @@ struct NestView: View {
 
     private func restart() {
         stopPerformance(); stage.reset()
+        successfulFeeds = 0
         store.restart(); store.sound(.respawn); store.feedback(.medium)
     }
 
-    private func perform(_ action: Care) {
-        let next = CarePerformance(action:action)
+    private func perform(_ action: Care, food: FeedFood? = nil) {
+        let next = CarePerformance(action:action, food:food)
         performance = next
         store.sound(DillSound(rawValue:action.rawValue)!)
         revealCare()

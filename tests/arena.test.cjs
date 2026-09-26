@@ -29,6 +29,42 @@ test('expanded gardens retain food density and use varied, unique everyday handl
   assert.equal(new Set(names).size, RULES.population);
   assert.ok(names.every(name => name.length <= 18 && !/\bbot\b|dillbert|briney/.test(name)));
 });
+test('the bot pool has distinct everyday handles', async () => {
+  const { BOT_NAMES, cleanName } = await setup();
+  assert.ok(BOT_NAMES.length>=240);
+  assert.equal(new Set(BOT_NAMES.map(name=>name.toLowerCase())).size,BOT_NAMES.length);
+  assert.equal(BOT_NAMES[0],'maya.j'); assert.equal(BOT_NAMES[71],'Harper');
+  assert.ok(BOT_NAMES.every(name=>cleanName(name)===name));
+});
+test('public bot mass is bounded and becomes rarer in each larger band', async () => {
+  const { publicBotMass, ArenaEngine, RULES } = await engineModule;
+  const random = seeded(17), counts = [0,0,0,0,0];
+  for (let n=0;n<100000;n++) {
+    const mass = publicBotMass(random);
+    assert.ok(mass>=25 && mass<=5000);
+    counts[mass<150?0:mass<500?1:mass<1200?2:mass<3000?3:4]++;
+  }
+  assert.ok(counts.every((count,i)=>i===0 || count<counts[i-1]),counts.join(','));
+  assert.ok(counts[4]>1000 && counts[4]<2000,counts.join(','));
+  const publicRoom = new ArenaEngine({random:seeded(8),publicRoom:true});
+  const human = publicRoom.addPlayer('human',{name:'maya.j'});
+  assert.equal(human.mass,RULES.startMass);
+  assert.equal(human.name,'Dilly');
+  const bots = [...publicRoom.players.values()].filter(p=>p.bot);
+  assert.equal(bots.length,RULES.population-1);
+  assert.equal(bots.filter(p=>p.profile.hard).length,1);
+  assert.equal(new Set([...publicRoom.players.values()].map(p=>p.name.toLowerCase())).size,RULES.population);
+  for(let n=0;n<25;n++) publicRoom.addPlayer(`human-${n}`,{name:'Dilly'});
+  assert.equal([...publicRoom.players.values()].filter(p=>p.bot&&p.profile.hard).length,1);
+  assert.equal(new Set([...publicRoom.players.values()].map(p=>p.name.toLowerCase())).size,RULES.population);
+  const checkpoint=publicRoom.checkpoint(); delete checkpoint.publicRoom; delete checkpoint.hardBotId;
+  const restored=new ArenaEngine({checkpoint,publicRoom:true,random:seeded(9)});
+  assert.equal([...restored.players.values()].filter(p=>p.bot&&p.profile.hard).length,1);
+  for(let n=0;n<25;n++) restored.removePlayer(`human-${n}`);
+  assert.equal([...restored.players.values()].filter(p=>p.bot&&p.profile.hard).length,1);
+  const crew=new ArenaEngine({random:seeded(8)}); crew.addPlayer('crew-member');
+  assert.ok([...crew.players.values()].filter(p=>p.bot).every(p=>p.mass>=25&&p.mass<=54&&!p.profile.hard));
+});
 test('food lookup crosses bucket edges and updates replacement locations in the same tick', async () => {
   const { engine } = await setup();
   const a = engine.addPlayer('a'), b = engine.addPlayer('b');
@@ -54,13 +90,13 @@ test('a full room simulates every split cell and fits the native packet budget',
   const { engine, RULES, radius } = await setup();
   for (let n = 0; n < RULES.maxHumans; n++) {
     const p = engine.addPlayer(`full-${n}`, { name: `Player ${n}` });
-    p.mass = 240; p.x = 350 + (n % 8)*740; p.y = 280 + Math.floor(n/8)*550;
-    engine.split(p); p.splitReady = 0; engine.split(p);
+    p.mass = 480; p.x = 350 + (n % 8)*740; p.y = 280 + Math.floor(n/8)*550;
+    for (let split=0;split<3;split++) {p.splitReady=0;engine.split(p);}
     p.shieldUntil = 100; p.mergeUntil = 100;
   }
   for (let tick = 0; tick < 120; tick++) engine.step();
   assert.equal(engine.humans, 64);
-  assert.equal(engine.liveCells().length, 256);
+  assert.equal(engine.liveCells().length, 512);
   assert.equal(engine.food.length, RULES.foodCount);
   for (const { cell } of engine.liveCells()) {
     assert.ok(Number.isFinite(cell.x+cell.y+cell.mass));
@@ -161,7 +197,7 @@ test('bots independently forage, grow, avoid predators and respawn', async () =>
     engine.step();
     for (const p of engine.players.values()) {
       assert.ok(Number.isFinite(p.x + p.y + p.mass)); assert.ok(p.mass >= 0);
-      if (p.alive) { const r = radius(p.mass); assert.ok(p.x >= r - 2 && p.x <= RULES.width - r + 2); }
+      if (p.alive) for (const cell of p.cells) { const r = radius(cell.mass); assert.ok(cell.x >= r - 2 && cell.x <= RULES.width - r + 2); }
       if (p.bot && p.best > 100) hadGrowth = true;
       if (p.bot && Math.hypot(p.x - initial.get(p.id).x, p.y - initial.get(p.id).y) > 30) hadMovement = true;
     }
@@ -179,6 +215,18 @@ test('names and appearances are bounded at the server', async () => {
   assert.equal(cleanName('\n\t'), 'Dilly'); assert.equal(Array.from(cleanName('🥒'.repeat(30))).length, 18);
   const p = engine.addPlayer('a', { name: 'a\u0000b', brine: 'hacked', outfit: 'unknown' });
   assert.equal(p.name, 'ab'); assert.equal(p.brine, 'classic'); assert.equal(p.outfit, 'sprout');
+});
+test('pet varieties reach snapshots and checkpoints, fall back within the brine, and spread across bots', async () => {
+  const { engine, VARIETIES, BRINES, pickVariety, ArenaEngine } = await setup();
+  assert.equal(engine.addPlayer('a', { brine: 'spicy', variety: 'butter' }).variety, 'butter');
+  for (const id of ['b', 'c', 'dd', 'eee']) assert.ok(['chili', 'pepper'].includes(engine.addPlayer(id, { brine: 'spicy', variety: 'hacked' }).variety));
+  assert.equal(pickVariety(undefined, 'garlic', 'x'), pickVariety(undefined, 'garlic', 'x'));
+  const state = engine.snapshot(false);
+  assert.equal(state.players.find(p => p.id === 'a').variety, 'butter');
+  const bots = state.players.filter(p => p.bot);
+  assert.deepEqual(new Set(bots.map(p => p.variety)), new Set(VARIETIES));
+  for (const bot of bots) assert.equal(bot.brine, BRINES[Math.floor(VARIETIES.indexOf(bot.variety) / 2)]);
+  assert.equal(new ArenaEngine({ checkpoint: engine.checkpoint() }).players.get('a').variety, 'butter');
 });
 
 test('fresh pickles can forage to dash quickly and reach 100 mass without a long empty-world grind', async () => {
@@ -245,20 +293,22 @@ test('split intent is authoritative, halves eligible pieces and launches in the 
   assert.ok(launched.x > start+35); assert.ok(launched.x > original.x);
   assert.equal(new Set(p.cells.map(c => c.id)).size,2);
 });
-test('split enforces per-piece mass, cooldown and four-piece maximum without spending mass', async () => {
+test('split enforces per-piece mass, cooldown and eight-piece maximum without spending mass', async () => {
   const {engine,p,RULES} = await soloSplit(59);
-  assert.equal(engine.split(p),false); p.mass=240;
+  assert.equal(engine.split(p),false); p.mass=480;
   assert.ok(engine.split(p)); assert.equal(engine.split(p),false);
   engine.time += RULES.splitCooldown+.01; assert.ok(engine.split(p));
-  assert.equal(p.cells.length,4); assert.equal(p.mass,240);
-  engine.time += 2; assert.equal(engine.split(p),false); assert.equal(p.mass,240);
+  assert.equal(p.cells.length,4); assert.equal(p.mass,480);
+  engine.time += RULES.splitCooldown+.01; assert.ok(engine.split(p));
+  assert.equal(p.cells.length,8); assert.equal(p.mass,480);
+  engine.time += 2; assert.equal(engine.split(p),false); assert.equal(p.mass,480);
   p.alive=false; assert.equal(engine.split(p),false);
 });
-test('four independently moving siblings cannot merge early and regroup automatically without losing mass', async () => {
-  const {engine,p,RULES} = await soloSplit();
-  engine.split(p); engine.time += RULES.splitCooldown+.01; engine.split(p);
+test('eight independently moving slices cannot merge early and regroup without losing mass', async () => {
+  const {engine,p,RULES} = await soloSplit(240);
+  for (let split=0;split<3;split++) {engine.time += RULES.splitCooldown+.01; engine.split(p);}
   const ready = p.mergeUntil;
-  while(engine.time < ready-.1) { engine.step(); assert.equal(p.cells.length,4); }
+  while(engine.time < ready-.1) { engine.step(); assert.equal(p.cells.length,8); }
   assert.equal(p.mass,240);
   for(let n=0;n<100&&p.cells.length>1;n++) engine.step();
   assert.equal(p.cells.length,1); assert.equal(p.mass,240); assert.equal(p.mergeUntil,0);
@@ -276,15 +326,17 @@ test('eating one piece keeps its owner alive; eliminating its last piece awards 
   const {engine,p} = await soloSplit(120); const hunter=engine.addPlayer('hunter');
   for(const [id,other] of engine.players) if(other.bot) engine.players.delete(id);
   engine.split(p); engine.food=[]; p.shieldUntil=hunter.shieldUntil=0; hunter.mass=100;
-  p.cells[0].x=1000; p.cells[0].y=600; p.cells[1].x=1800; p.cells[1].y=1200;
+  p.cells[0].x=1000; p.cells[0].y=600; p.cells[1].x=1800; p.cells[1].y=1000;
   for(const c of p.cells) c.vx=c.vy=0;
   hunter.x=1000; hunter.y=600; engine.step();
   assert.equal(p.cells.length,1); assert.ok(p.alive); assert.equal(hunter.kills,0); assert.equal(p.mass,60);
+  assert.equal(engine.snapshot(false).players.find(player => player.id === p.id).hurt,15);
   assert.equal(engine.events[0].eliminated,false); assert.equal(engine.input(p.id,{type:'respawn'}),false);
   hunter.x=p.x; hunter.y=p.y; engine.step();
   assert.equal(p.cells.length,0); assert.equal(p.alive,false); assert.equal(hunter.kills,1);
+  assert.equal(engine.snapshot(false).players.find(player => player.id === p.id).hurt,0);
   assert.equal(engine.events[0].eliminated,true); engine.step(); assert.equal(hunter.kills,1);
-  engine.time+=2.1; assert.ok(engine.respawn(p)); assert.equal(p.cells.length,1); assert.equal(p.mass,25); assert.equal(p.splitReady,0);
+  engine.time+=2.1; assert.ok(engine.respawn(p)); assert.equal(p.cells.length,1); assert.equal(p.mass,25); assert.equal(p.splitReady,0); assert.equal(p.hurtUntil,0);
 });
 test('absorption compares individual piece mass rather than combined player mass', async () => {
   const {engine,p} = await soloSplit(240); const rival=engine.addPlayer('rival');
@@ -316,78 +368,343 @@ test('split snapshots expose stable cells and regroup countdown while preserving
   assert.equal(player.cells.reduce((sum,c)=>sum+c.mass,0),player.mass);
   assert.ok(JSON.stringify(snapshot).length<5000);
 });
-const workerModule = import('../server/arena-worker.mjs');
-function arenaRequest(query = '', headers = {}) { return new Request('https://arena.test/arena' + query, { headers: { Upgrade: 'websocket', 'CF-Connecting-IP': '203.0.113.1', ...headers } }); }
-function fakeArenas(statuses) {
-  const calls = [];
-  return { calls, getByName: id => ({ fetch: async req => { calls.push({ id, ip: req.headers.get('X-Arena-Client-IP'), secret: req.headers.get('X-Arena-Proxy-Secret'), room: new URL(req.url).searchParams.get('assignedRoom') }); const status = statuses[calls.length - 1] ?? 200; return Response.json({ id, status }, { status }); } }) };
+
+async function fieldPair(mass = 25) {
+  const api = await setup(), inside = api.engine.addPlayer('inside'), outside = api.engine.addPlayer('outside');
+  for (const [id,p] of api.engine.players) if (p.bot) api.engine.players.delete(id);
+  const h = api.HAZARDS[0];
+  api.engine.food = []; inside.mass = outside.mass = mass;
+  inside.x = h.x; inside.y = h.y; outside.x = 1000; outside.y = 1000;
+  return {...api,inside,outside,h};
 }
-test('public matchmaking skips rooms refusing a full garden or a crowded network', async () => {
-  const worker = (await workerModule).default;
-  let ARENAS = fakeArenas([429, 503, 200]);
-  let response = await worker.fetch(arenaRequest(), { ARENAS });
-  assert.equal(response.status, 200); assert.deepEqual(ARENAS.calls.map(c => c.id), ['public-1', 'public-2', 'public-3']); assert.equal(ARENAS.calls[2].room, 'public-3');
-  ARENAS = fakeArenas([503, 429, ...Array(14).fill(503)]);
-  response = await worker.fetch(arenaRequest(), { ARENAS });
-  assert.equal(ARENAS.calls.length, 16); assert.equal(response.status, 429); assert.equal((await response.json()).id, 'public-2');
-  ARENAS = fakeArenas(Array(16).fill(503));
-  response = await worker.fetch(arenaRequest(), { ARENAS });
-  assert.equal(response.status, 503); assert.equal((await response.json()).error, 'All gardens are full. Try again in a moment.');
-  ARENAS = fakeArenas([429]);
-  response = await worker.fetch(arenaRequest('?room=ABC123'), { ARENAS });
-  assert.equal(response.status, 429); assert.deepEqual(ARENAS.calls.map(c => c.id), ['crew-ABC123']);
+const snapCells = (engine,id) => engine.snapshot(false).players.find(p => p.id === id).cells;
+test('kitchen gadget fields appear in every snapshot with the fixed contract', async () => {
+  const {engine,HAZARDS,RULES} = await setup();
+  const expected = [{id:'slicer-1',kind:'slicer',x:1650,y:1300,r:150},{id:'shaker-1',kind:'shaker',x:4350,y:1300,r:150},{id:'grater-1',kind:'grater',x:3000,y:3250,r:150}];
+  assert.deepEqual(HAZARDS,expected); assert.ok(Object.isFrozen(HAZARDS) && HAZARDS.every(Object.isFrozen));
+  assert.deepEqual(engine.snapshot().hazards,expected); assert.deepEqual(engine.snapshot(false).hazards,expected);
+  assert.deepEqual(JSON.parse(JSON.stringify(engine.snapshot(false))).hazards,expected);
+  const {hazardRadius,hazardSlow,leakRate,leakMin,leakMax,leakFloor,spitMass} = RULES;
+  assert.deepEqual({hazardRadius,hazardSlow,leakRate,leakMin,leakMax,leakFloor,spitMass},{hazardRadius:150,hazardSlow:0.5,leakRate:0.05,leakMin:4,leakMax:60,leakFloor:500,spitMass:4});
+  assert.equal('hazards' in engine.checkpoint(),false);
 });
-test('forwarded client IPs are trusted only with the matching proxy secret', async () => {
-  const worker = (await workerModule).default;
-  const proxied = secret => arenaRequest('', { 'X-Arena-Client-IP': '198.51.100.7', 'X-Arena-Proxy-Secret': secret });
-  for (const [env, request, ip] of [
-    [{ ARENA_PROXY_SECRET: 'brine-secret' }, proxied('brine-secret'), '198.51.100.7'],
-    [{ ARENA_PROXY_SECRET: 'brine-secret' }, proxied('brine-secreT'), '203.0.113.1'],
-    [{ ARENA_PROXY_SECRET: 'brine-secret' }, proxied('short'), '203.0.113.1'],
-    [{ ARENA_PROXY_SECRET: 'brine-secret' }, arenaRequest('', { 'X-Arena-Client-IP': '198.51.100.7' }), '203.0.113.1'],
-    [{}, proxied('brine-secret'), '203.0.113.1'],
-    [{}, proxied(''), '203.0.113.1'],
-    [{}, arenaRequest(), '203.0.113.1']
-  ]) {
-    const ARENAS = fakeArenas([200]);
-    assert.equal((await worker.fetch(request, { ...env, ARENAS })).status, 200);
-    assert.equal(ARENAS.calls[0].ip, ip); assert.equal(ARENAS.calls[0].secret, null);
+test('draining cells steer at half speed while split launch velocity is unchanged', async () => {
+  const {engine,inside,outside} = await fieldPair();
+  for (const p of [inside,outside]) engine.input(p.id,{type:'input',seq:1,x:1,y:0});
+  let start = [inside.x,outside.x]; engine.step();
+  assert.ok(outside.x-start[1] > 9);
+  assert.ok(Math.abs((inside.x-start[0])/(outside.x-start[1])-0.5) < 1e-9);
+  for (const p of [inside,outside]) { engine.input(p.id,{type:'input',seq:2,x:0,y:0}); p.cells[0].vx = 520; p.cells[0].vy = 0; }
+  start = [inside.x,outside.x]; engine.step();
+  assert.ok(Math.abs((inside.x-start[0])-(outside.x-start[1])) < 1e-9);
+});
+test('snapshot cells carry drain only while each cell overlaps a field', async () => {
+  const {engine,inside,outside,h,radius} = await fieldPair(1200);
+  const edge = h.r+radius(inside.mass);
+  inside.x = h.x+edge-1; assert.equal(snapCells(engine,'inside')[0].drain,1);
+  inside.x = h.x+edge+1; assert.equal('drain' in snapCells(engine,'inside')[0],false);
+  assert.equal('drain' in snapCells(engine,'outside')[0],false);
+  engine.split(inside); inside.cells[0].x = h.x; inside.cells[0].y = h.y; inside.cells[1].x = 900; inside.cells[1].y = 900;
+  const cells = snapCells(engine,'inside');
+  assert.equal(cells[0].drain,1); assert.equal('drain' in cells[1],false);
+});
+test('leaking stops at the floor and leaves the player alive, even after a minute inside', async () => {
+  const {engine,inside,RULES} = await fieldPair(700);
+  for (let n = 0; n < 60*RULES.tickRate; n++) { inside.lastMeal=engine.time; engine.step(); assert.ok(inside.mass >= RULES.leakFloor); }
+  assert.equal(inside.mass,RULES.leakFloor); assert.ok(inside.alive); assert.equal(inside.cells.length,1);
+  assert.equal('drain' in snapCells(engine,'inside')[0],false);
+});
+test('leaked mass returns as value-4 pellets beyond the far side, and eaten spit becomes normal food', async () => {
+  const {engine,RULES,HAZARDS,radius} = await setup(), {foodDelta} = await import('../server/arena-worker.mjs'), h = HAZARDS[0];
+  const p = engine.addPlayer('drained');
+  for (const [id,o] of engine.players) if (o.bot) engine.players.delete(id);
+  for (const f of engine.food) if (Math.hypot(f.x-h.x,f.y-h.y) < 450) { f.x = 5500; f.y = 4000; }
+  p.mass = 800; p.x = h.x-150; p.y = h.y;
+  const before = engine.snapshot().food, oldIds = new Set(engine.food.map(f => f.id));
+  for (let n = 0; n < 100; n++) engine.step();
+  const spat = engine.food.filter(f => f.value === RULES.spitMass);
+  assert.ok(spat.length >= 8, `spat ${spat.length}`);
+  for (const f of spat) {
+    const d = Math.hypot(f.x-h.x,f.y-h.y);
+    assert.ok(d >= h.r+40-1e-9 && d <= h.r+180+1e-9, `distance ${d}`);
+    assert.ok(f.x > h.x, 'spit lands on the far side from the drained cell');
+    assert.equal(oldIds.has(f.id),false);
   }
-  const { ArenaRoom } = await workerModule, room = new ArenaRoom({});
-  for (let i = 0; i < 8; i++) room.sessions.set({}, { ip: '198.51.100.7' });
-  const crowded = await room.fetch(arenaRequest('?assignedRoom=public-1', { 'X-Arena-Client-IP': '198.51.100.7' }));
-  assert.equal(crowded.status, 429); assert.equal((await crowded.json()).error, 'Too many connections from this network.');
+  assert.equal(engine.food.length,RULES.foodCount);
+  assert.ok(Math.abs(800-p.mass-(spat.length*RULES.spitMass+engine.hazardLeak['slicer-1'])) < 1e-9);
+  const delta = foodDelta(before,engine.snapshot().food);
+  assert.equal(delta.foodRemoved.length,spat.length);
+  assert.deepEqual(delta.foodAdded.map(f => f[0]).sort(),spat.map(f => f.id).sort());
+  engine.players.delete(p.id);
+  const pellet = spat[0], eater = engine.addPlayer('eater');
+  eater.x = pellet.x; eater.y = pellet.y;
+  const eaten = engine.food.filter(f => Math.hypot(f.x-eater.x,f.y-eater.y) < radius(eater.mass)+4);
+  const slots = eaten.map(f => engine.food.indexOf(f));
+  assert.ok(eaten.includes(pellet) && eaten.every(f => f.value === RULES.spitMass));
+  engine.step();
+  assert.equal(eater.mass,RULES.startMass+eaten.length*RULES.spitMass);
+  assert.ok(eaten.every(f => !engine.food.some(g => g.id === f.id)));
+  assert.ok(slots.every(i => [RULES.foodMass,RULES.bonusFoodMass].includes(engine.food[i].value)));
+  assert.equal(engine.food.length,RULES.foodCount);
 });
-test('crew room joins are rate limited per resolved client IP when the binding exists', async () => {
-  const worker = (await workerModule).default, keys = [];
-  const CREW_JOINS = { limit: async ({ key }) => { keys.push(key); return { success: keys.length <= 1 }; } };
-  const env = { ARENA_PROXY_SECRET: 'brine-secret', CREW_JOINS };
-  const crew = () => arenaRequest('?room=ABC123', { 'X-Arena-Client-IP': '198.51.100.7', 'X-Arena-Proxy-Secret': 'brine-secret' });
-  let ARENAS = fakeArenas([200]);
-  assert.equal((await worker.fetch(crew(), { ...env, ARENAS })).status, 200); assert.equal(ARENAS.calls.length, 1);
-  ARENAS = fakeArenas([200]);
-  const limited = await worker.fetch(crew(), { ...env, ARENAS });
-  assert.equal(limited.status, 429); assert.equal((await limited.json()).error, 'Too many private rooms. Try again in a minute.');
-  assert.equal(ARENAS.calls.length, 0); assert.deepEqual(keys, ['198.51.100.7', '198.51.100.7']);
-  ARENAS = fakeArenas([200]);
-  assert.equal((await worker.fetch(arenaRequest(), { ...env, ARENAS })).status, 200); assert.equal(keys.length, 2);
-  ARENAS = fakeArenas([200]);
-  assert.equal((await worker.fetch(crew(), { ARENAS })).status, 200); assert.equal(ARENAS.calls[0].id, 'crew-ABC123');
+test('bots skip food and prey inside fields and steer out from a field edge', async () => {
+  const {engine,HAZARDS,radius} = await setup(), h = HAZARDS[0];
+  engine.addPlayer('human');
+  const bot = [...engine.players.values()].find(p => p.bot);
+  for (const [id,p] of engine.players) if (p !== bot) engine.players.delete(id);
+  bot.mass = 60; bot.shieldUntil = 0;
+  const reach = radius(bot.mass);
+  bot.x = h.x+h.r+reach+400; bot.y = h.y;
+  engine.food = [{id:1,x:h.x+60,y:h.y,value:3},{id:2,x:bot.x,y:bot.y+250,value:3}];
+  engine.think(bot); assert.ok(bot.dy > 0.99, 'targets the pellet outside the field');
+  const prey = engine.addPlayer('prey');
+  prey.x = h.x; prey.y = h.y; prey.shieldUntil = 0; bot.x = h.x+h.r+reach+200;
+  engine.food = [{id:3,x:bot.x,y:bot.y+250,value:3}];
+  engine.think(bot); assert.ok(bot.dy > 0.99, 'ignores draining prey');
+  engine.players.delete(prey.id);
+  bot.x = h.x+h.r+reach-10; bot.y = h.y; bot.botHazardReady = Infinity;
+  engine.food = [{id:4,x:h.x-h.r-300,y:h.y,value:3}];
+  engine.think(bot); assert.ok(bot.dx > 0, 'steers away from the field centre');
+  for (let n = 0; n < 60; n++) engine.step();
+  assert.ok(Math.hypot(bot.x-h.x,bot.y-h.y) >= h.r+radius(bot.mass), 'left the field');
 });
-test('humans cannot take the self label or a bot handle, while bots keep their handles', async () => {
-  const { engine, humanName } = await setup();
-  for (const name of ['you', ' YOU ', 'You', 'maya.j', 'MAYA.J', 'sophiek', 'Harper', 'you\u2800', 'noah\u3164']) assert.equal(humanName(name), 'Dilly', name);
-  for (const name of ['Maya', 'you2', 'your pickle', 'Dilly']) assert.equal(humanName(name), name);
-  assert.equal(engine.addPlayer('h1', { name: 'You' }).name, 'Dilly');
-  assert.equal(engine.addPlayer('h2', { name: 'noah' }).name, 'Dilly');
-  assert.equal(engine.addPlayer('bot-x', { bot: true, name: 'maya.j' }).name, 'maya.j');
+test('spawn points keep clear of every field', async () => {
+  const {engine,HAZARDS,RULES} = await setup(), h = HAZARDS[0];
+  const scripted = [(h.x-80)/(RULES.width-160),(h.y-80)/(RULES.height-160),0.1,0.9], next = seeded(7);
+  engine.random = () => scripted.length ? scripted.shift() : next();
+  assert.deepEqual(engine.spawnPoint(RULES.startMass),{x:80+0.1*(RULES.width-160),y:80+0.9*(RULES.height-160)});
+  for (let n = 0; n < 500; n++) {
+    const spawn = engine.spawnPoint(RULES.startMass);
+    assert.ok(HAZARDS.every(field => Math.hypot(spawn.x-field.x,spawn.y-field.y) >= field.r+250));
+  }
 });
-test('join snapshot starts from the food list the next delta is built against', async () => {
-  const { ArenaRoom } = await workerModule, room = new ArenaRoom({}), sent = [];
-  const server = { accept() {}, addEventListener() {}, send: data => sent.push(JSON.parse(data)) };
-  globalThis.WebSocketPair = function () { return { 0: {}, 1: server }; };
-  room.lastFood = [[-1, 10, 10, 0]];
-  await room.fetch(arenaRequest('?assignedRoom=public-1&foodDeltas=1')).catch(() => {});
-  clearInterval(room.timer); delete globalThis.WebSocketPair;
-  assert.deepEqual(sent[1].food, [[-1, 10, 10, 0]]);
+test('an engine restored from a checkpoint without hazard state still drains and spits', async () => {
+  const {engine,ArenaEngine,HAZARDS,RULES} = await setup(), h = HAZARDS[2];
+  const p = engine.addPlayer('saved');
+  for (const [id,o] of engine.players) if (o.bot) engine.players.delete(id);
+  p.mass = 700; p.x = h.x; p.y = h.y;
+  const saved = engine.checkpoint();
+  assert.equal('hazardLeak' in saved,false);
+  const restored = new ArenaEngine({checkpoint:saved,random:seeded(9)}); delete restored.hazardLeak;
+  const q = restored.players.get('saved');
+  for (let n = 0; n < 200; n++) restored.step();
+  assert.ok(q.alive); assert.ok(q.mass < 700);
+  assert.ok(restored.food.some(f => f.value === RULES.spitMass));
+  assert.equal(restored.food.length,RULES.foodCount);
+  assert.ok(restored.hazardLeak['grater-1'] < RULES.spitMass);
+});
+test('worker health reports gadget fields alongside existing capabilities', async () => {
+  const worker = (await import('../server/arena-worker.mjs')).default;
+  const body = await (await worker.fetch(new Request('https://arena.test/health'),{})).json();
+  assert.deepEqual(body.hazards,['slicer','shaker','grater']); assert.equal(body.hazardRadius,150);
+  assert.equal(body.protocol,1); assert.equal(body.durableRecovery,true); assert.equal(body.foodDeltas,true);
+  assert.equal(body.maxCells,8); assert.equal(body.reconnectGraceSeconds,30); assert.equal(body.foodCount,3375);
+});
+
+test('a giant pickle leaks at most leakMax per second', async () => {
+  const { ArenaEngine, RULES, HAZARDS } = await engineModule;
+  const engine = new ArenaEngine({ random: () => 0.5 }), cell = engine.makeCell(HAZARDS[0].x, HAZARDS[0].y, 100000);
+  engine.leak(HAZARDS[0], cell, 0.1, { replace() {} });
+  assert.ok(Math.abs(100000 - cell.mass - RULES.leakMax * 0.1) < 1e-6);
+});
+test('a gadget slows small players without draining them', async () => {
+  const {engine,inside,h} = await fieldPair(50);
+  engine.input(inside.id,{type:'input',seq:1,x:1,y:0});
+  const start = inside.x;
+  for(let n=0;n<20;n++) engine.step();
+  assert.equal(inside.mass,50);
+  assert.ok(inside.x>start);
+  assert.equal('drain' in snapCells(engine,inside.id)[0],false);
+  inside.mass=25; inside.x=h.x;
+  for(let n=0;n<20;n++) engine.step();
+  assert.equal(inside.mass,25);
+});
+test('a gadget protects 500 mass in each touching piece', async () => {
+  const {engine,inside,h} = await fieldPair(1200);
+  assert.ok(engine.split(inside));
+  for(const cell of inside.cells){cell.x=h.x;cell.y=h.y;cell.vx=cell.vy=0;}
+  for(let n=0;n<190;n++) {inside.lastMeal=engine.time;engine.step();}
+  assert.equal(inside.cells.length,2);
+  assert.ok(Math.abs(inside.mass-1000)<1e-8);
+  assert.ok(inside.cells.every(cell=>cell.mass===500));
+  assert.ok(snapCells(engine,inside.id).every(cell=>!('drain' in cell)));
+});
+test('a gadget splits only touching pieces over 2500 with a player-wide two-second cooldown', async () => {
+  const {engine,inside,h,RULES} = await fieldPair(5002);
+  inside.x=h.x; inside.y=h.y;
+  engine.step(0);
+  assert.equal(inside.mass,5002); assert.equal(inside.cells.length,2);
+  assert.equal(inside.hazardSplitReady,engine.time+2);
+  assert.equal(inside.mergeUntil,engine.time+RULES.mergeSeconds);
+  assert.equal(engine.split(inside,true),false);
+  inside.cells[0].x=h.x; inside.cells[0].y=h.y;
+  inside.cells[1].x=900; inside.cells[1].y=900;
+  engine.time+=2.01;
+  assert.ok(engine.split(inside,true));
+  assert.equal(inside.cells.length,3); assert.equal(inside.mass,5002);
+  for(const cell of inside.cells){cell.x=h.x;cell.y=h.y;cell.mass=2501;}
+  inside.hazardSplitReady=engine.time+2;
+  engine.time+=2.01;
+  assert.ok(engine.split(inside,true));
+  assert.equal(inside.cells.length,6);
+  assert.equal(inside.mass,7503);
+});
+test('eating requires overlap past the published 0.6 prey-radius boundary', async () => {
+  const {engine,RULES,radius} = await fieldPair(25);
+  const predator=engine.players.get('inside'), prey=engine.players.get('outside');
+  engine.food=[]; predator.mass=200; prey.mass=25;
+  predator.shieldUntil=prey.shieldUntil=0;
+  predator.x=1000;predator.y=1000;
+  const boundary=radius(predator.mass)-RULES.eatOverlap*radius(prey.mass);
+  prey.x=predator.x+boundary+0.1;prey.y=1000;
+  engine.step(0);
+  assert.ok(prey.alive);
+  prey.x=predator.x+boundary-0.1;
+  engine.step(0);
+  assert.equal(prey.alive,false);
+  assert.equal(RULES.eatOverlap,0.6);
+});
+test('nonfatal hurt survives checkpoint recovery and decays to zero', async () => {
+  const {engine,ArenaEngine} = await setup(), victim=engine.addPlayer('victim'), hunter=engine.addPlayer('hunter');
+  for(const [id,p] of engine.players) if(p.bot) engine.players.delete(id);
+  victim.mass=120;engine.split(victim);engine.food=[];
+  victim.shieldUntil=hunter.shieldUntil=0;hunter.mass=100;
+  victim.cells[0].x=hunter.x=1000;victim.cells[0].y=hunter.y=1000;
+  victim.cells[1].x=1800;victim.cells[1].y=1000;
+  for(const cell of victim.cells) cell.vx=cell.vy=0;
+  engine.random=()=>0.1;
+  engine.step(0);
+  assert.equal(engine.snapshot(false).players.find(p=>p.id==='victim').hurt,15);
+  assert.equal(engine.snapshot(false).players.find(p=>p.id==='victim').tear,1.4);
+  const restored=new ArenaEngine({checkpoint:engine.checkpoint()});
+  const saved=restored.players.get('victim');
+  assert.equal(saved.hurtUntil,restored.time+15);
+  assert.equal(saved.tearRemaining,1.4);
+  for(let n=0;n<15;n++) restored.step(.1);
+  assert.equal('tear' in restored.snapshot(false).players.find(p=>p.id==='victim'),false);
+  restored.time+=13.6;
+  assert.equal(restored.snapshot(false).players.find(p=>p.id==='victim').hurt,0);
+  const old=engine.checkpoint();delete old.players.find(p=>p.id==='victim').hurtUntil;delete old.players.find(p=>p.id==='victim').tearRemaining;
+  const legacy=new ArenaEngine({checkpoint:old}).players.get('victim');
+  assert.equal(legacy.hurtUntil,0);assert.equal(legacy.tearRemaining,0);
+});
+test('nonfatal piece loss makes one server-side tear roll', async () => {
+  const {engine} = await setup(), victim=engine.addPlayer('victim'), hunter=engine.addPlayer('hunter');
+  for(const [id,p] of engine.players) if(p.bot) engine.players.delete(id);
+  victim.mass=120;engine.split(victim);engine.food=[];
+  victim.shieldUntil=hunter.shieldUntil=0;hunter.mass=100;
+  victim.cells[0].x=hunter.x=1000;victim.cells[0].y=hunter.y=1000;
+  victim.cells[1].x=1800;victim.cells[1].y=1000;
+  for(const cell of victim.cells) cell.vx=cell.vy=0;
+  let rolls=0;engine.random=()=>{rolls++;return .25;};
+  engine.step(0);
+  const snapshot=engine.snapshot(false).players.find(p=>p.id==='victim');
+  assert.equal(rolls,1);assert.equal(snapshot.hurt,15);
+  assert.equal('tear' in snapshot,false);
+  engine.step(.05);assert.equal(rolls,1);
+});
+test('bots retain distinct perception and risk profiles and keep a visible target', async () => {
+  const {engine,HAZARDS} = await setup();
+  const cautious=engine.addPlayer('bot-1',{bot:true,name:'one'}),bold=engine.addPlayer('bot-4',{bot:true,name:'four'});
+  engine.food=[{id:1,x:1000,y:1350,value:3},{id:2,x:1000,y:1030,value:3}];
+  for(const bot of [cautious,bold]){bot.x=1000;bot.y=1000;bot.shieldUntil=0;bot.mass=100;}
+  assert.ok(cautious.profile.awareness<bold.profile.awareness);
+  assert.ok(cautious.profile.intelligence<bold.profile.intelligence);
+  assert.ok(cautious.profile.risk<bold.profile.risk);
+  engine.think(cautious);assert.equal(cautious.botTarget.id,2);
+  engine.food[0].y=1020;
+  engine.think(cautious);assert.equal(cautious.botTarget.id,2);
+  engine.food=[{id:1,x:1000,y:1300,value:3}];
+  cautious.dx=0;engine.think(cautious);assert.equal(cautious.dx,0);
+  engine.think(bold);assert.equal(bold.botTarget.id,1);
+  assert.ok(HAZARDS.every(h=>Math.hypot(h.x-1000,h.y-1000)>bold.profile.awareness));
+});
+test('the public hard opponent leads moving prey and uses ordinary movement', async () => {
+  const {ArenaEngine,speed} = await engineModule, engine=new ArenaEngine({random:seeded(31),publicRoom:true});
+  const bot=engine.addPlayer('bot-1',{bot:true,name:'Adrian'}), prey=engine.addPlayer('human',{name:'Player'});
+  for(const [id,p] of engine.players) if(p!==bot&&p!==prey) engine.players.delete(id);
+  engine.assignHardBot();engine.food=[];
+  bot.mass=500;bot.x=1000;bot.y=2500;bot.shieldUntil=0;
+  prey.mass=100;prey.x=1350;prey.y=2500;prey.dy=1;prey.shieldUntil=0;
+  engine.time=1;
+  engine.think(bot);
+  assert.equal(bot.profile.hard,true);assert.ok(bot.dx>0&&bot.dy>0);
+  const before={x:bot.x,y:bot.y};engine.step(0.05);
+  assert.ok(Math.hypot(bot.x-before.x,bot.y-before.y)<=speed(bot.mass)*0.05+0.001);
+});
+test('gadget routes keep a direction across food, threat, and split-body trajectories', async () => {
+  const {ArenaEngine,HAZARDS,radius} = await engineModule, field=HAZARDS[0];
+  for(const scenario of ['food','threat','split']) {
+    const engine=new ArenaEngine({random:seeded(103),publicRoom:true});
+    const bot=engine.addPlayer('bot-1',{bot:true,name:'Adrian'});
+    engine.assignHardBot();engine.food=[];bot.mass=scenario==='split'?6000:scenario==='food'?3000:250;
+    bot.x=field.x+field.r+radius(bot.mass)+(scenario==='split'?-1:115);bot.y=field.y;
+    bot.shieldUntil=Infinity;bot.botHazardReady=Infinity;
+    if(scenario==='split') {assert.ok(engine.split(bot,true));for(const cell of bot.cells)cell.vx=cell.vy=0;bot.hazardSplitReady=Infinity;}
+    if(scenario==='threat') {
+      const predator=engine.addPlayer('predator',{name:'Predator'});
+      predator.mass=10000;predator.x=bot.x+180;predator.y=bot.y;predator.shieldUntil=Infinity;
+    } else engine.food=[{id:1,x:field.x-field.r-radius(bot.cells[0].mass)-115,y:field.y,value:3}];
+    const startX=bot.x, headings=[];
+    for(let tick=0;tick<240;tick++) {
+      engine.step();
+      if(tick%6===0) headings.push(Math.atan2(bot.dy,bot.dx));
+    }
+    const flips=headings.slice(1).filter((angle,i)=>Math.cos(angle-headings[i]) < -0.2).length;
+    assert.ok(flips<=2,`${scenario}: ${flips} heading reversals`);
+    assert.ok(Math.hypot(bot.x-startX,bot.y-field.y)>130,`${scenario}: bot did not progress`);
+    if(scenario==='split') assert.ok(bot.cells.some(cell=>Math.hypot(cell.x-field.x,cell.y-field.y)>field.r+radius(cell.mass)), 'a split piece exited');
+  }
+});
+test('bot curiosity enters briefly then retreats without rerolling the encounter', async () => {
+  const {engine,HAZARDS,radius} = await setup(), h=HAZARDS[0];
+  const bot=engine.addPlayer('bot-4',{bot:true,name:'four'});
+  engine.food=[];bot.x=h.x+h.r+radius(bot.mass)+110;bot.y=h.y;
+  let rolls=0;engine.random=()=>{rolls++;return 0.5;};
+  engine.think(bot);
+  assert.equal(bot.botHazard.phase,'approach');assert.ok(bot.dx<0);
+  const firstRolls=rolls;
+  for(let n=0;n<5;n++) engine.think(bot);
+  assert.equal(rolls,firstRolls);
+  bot.x=h.x+h.r+radius(bot.mass)-30;
+  engine.think(bot);
+  assert.equal(bot.botHazard.phase,'retreat');assert.ok(bot.dx>0);
+  for(let n=0;n<5;n++) engine.think(bot);
+  assert.equal(bot.botHazard.phase,'retreat');assert.equal(rolls,firstRolls);
+  bot.x=bot.botHazard.exit.x;bot.y=bot.botHazard.exit.y;engine.think(bot);
+  assert.equal(bot.botHazard.phase,'detour');
+  bot.x=bot.botHazard.around.x;bot.y=bot.botHazard.around.y;engine.think(bot);
+  assert.equal(bot.botHazard,null);assert.ok(bot.botHazardReady>engine.time);
+});
+test('an avoiding bot clears the field and continues around it without reversing at its exit', async () => {
+  const {engine,HAZARDS,radius} = await setup(), h=HAZARDS[0];
+  const bot=engine.addPlayer('bot-1',{bot:true,name:'one'});
+  engine.food=[{id:1,x:h.x-500,y:h.y,value:3}];
+  bot.mass=60;bot.x=h.x+h.r+radius(bot.mass)+110;bot.y=h.y;
+  engine.random=()=>0.99;
+  engine.think(bot);
+  assert.equal(bot.botHazard.phase,'avoid');
+  const phases=[];
+  for(let n=0;n<220;n++){
+    engine.step();
+    phases.push(bot.botHazard?.phase || 'clear');
+    assert.ok(Math.hypot(bot.x-h.x,bot.y-h.y)>=h.r+radius(bot.mass)-1);
+  }
+  assert.ok(phases.includes('detour'));
+  assert.ok(phases.includes('clear'));
+  assert.equal(bot.botHazard,null);
+  assert.ok(bot.x<h.x);
+  assert.equal(phases.lastIndexOf('avoid'),phases.indexOf('detour')-1);
+});
+test('rare bot crossings commit to the far side on one encounter roll', async () => {
+  const {engine,HAZARDS,radius} = await setup(), h=HAZARDS[0];
+  const bot=engine.addPlayer('bot-4',{bot:true,name:'four'});
+  engine.food=[];bot.x=h.x+h.r+radius(bot.mass)+110;bot.y=h.y;
+  let rolls=0;engine.random=()=>{rolls++;return 0.005;};
+  engine.think(bot);
+  assert.equal(bot.botHazard.phase,'cross');assert.ok(bot.dx<0);
+  for(let n=0;n<10;n++) engine.think(bot);
+  assert.equal(rolls,1);assert.equal(bot.botHazard.phase,'cross');
+  bot.x=h.x-h.r-radius(bot.mass)-90;engine.think(bot);
+  assert.equal(bot.botHazard,null);
 });

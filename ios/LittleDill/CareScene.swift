@@ -2,9 +2,35 @@ import SwiftUI
 
 struct CarePerformance {
     let action: Care
+    let food: FeedFood?
     let started = Date()
+    init(action: Care, food: FeedFood? = nil) { self.action = action; self.food = food }
     var duration: Double {switch action {case .feed:return 3.8; case .pet:return 4; case .wash:return 5; case .nap:return 6}}
     var caption: String {switch action {case .feed:return "NOM NOM NOM"; case .pet:return "ABSOLUTELY ADORED"; case .wash:return "SQUEAKY CLEAN CLUB"; case .nap:return "DO NOT DISTURB"}}
+}
+
+/// Feed timing shared by the pickle's pose and food, so each chomp lands on the food.
+struct FeedBeat {
+    static let arrive = 0.5, bite = 0.55, bites = 4, chomp = 0.4
+    static let gulp = arrive + bite * Double(bites)
+    static let rest: CGFloat = 14, chunk: CGFloat = 15
+    let t: Double
+    private var beat: Double { (t - FeedBeat.arrive) / FeedBeat.bite }
+    var biting: Bool { t >= FeedBeat.arrive && t < FeedBeat.gulp }
+    var phase: Double { beat - floor(beat) }
+    var chewing: Bool { biting && phase >= FeedBeat.chomp }
+    var eaten: Int { t < FeedBeat.arrive ? 0 : min(FeedBeat.bites, Int(floor(beat - FeedBeat.chomp)) + 1) }
+    /// 0 while food waits at the lips, 1 when it is pushed into the mouth.
+    var push: Double { biting && !chewing ? Ease.inOut(phase / FeedBeat.chomp) : 0 }
+    var squash: Double { chewing ? max(0, 1 - (phase - FeedBeat.chomp) / 0.3) : 0 }
+    var mouthOpen: Double {
+        if t < FeedBeat.arrive { return 0.8 * Ease.out(t / FeedBeat.arrive) }
+        if !biting { return 0 }
+        if chewing { return 0.15 + 0.3 * abs(sin((phase - FeedBeat.chomp) / (1 - FeedBeat.chomp) * .pi * 2)) }
+        let from = eaten == 0 ? 0.8 : 0.15
+        return from + (1 - from) * Ease.inOut(phase / FeedBeat.chomp)
+    }
+    func chompTime(_ k: Int) -> Double { FeedBeat.arrive + (Double(k) + FeedBeat.chomp) * FeedBeat.bite }
 }
 
 /// One frame of the Nest. Scenery, pickle, mess and effects all read the TimelineView date.
@@ -19,19 +45,21 @@ struct CareScene: View {
     let reduceMotion: Bool
     private var clock: Double { now.timeIntervalSinceReferenceDate }
     private var elapsed: Double { max(0, now.timeIntervalSince(performance?.started ?? now)) }
+    private var performanceTime: Double { reduceMotion ? 1.3 : elapsed }
 
     var body: some View {
         let mood = stage.mood(pet.life, snacking: bites != nil, now: now)
         let vibe = performance == nil ? stage.vibe(for: mood, now: now) : nil
         let look = currentLook(mood: mood, vibe: vibe)
         let pose = resolvedPose(mood: mood, vibe: vibe)
+        let mouth = CareScene.mouth(look: look, pose: pose)
         let scenery: Care? = performance?.action ?? (mood == .sleeping ? .nap : nil)
-        let sceneTime = performance == nil ? clock.truncatingRemainder(dividingBy: 3600) : (reduceMotion ? 1.3 : elapsed)
+        let sceneTime = performance == nil ? clock.truncatingRemainder(dividingBy: 3600) : performanceTime
         let effect = stage.effect, time = clock, current = now
         let dead = pet.life.dead, eaten = pet.life.eaten == true, messy = pet.life.hygiene < 40
         let headTop = -(PickleFrame(look: look).h + 6) * CareScene.unit - 22
         ZStack {
-            CareScenery(action: scenery, time: sceneTime, foreground: false, reduceMotion: reduceMotion)
+            CareScenery(action: scenery, time: sceneTime, foreground: false, reduceMotion: reduceMotion, food: performance?.food ?? .carrot)
             Canvas { context, size in
                 var ground = context
                 ground.translateBy(x: size.width / 2, y: size.height / 2 + CareScene.groundOffset)
@@ -45,7 +73,7 @@ struct CareScene: View {
                 PickleArtist.draw(body, look: look, pose: pose, time: time)
                 if let effect { CareScene.drawEffect(ground, effect: effect, now: current, top: headTop, still: reduceMotion) }
             }
-            CareScenery(action: scenery, time: sceneTime, foreground: true, reduceMotion: reduceMotion)
+            CareScenery(action: scenery, time: sceneTime, foreground: true, reduceMotion: reduceMotion, mouth: mouth, food: performance?.food ?? .carrot)
         }.frame(height: 260).frame(maxWidth: .infinity).clipped()
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(label(mood))
@@ -93,7 +121,7 @@ struct CareScene: View {
     @MainActor private func resolvedPose(mood: PetMood, vibe: PetVibe?) -> PicklePose {
         let target: PicklePose
         if let performance {
-            target = CareScene.performancePose(performance.action, t: elapsed, clock: clock, reduceMotion: reduceMotion)
+            target = CareScene.performancePose(performance.action, t: performanceTime, clock: clock, reduceMotion: reduceMotion)
         } else {
             target = PetMotion.pose(mood: mood, vibe: vibe, act: stage.act, actElapsed: now.timeIntervalSince(stage.actStarted), time: clock, reduceMotion: reduceMotion)
         }
@@ -108,10 +136,17 @@ struct CareScene: View {
         let move = reduceMotion ? 0.0 : 1.0
         switch action {
         case .feed:
-            let wave = sin(t * 13) * move
-            pose.body = Motion(rotation: wave * 4, sx: 1 + wave * 0.055, sy: 1 - wave * 0.045)
-            pose.mouth = .chew; pose.mouthOpen = (wave + 1) / 2; pose.cheek = 1.35
+            let beat = FeedBeat(t: t), squash = beat.squash * move
+            pose.body = Motion(sx: 1 + squash * 0.06, sy: 1 - squash * 0.05)
+            pose.eyes = t < FeedBeat.arrive ? .wide : beat.chewing ? .happy : .open
+            pose.mouth = .chew; pose.mouthOpen = beat.mouthOpen; pose.cheek = 1.3 + squash * 0.4
             pose.armLeft = 40; pose.armRight = -40
+            if t >= FeedBeat.gulp {
+                let hop = sin(min(1, (t - FeedBeat.gulp) / 0.4) * .pi) * move
+                pose.body = Motion(y: -hop * 7, sx: 1 - hop * 0.04, sy: 1 + hop * 0.07)
+                pose.eyes = .happy; pose.mouth = .grin; pose.cheek = 1.4
+                pose.armLeft = 70; pose.armRight = -70
+            }
         case .pet:
             let bob = abs(sin(t * 5)) * move
             pose.body = Motion(y: -bob * 8, rotation: sin(t * 5) * 9 * move, sx: 1 - bob * 0.04, sy: 1 + bob * 0.05)
@@ -130,6 +165,14 @@ struct CareScene: View {
             pose.armLeft = -42; pose.armRight = 42
         }
         return pose
+    }
+
+    /// The mouth's scene position, following the pose's squash and hop so the food meets it.
+    static func mouth(look: PickleLook, pose: PicklePose) -> CGPoint {
+        let f = PickleFrame(look: look)
+        var t = CGAffineTransform(translationX: 0, y: groundOffset).scaledBy(x: unit, y: unit)
+        for m in [pose.actor, pose.body] { t = PickleArtist.transform(m).concatenating(t) }
+        return CGPoint(x: pose.faceX, y: f.face + 12.5 - f.h - 6).applying(t)
     }
 
     static func drawEffect(_ c: GraphicsContext, effect: FloatEffect, now: Date, top: CGFloat, still: Bool) {
@@ -197,6 +240,8 @@ private struct CareScenery: View {
     let time: Double
     let foreground: Bool
     let reduceMotion: Bool
+    var mouth = CGPoint.zero
+    let food: FeedFood
     private var ink: Color {DillTheme.ink}
     var body: some View {
         Canvas { context,size in
@@ -227,23 +272,41 @@ private struct CareScenery: View {
                     shape(Path(roundedRect:CGRect(x:-109,y:52,width:58,height:22),cornerRadius:9),DillTheme.peach)
                     for i in 0..<3 {oval(-101+Double(i)*15,46,15,12,DillTheme.lime,outline:true)}
                 } else {
-                    let approach = reduceMotion ? 1 : min(1,time / 0.45)
-                    let chews = min(1,max(0,(time - 0.45) / 2.1))
-                    var carrot = context
-                    carrot.translateBy(x:72 - approach*53,y:30 - approach*15)
-                    carrot.rotate(by:.degrees(-38))
-                    let length = 43 * (1 - chews) + 8
-                    var p = Path(); p.move(to:CGPoint(x:0,y:0)); p.addQuadCurve(to:CGPoint(x:length,y:-10),control:CGPoint(x:20,y:-15)); p.addLine(to:CGPoint(x:length,y:10)); p.addQuadCurve(to:.zero,control:CGPoint(x:20,y:15))
-                    carrot.fill(p,with:.color(Color(hex:0xED9C53))); carrot.stroke(p,with:.color(ink),lineWidth:2.5)
-                    for i in -1...1 {var leaf = Path(); leaf.move(to:CGPoint(x:length,y:0)); leaf.addQuadCurve(to:CGPoint(x:length+14,y:Double(i)*12),control:CGPoint(x:length+8,y:Double(i)*5)); carrot.stroke(leaf,with:.color(Color(hex:0x698E4E)),style:StrokeStyle(lineWidth:4,lineCap:.round))}
-                    if time > 0.4 && time < 2.9 {
-                        for i in 0..<9 {
-                            let phase = (time*1.8 + Double(i)*0.19).truncatingRemainder(dividingBy:1)
-                            let side = i%2 == 0 ? 1.0 : -1.0
-                            oval(8 + side*(10+phase*42),18+phase*42,4+Double(i%3),4,Color(hex:0xD89B58))
+                    // The food's near end rests at the lips and loses a chunk on every chomp.
+                    let beat = FeedBeat(t:time), tilt = food == .carrot ? -14 - beat.squash*6 : 14 - beat.squash*3
+                    let swoop = 1 - Ease.springy(min(1,time/FeedBeat.arrive))
+                    if beat.eaten < FeedBeat.bites {
+                        let eaten = CGFloat(beat.eaten)*FeedBeat.chunk
+                        var morsel = context
+                        morsel.translateBy(x:mouth.x + 150*swoop,y:mouth.y - 80*swoop)
+                        morsel.rotate(by:.degrees(tilt + 50*swoop))
+                        morsel.translateBy(x:FeedBeat.rest - FeedBeat.chunk*beat.push - eaten,y:0)
+                        food.draw(morsel,eaten:eaten)
+                    }
+                    if !reduceMotion {
+                        let lips = CGPoint(x:mouth.x + cos(tilt * .pi/180)*4,y:mouth.y + sin(tilt * .pi/180)*4)
+                        for k in 0..<beat.eaten {
+                            let age = time - beat.chompTime(k)
+                            guard age < 0.6 else {continue}
+                            var bits = context; bits.opacity = 1 - age/0.6
+                            for i in 0..<6 {
+                                let angle = (-130 + Double(i)*30 + Double(k)*9) * .pi/180, speed = 70 + Double((i*37 + k*11)%50), side = 4 + Double(i%3)
+                                let x = lips.x + cos(angle)*speed*age, y = lips.y + sin(angle)*speed*age + 260*age*age
+                                let color = i%3 == 0 ? Color(hex:0xFFE5B1) : food.crumb
+                                let bit = Path(roundedRect:CGRect(x:x - side/2,y:y - side/2,width:side,height:side),cornerRadius:1.2)
+                                bits.fill(bit,with:.color(color)); bits.stroke(bit,with:.color(ink),lineWidth:1)
+                            }
                         }
                     }
-                    if time > 2.5 {symbol("heart.fill",65,-35,25,DillTheme.peach); sparkle(-68,-42,12,DillTheme.lime)}
+                    if time > FeedBeat.gulp {
+                        for i in 0..<3 {
+                            let age = time - FeedBeat.gulp - Double(i)*0.14
+                            guard age > 0 else {continue}
+                            let pop = Ease.springy(min(1,age/0.3))
+                            symbol("heart.fill",mouth.x + [52,70,36][i],mouth.y - [34,54,70][i] - age*18,max(1,[24,15,12][i]*pop),[DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)][i])
+                        }
+                        sparkle(mouth.x - 62,mouth.y - 50,12*Ease.springy(min(1,(time - FeedBeat.gulp)/0.3)),DillTheme.lime)
+                    }
                 }
             case .pet:
                 if foreground {
@@ -310,4 +373,5 @@ private struct CareScenery: View {
             }
         }.accessibilityHidden(true)
     }
+
 }
