@@ -47,6 +47,8 @@ Read [README.md](README.md) for player behavior and deployment targets, [ios/REA
 - Preserve one-second Durable Object checkpoints, paused timers, room identity, monotonic ticks, expiry, and explicit-leave revocation. Active sessions have no fixed age limit.
 - Preserve crew join rate limiting, name validation, per-IP connection limits, socket input budgets, and trusted proxy-header checks.
 - Keep the 18 wardrobe IDs accepted by the server and rendered on both arena clients. Native coin ownership remains local.
+- Arena `earnedMass` counts collected food and absorbed opponent mass across respawns and recovery. Native rewards use one coin per 1,000 earned mass, capped at 1,000 per UTC day; persist the daily total and credited cursor together with coins. Exclude starting mass, splits, and regrouping.
+- Play wakes living pets without care coins or energy cost; the six-energy charge applies when a game starts.
 - Native save additions need optional fields or decoding defaults. Preserve the `hop` score key used by Countertop escape.
 - Browser `.dill` imports retain the `native` extras through reload and export, including iOS circuit progress. Shared arcade bests merge without discarding native-only fields.
 - Reset removes the native recovery copy as well as active progress. Resume credentials stay out of pet backups.

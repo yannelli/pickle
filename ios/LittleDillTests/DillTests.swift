@@ -464,7 +464,7 @@ final class PetModelTests: XCTestCase {
             XCTAssertEqual(PetState.arcadeReward(game: game, score: score), reward, game)
         }
         p.life.energy = 5; XCTAssertFalse(p.startArcade(at: t0))
-        p.life.energy = 50; p.life.sleeping = true; XCTAssertFalse(p.startArcade(at: t0))
+        p.life.energy = 50; p.life.sleeping = true; XCTAssertTrue(p.startArcade(at: t0)); XCTAssertFalse(p.life.sleeping); XCTAssertEqual(p.life.energy, 44)
     }
     func testNameRulesMatchTheWeb() {
         XCTAssertEqual(PetLife.cleanName("  Sir \t\n Crunch "), "Sir Crunch")

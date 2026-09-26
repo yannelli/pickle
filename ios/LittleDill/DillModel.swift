@@ -131,6 +131,7 @@ struct PetState: Codable {
     var haptics = true
     var soundEnabled: Bool?
     var arenaBest: Int?
+    var arenaEarnings: ArenaEarnings?
     var arcadeRecords: [String: Int] = [:]
     var arcadeCircuit: ArcadeCircuit?
     var lastPetAt: Int64?
@@ -154,7 +155,7 @@ struct PetState: Codable {
     func nextCareAt(after now: Date = Date()) -> Date { Date(timeIntervalSince1970: PetLife.nextCareAt(life, now: PetLife.ms(now)) / 1000) }
 
     private enum CodingKeys: String, CodingKey {
-        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arcadeRecords, arcadeCircuit
+        case version, life, outfit, coins, unlocked, careDay, dailyCare, streak, lastVisitDay, scores, rewardedDays, haptics, soundEnabled, arenaBest, arenaEarnings, arcadeRecords, arcadeCircuit
         case name, brine, adopted, birthday, food, joy, clean, energy
     }
 
@@ -173,6 +174,7 @@ struct PetState: Codable {
         haptics = try c.decode(Bool.self, forKey: .haptics)
         soundEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundEnabled)
         arenaBest = try c.decodeIfPresent(Int.self, forKey: .arenaBest)
+        arenaEarnings = try? c.decodeIfPresent(ArenaEarnings.self, forKey: .arenaEarnings)
         arcadeRecords = try c.decodeIfPresent([String: Int].self, forKey: .arcadeRecords) ?? [:]
         arcadeCircuit = try? c.decodeIfPresent(ArcadeCircuit.self, forKey: .arcadeCircuit)
         switch version {
@@ -214,6 +216,7 @@ struct PetState: Codable {
         try c.encode(haptics, forKey: .haptics)
         try c.encodeIfPresent(soundEnabled, forKey: .soundEnabled)
         try c.encodeIfPresent(arenaBest, forKey: .arenaBest)
+        try c.encodeIfPresent(arenaEarnings, forKey: .arenaEarnings)
         try c.encode(arcadeRecords, forKey: .arcadeRecords)
         try c.encodeIfPresent(arcadeCircuit, forKey: .arcadeCircuit)
     }
@@ -305,11 +308,27 @@ struct PetState: Codable {
         return CareResult(applied: true, coins: reward(action), message: sleeping ? "night night. don’t let the dill bugs bite." : "rise & brine, sleepyhead.")
     }
 
-    mutating func startArcade(at now: Date = Date()) -> Bool {
+    mutating func prepareArcade(at now: Date = Date()) -> Bool {
         refresh(at: now)
-        guard life.phase == .living, !life.dead, !life.sleeping, life.energy >= 6 else { return false }
+        guard life.phase == .living, !life.dead else { return false }
+        if life.sleeping {
+            life.sleeping = false
+            life.lastCareAt = PetLife.ms(now)
+        }
+        return true
+    }
+
+    mutating func startArcade(at now: Date = Date()) -> Bool {
+        guard prepareArcade(at: now), life.energy >= 6 else { return false }
         life.energy = PetLife.clamp(life.energy - 6)
         return true
+    }
+
+    @discardableResult mutating func recordArena(earnedMass: Double, session: String, at now: Date = Date()) -> Int {
+        var progress = arenaEarnings ?? ArenaEarnings()
+        let earned = progress.record(session: session, earnedMass: earnedMass, day: DailyChallenge.today(now))
+        arenaEarnings = progress
+        return addCoins(earned)
     }
 
     // Web rewards: hunt 10 + 8 per heart, memory 10 + 4 per level (34 for all five), catch 10 + 2 per point up to 34.
@@ -371,7 +390,7 @@ struct PetState: Codable {
                           streak: streak, lastVisitDay: lastVisitDay, careDay: careDay, dailyCare: dailyCare.sorted(),
                           rewardedDays: rewardedDays.sorted(),
                           scores: scores.sorted { $0.day > $1.day }.map { DillBackup.Score(d: $0.day, s: $0.score, t: PetLife.ms($0.date)) },
-                          arenaBest: arenaBest, arcade: arcadeRecords, arcadeCircuit: arcadeCircuit, haptics: haptics, sounds: soundEnabled)
+                          arenaBest: arenaBest, arenaEarnings: arenaEarnings, arcade: arcadeRecords, arcadeCircuit: arcadeCircuit, haptics: haptics, sounds: soundEnabled)
     }
 
     /// Runs a save that decoded but failed `isValid` through the backup import clamps.
@@ -398,6 +417,7 @@ struct PetState: Codable {
         }
         scores = Array(best.values.sorted { $0.d > $1.d }.prefix(90).map { ScoreEntry(day: $0.d, score: $0.s, date: PetLife.date($0.t)) })
         arenaBest = native.arenaBest.map { max(0, $0) }
+        arenaEarnings = native.arenaEarnings?.normalized()
         arcadeRecords = native.arcade.filter { Self.arcadeGames.contains($0.key) && $0.value >= 0 }
         arcadeCircuit = native.arcadeCircuit.flatMap {
             DailyChallenge.validDay($0.day) ? ArcadeCircuit(day: $0.day, scores: $0.scores) : nil

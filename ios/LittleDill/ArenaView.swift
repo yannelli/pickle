@@ -79,7 +79,7 @@ struct ArenaView: View {
     }
     /// Sounds from one snapshot to the next while alive; death and respawn are handled by the `alive` change.
     private func listen() {
-        updateGadgetSound(); updateHaptics()
+        updateGadgetSound(); updateHaptics(); saveEarnings()
         guard let snapshot = client.snapshot else {feedbackEvents.reset(); return}
         let at = client.receivedAt.timeIntervalSinceReferenceDate
         let gadget = Self.drainingGadget(player:client.me,hazards:snapshot.hazards ?? [],enabled:tactile.enabled)
@@ -227,6 +227,9 @@ struct ArenaView: View {
                         ArenaMinimap(snapshot:state,playerID:client.playerID).frame(width:38,height:38).accessibilityLabel("Garden minimap")
                     }
                 }
+                Text("✦ \(store.arenaCoinsToday) / 1,000 coins today")
+                    .font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.7)
+                    .accessibilityIdentifier("arenaCoinsToday")
                 if me.shield > 0 && me.alive && !compact {
                     Label("Protected \(Int(ceil(me.shield)))s",systemImage:"shield.fill").font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.8)
                 }
@@ -245,7 +248,14 @@ struct ArenaView: View {
             }.accessibilityLabel("Leaderboard. Rank \(client.rank). Tap to show more.")
         }.padding(.horizontal,18).padding(.top,compact ? 6 : 12)
     }
-    private func saveBest() {if client.best > 0 {store.recordArena(best:client.best)}}
+    private func saveEarnings() {
+        guard let earnedMass = client.me?.earnedMass, !client.room.isEmpty, !client.playerID.isEmpty else { return }
+        store.recordArena(earnedMass:earnedMass,session:client.room + ":" + client.playerID)
+    }
+    private func saveBest() {
+        saveEarnings()
+        if client.best > 0 {store.recordArena(best:client.best)}
+    }
 }
 
 

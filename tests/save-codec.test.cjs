@@ -45,7 +45,8 @@ test('each export has a fresh IV and ciphertext', async () => {
 
 test('native progress survives iOS to web to iOS with a separate snapshot', async () => {
   const native = { coins: 42, outfit: 'crown', unlocked: ['crown'], arcade: { hop: 12, hunt: 3 },
-    arcadeCircuit: { day: '2026-09-25', scores: { hop: 12, chop: 30, toss: 8 } } };
+    arcadeCircuit: { day: '2026-09-25', scores: { hop: 12, chop: 30, toss: 8 } },
+    arenaEarnings: { day: '2026-09-25', mass: 123456.7, session: 'public-1:player', total: 123456.7 } };
   const first = saves.encode(pet, native);
   native.coins = 0;
   const imported = await saves.decode(await first);

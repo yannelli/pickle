@@ -20,11 +20,10 @@ struct ArcadeSheet: View {
         guard let game = engine else { return false }
         return !game.isFinished
     }
-    private var canPlay: Bool { store.pet.adopted && !store.pet.life.dead && !store.pet.life.sleeping }
+    private var canPlay: Bool { store.pet.adopted && !store.pet.life.dead }
     private var menuStatus: String? {
         if !store.pet.adopted { return "hatch your pickle first. then it’s game time." }
         if store.pet.life.dead { return "every ending is a new beginning" }
-        if store.pet.life.sleeping { return "shh… your pickle is napping. wake them to play." }
         if store.pet.energy < 6 { return "a little nap first! games need 6 energy." }
         return nil
     }
@@ -103,7 +102,7 @@ struct ArcadeSheet: View {
     private var menu: some View {
         VStack(spacing: 20) {
             PageHeading(eyebrow: "Pick your kind of pickle play", title: "The dill\narcade.", detail: "6 energy per game · 10–34 happy ♥ for every finished round.")
-            ArcadeCircuitCard(circuit: store.circuitToday, canPlay: canPlay && store.pet.energy >= 6) {
+            ArcadeCircuitCard(circuit: store.circuitToday, canPlay: canPlay) {
                 start($0, circuit: true)
             }
             VStack(spacing: 12) {

@@ -89,6 +89,7 @@ struct ArenaPlayer: Decodable, Identifiable {
     let y: Double
     let mass: Double
     let best: Int
+    let earnedMass: Double?
     let kills: Int
     let alive: Bool
     let shield: Double

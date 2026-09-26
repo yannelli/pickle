@@ -56,6 +56,7 @@ enum DillBackup {
         var rewardedDays: [String] = []
         var scores: [Score] = []
         var arenaBest: Int?
+        var arenaEarnings: ArenaEarnings?
         var arcade: [String: Int] = [:]
         var arcadeCircuit: ArcadeCircuit?
         var haptics = true
@@ -205,6 +206,7 @@ extension DillBackup.Native {
         rewardedDays = (try? c.decodeIfPresent([String].self, forKey: .rewardedDays)) ?? rewardedDays
         scores = (try? c.decodeIfPresent([DillBackup.Score].self, forKey: .scores)) ?? scores
         arenaBest = try? c.decodeIfPresent(Int.self, forKey: .arenaBest)
+        arenaEarnings = try? c.decodeIfPresent(ArenaEarnings.self, forKey: .arenaEarnings)
         arcade = (try? c.decodeIfPresent([String: Int].self, forKey: .arcade)) ?? arcade
         arcadeCircuit = try? c.decodeIfPresent(ArcadeCircuit.self, forKey: .arcadeCircuit)
         haptics = (try? c.decodeIfPresent(Bool.self, forKey: .haptics)) ?? haptics

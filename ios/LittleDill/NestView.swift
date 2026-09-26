@@ -16,7 +16,7 @@ struct NestView: View {
     private var life: WebPet { store.pet.life }
     private var snacking: Bool { store.snackBites != nil }
     private var nowMs: Int64 { PetLife.ms(Date()) }
-    private var canPlay: Bool { store.pet.adopted && !life.dead && !life.sleeping && life.energy >= 6 && !snacking }
+    private var canPlay: Bool { store.pet.adopted && !life.dead && !snacking }
 
     var body: some View {
         VStack(spacing:22) {
@@ -163,7 +163,14 @@ struct NestView: View {
     }
 
     private func openArcade() {
-        guard canPlay else { return }
+        let wasSleeping = life.sleeping
+        guard canPlay, store.prepareArcade() else { return }
+        if wasSleeping {
+            stopPerformance()
+            stage.happyUntil = .distantPast
+            stage.play(.wake)
+            stage.say("rise & brine, sleepyhead.")
+        }
         joyBeforeArcade = life.happiness
         store.feedback(); store.sound(.pop); arcade = true
     }

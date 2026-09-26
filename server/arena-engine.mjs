@@ -114,7 +114,7 @@ export function parseIntent(raw) {
 // Structured storage turns accessors into values; rebuild the live aggregates.
 export function restorePlayer(fields) {
   return {
-    hurtUntil: 0, tearRemaining: 0, hazardSplitReady: 0, botHazard: null, botHazardReady: 0, botTarget: null, botRoute: null, ...(fields.bot ? { profile: botProfile(fields.id) } : {}), ...fields,
+    hurtUntil: 0, tearRemaining: 0, earnedMass: 0, hazardSplitReady: 0, botHazard: null, botHazardReady: 0, botTarget: null, botRoute: null, ...(fields.bot ? { profile: botProfile(fields.id) } : {}), ...fields,
     get mass() { return this.cells.reduce((sum,c) => sum+c.mass,0); },
     set mass(value) { const total = this.mass; if (this.cells.length === 1) this.cells[0].mass = value; else if (total > 0) for (const c of this.cells) c.mass *= value/total; },
     get x() { const total = this.mass; return total > 0 ? this.cells.reduce((sum,c) => sum+c.x*c.mass,0)/total : this.lastX; },
@@ -175,7 +175,7 @@ export class ArenaEngine {
     const p = restorePlayer({
       id, name: this.uniqueName(bot ? cleanName(name) : humanName(name)), brine: BRINES.includes(brine) ? brine : 'classic', outfit: OUTFITS.includes(outfit) ? outfit : 'sprout', variety: pickVariety(variety, brine, id), bot,
       cells: [this.makeCell(spawn.x,spawn.y,mass)], lastX: spawn.x, lastY: spawn.y,
-      best: mass, kills: 0, alive: true, dx: 0, dy: 0, aimX: 0, aimY: -1, seq: -1, lastInput: this.time, lastMeal: this.time,
+      best: mass, earnedMass: 0, kills: 0, alive: true, dx: 0, dy: 0, aimX: 0, aimY: -1, seq: -1, lastInput: this.time, lastMeal: this.time,
       shieldUntil: this.time + RULES.shieldSeconds, dashUntil: 0, dashReady: 0, splitReady: 0, hazardSplitReady: 0, mergeUntil: 0, hurtUntil: 0, diedAt: 0, eatenBy: '', joinedAt: this.time
     });
     this.players.set(id, p);
@@ -383,7 +383,7 @@ export class ArenaEngine {
         const r = radius(cell.mass);
         for (const i of foodGrid.near(cell,r+4)) if (distance(cell,this.food[i]) < r+4) {
           const before = this.food[i], after = this.makeFood();
-          cell.mass += before.value; p.lastMeal = this.time; this.food[i] = after;
+          cell.mass += before.value; p.earnedMass += before.value; p.lastMeal = this.time; this.food[i] = after;
           foodGrid.replace(i,before,after);
         }
         if (hazard && cell.mass > RULES.leakFloor) this.leak(hazard,cell,dt,foodGrid);
@@ -397,7 +397,8 @@ export class ArenaEngine {
         if (predator === prey || !prey.alive || !prey.cells.includes(snack) || prey.shieldUntil > this.time || hunter.mass < snack.mass*1.22) continue;
         if (distance(hunter,snack) >= radius(hunter.mass)-radius(snack.mass)*RULES.eatOverlap) continue;
         prey.lastX = snack.x; prey.lastY = snack.y; prey.cells.splice(prey.cells.indexOf(snack),1);
-        hunter.mass += snack.mass*0.7; predator.lastMeal = this.time; predator.best = Math.max(predator.best,predator.mass);
+        const absorbed = snack.mass*0.7;
+        hunter.mass += absorbed; predator.earnedMass += absorbed; predator.lastMeal = this.time; predator.best = Math.max(predator.best,predator.mass);
         const eliminated = prey.cells.length === 0;
         if (eliminated) { prey.alive = false; prey.diedAt = this.time; prey.eatenBy = predator.name; prey.dx = 0; prey.dy = 0; prey.mergeUntil = 0; prey.hurtUntil = 0; prey.tearRemaining = 0; predator.kills++; }
         else { prey.hurtUntil = this.time+RULES.hurtSeconds; prey.tearRemaining = this.random() < 0.25 ? RULES.tearSeconds : 0; if (prey.cells.length === 1) prey.mergeUntil = 0; }
@@ -411,7 +412,7 @@ export class ArenaEngine {
     return {
       type: 'state', tick: this.tick, time: round(this.time), width: RULES.width, height: RULES.height,
       humans: this.humans, bots: [...this.players.values()].filter(p => p.bot).length, hazards: HAZARDS.map(h => ({ ...h })),
-      players: [...this.players.values()].map(p => ({ id: p.id, name: p.name, brine: p.brine, outfit: p.outfit, variety: p.variety, bot: p.bot, x: round(p.x), y: round(p.y), mass: round(p.mass), best: Math.floor(p.best), kills: p.kills, alive: p.alive, shield: round(Math.max(0, p.shieldUntil - this.time)), dash: round(Math.max(0, p.dashUntil - this.time)), cooldown: round(Math.max(0, p.dashReady - this.time)), splitCooldown: round(Math.max(0,p.splitReady-this.time)), merge: p.cells.length > 1 ? round(Math.max(0,p.mergeUntil-this.time)) : 0, hurt: round(Math.max(0,p.hurtUntil-this.time)), ...(p.tearRemaining > 0 ? {tear:round(p.tearRemaining)} : {}), cells: p.cells.map(c => ({id:c.id,x:round(c.x),y:round(c.y),mass:round(c.mass),...(c.mass > RULES.leakFloor && hazardFor(c) ? {drain:1} : {})})), respawn: p.alive ? 0 : round(Math.max(0, RULES.respawnSeconds - (this.time - p.diedAt))), eatenBy: p.eatenBy })),
+      players: [...this.players.values()].map(p => ({ id: p.id, name: p.name, brine: p.brine, outfit: p.outfit, variety: p.variety, bot: p.bot, x: round(p.x), y: round(p.y), mass: round(p.mass), earnedMass: round(p.earnedMass), best: Math.floor(p.best), kills: p.kills, alive: p.alive, shield: round(Math.max(0, p.shieldUntil - this.time)), dash: round(Math.max(0, p.dashUntil - this.time)), cooldown: round(Math.max(0, p.dashReady - this.time)), splitCooldown: round(Math.max(0,p.splitReady-this.time)), merge: p.cells.length > 1 ? round(Math.max(0,p.mergeUntil-this.time)) : 0, hurt: round(Math.max(0,p.hurtUntil-this.time)), ...(p.tearRemaining > 0 ? {tear:round(p.tearRemaining)} : {}), cells: p.cells.map(c => ({id:c.id,x:round(c.x),y:round(c.y),mass:round(c.mass),...(c.mass > RULES.leakFloor && hazardFor(c) ? {drain:1} : {})})), respawn: p.alive ? 0 : round(Math.max(0, RULES.respawnSeconds - (this.time - p.diedAt))), eatenBy: p.eatenBy })),
       ...(includeFood ? { food: this.food.map(f => [f.id, Math.round(f.x), Math.round(f.y), f.value]) } : {})
     };
   }

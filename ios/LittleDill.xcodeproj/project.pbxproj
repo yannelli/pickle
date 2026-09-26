@@ -43,10 +43,12 @@
 		82E77C18E19919F9E2AA3B59 /* ArcadeChop.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFD317F87A8D84C61B9099AD /* ArcadeChop.swift */; };
 		86829ECB2B67B80471FCA104 /* WardrobeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C18144AAFD107F75E0F814 /* WardrobeTests.swift */; };
 		87507B6ACF41960F35665F43 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 442704C35098D0258234BA9A /* Assets.xcassets */; };
+		8A0879F8F0B5913685CB407A /* ArenaEarnings.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE470B3A8077CAA7604E051A /* ArenaEarnings.swift */; };
 		8B5F65300CD7EF0DE6718128 /* ContinuityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F8B1CEEB43D5EFC7ED47A39 /* ContinuityUITests.swift */; };
 		8F9375D4012AD43A596E877D /* CollectionViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B94597CBADE2648796879E08 /* CollectionViews.swift */; };
 		92388A5657106EB180EF8600 /* BackupViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43DE2470389F37B37AE6D9D0 /* BackupViews.swift */; };
 		924DE7770F52A23604E909F0 /* arena-grater.wav in Resources */ = {isa = PBXBuildFile; fileRef = C681DCBE740415262BAE485C /* arena-grater.wav */; };
+		96102A86B6C3E427A51D7C08 /* PlayRewardIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 934B4A5A85FFD82992BDC6BE /* PlayRewardIntegrationTests.swift */; };
 		9DDD3CBBDC8725688B20825A /* ArcadeCircuitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7010978E8CC4FC2BDFAFE7 /* ArcadeCircuitTests.swift */; };
 		A968F609E7B05DBDBC4C63CB /* ArenaSplitParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D821DCBB823CC284DC1426D /* ArenaSplitParityTests.swift */; };
 		B0A4B9509F1BB8F9B334BC53 /* gadget-audio.json in Resources */ = {isa = PBXBuildFile; fileRef = 781DFBBE0921AA628D0BB5A2 /* gadget-audio.json */; };
@@ -57,6 +59,7 @@
 		BF8CC73229925DEFF629656C /* DillModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D97F7D7ACEDDAE7BF9777D24 /* DillModel.swift */; };
 		C3CD676CB043169CEA8A85B8 /* ArcadeToss.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */; };
 		D215CED4B7D146B18569DCE5 /* DillStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7624C5DB7F330E4CB30D615E /* DillStore.swift */; };
+		D4B9CC502232E7EF2F62207F /* PlayWakeUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960438BB56A75EC0642913B3 /* PlayWakeUITests.swift */; };
 		D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07138856D58D603AA5147715 /* LittleDillUITests.swift */; };
 		D803B2C63A66785E63FBF15F /* ArcadeArt.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9009B603D369568F09C9588 /* ArcadeArt.swift */; };
 		DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F84E43162441E79C5E7EE976 /* ArenaClient.swift */; };
@@ -64,6 +67,7 @@
 		DF542A4AD96506ADC6A39744 /* ArcadeViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E1909F605020F3F7001953F /* ArcadeViews.swift */; };
 		E089736DA1A96B67C8ABFB12 /* ArenaAudioParityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */; };
 		E46A4A05B5AAD9DEB61EC6D7 /* PetMotion.swift in Sources */ = {isa = PBXBuildFile; fileRef = D24AF5B68964EA18E99630EA /* PetMotion.swift */; };
+		E58D926F4CAB48E8081F0AFA /* ArenaEarningsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED66AD0CC8B7FD13268B440 /* ArenaEarningsTests.swift */; };
 		F4F9AA76503A401F4CD0ACDB /* FeedFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6540F39435E33E35E31386EC /* FeedFood.swift */; };
 		F58B96584F3A3F07000DD3B7 /* PetLife.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9487E60E0C2FEA26D77BBC5B /* PetLife.swift */; };
 		F60F161D0BBCE3263C541E82 /* ArenaFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEBCF3D267607EEE633DE56F /* ArenaFeedbackTests.swift */; };
@@ -100,6 +104,7 @@
 		1A4D82527044BA884F49EE5A /* ArenaResume.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaResume.swift; sourceTree = "<group>"; };
 		1D35D8FD3F6CFDD60BCAD770 /* ArcadeHop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeHop.swift; sourceTree = "<group>"; };
 		2E1909F605020F3F7001953F /* ArcadeViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeViews.swift; sourceTree = "<group>"; };
+		2ED66AD0CC8B7FD13268B440 /* ArenaEarningsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaEarningsTests.swift; sourceTree = "<group>"; };
 		359654D00BEBD3477F44DBEF /* ArcadeCircuit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeCircuit.swift; sourceTree = "<group>"; };
 		365E6C0F663ED79DF2D480C4 /* FriendsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendsView.swift; sourceTree = "<group>"; };
 		38B8F2975FA299D889705BF8 /* DillBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DillBackup.swift; sourceTree = "<group>"; };
@@ -126,7 +131,9 @@
 		832F1EEED47E489CA28DC996 /* PetArtData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetArtData.swift; sourceTree = "<group>"; };
 		839CFA3288BFA5EFC7D9C830 /* NestProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NestProfile.swift; sourceTree = "<group>"; };
 		8525FBBEE361B4CD825F61EC /* ArenaControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaControls.swift; sourceTree = "<group>"; };
+		934B4A5A85FFD82992BDC6BE /* PlayRewardIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayRewardIntegrationTests.swift; sourceTree = "<group>"; };
 		9487E60E0C2FEA26D77BBC5B /* PetLife.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLife.swift; sourceTree = "<group>"; };
+		960438BB56A75EC0642913B3 /* PlayWakeUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayWakeUITests.swift; sourceTree = "<group>"; };
 		973772CC6332B43C2FF55A0C /* ArenaExpression.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaExpression.swift; sourceTree = "<group>"; };
 		980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaAudioParityTests.swift; sourceTree = "<group>"; };
 		9F8B1CEEB43D5EFC7ED47A39 /* ContinuityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContinuityUITests.swift; sourceTree = "<group>"; };
@@ -147,6 +154,7 @@
 		C2877A3CAFE94F78CBE49879 /* ArcadeToss.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArcadeToss.swift; sourceTree = "<group>"; };
 		C681DCBE740415262BAE485C /* arena-grater.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-grater.wav"; sourceTree = "<group>"; };
 		CAFDFF4605FF2015B7E91004 /* arena-pickup-2.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "arena-pickup-2.wav"; sourceTree = "<group>"; };
+		CE470B3A8077CAA7604E051A /* ArenaEarnings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaEarnings.swift; sourceTree = "<group>"; };
 		D24AF5B68964EA18E99630EA /* PetMotion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetMotion.swift; sourceTree = "<group>"; };
 		D24EFFA7799A3CDECF9361E6 /* ArenaControlsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArenaControlsTests.swift; sourceTree = "<group>"; };
 		D49132AD73DDA5B3DBD4DB67 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -180,6 +188,7 @@
 				2E1909F605020F3F7001953F /* ArcadeViews.swift */,
 				F84E43162441E79C5E7EE976 /* ArenaClient.swift */,
 				8525FBBEE361B4CD825F61EC /* ArenaControls.swift */,
+				CE470B3A8077CAA7604E051A /* ArenaEarnings.swift */,
 				973772CC6332B43C2FF55A0C /* ArenaExpression.swift */,
 				13CB2BDB7AC44EFF03622AB6 /* ArenaFeedback.swift */,
 				1A4D82527044BA884F49EE5A /* ArenaResume.swift */,
@@ -233,6 +242,7 @@
 				7E7010978E8CC4FC2BDFAFE7 /* ArcadeCircuitTests.swift */,
 				980DB2F88BBB8D5DE864F44F /* ArenaAudioParityTests.swift */,
 				D24EFFA7799A3CDECF9361E6 /* ArenaControlsTests.swift */,
+				2ED66AD0CC8B7FD13268B440 /* ArenaEarningsTests.swift */,
 				A37E0F6699169D58F2E4DC5E /* ArenaExpressionTests.swift */,
 				DEBCF3D267607EEE633DE56F /* ArenaFeedbackTests.swift */,
 				7C38CBDB8E4E40DE37C57A2B /* ArenaRecoveryTests.swift */,
@@ -240,6 +250,7 @@
 				D9A0092F7E7FCEA74B2E09C0 /* CrossPlatformParityTests.swift */,
 				4E6AE199A809890C135FF5CF /* DillTests.swift */,
 				E880408BECBA90CD00B809E9 /* FeedFoodTests.swift */,
+				934B4A5A85FFD82992BDC6BE /* PlayRewardIntegrationTests.swift */,
 				B4C18144AAFD107F75E0F814 /* WardrobeTests.swift */,
 			);
 			path = LittleDillTests;
@@ -265,6 +276,7 @@
 			children = (
 				9F8B1CEEB43D5EFC7ED47A39 /* ContinuityUITests.swift */,
 				07138856D58D603AA5147715 /* LittleDillUITests.swift */,
+				960438BB56A75EC0642913B3 /* PlayWakeUITests.swift */,
 			);
 			path = LittleDillUITests;
 			sourceTree = "<group>";
@@ -436,6 +448,7 @@
 				DF542A4AD96506ADC6A39744 /* ArcadeViews.swift in Sources */,
 				DE23C6F2F1EE9E31161B9A74 /* ArenaClient.swift in Sources */,
 				4B44F7995716B7EEB1DEC9ED /* ArenaControls.swift in Sources */,
+				8A0879F8F0B5913685CB407A /* ArenaEarnings.swift in Sources */,
 				6FBC3D767AFC7F4FDA2629B4 /* ArenaExpression.swift in Sources */,
 				11A2B4924156C612114CC686 /* ArenaFeedback.swift in Sources */,
 				658D6D906536026B9B853BD3 /* ArenaResume.swift in Sources */,
@@ -473,6 +486,7 @@
 			files = (
 				8B5F65300CD7EF0DE6718128 /* ContinuityUITests.swift in Sources */,
 				D7765449B6B5A43A79D5D59F /* LittleDillUITests.swift in Sources */,
+				D4B9CC502232E7EF2F62207F /* PlayWakeUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +498,7 @@
 				9DDD3CBBDC8725688B20825A /* ArcadeCircuitTests.swift in Sources */,
 				E089736DA1A96B67C8ABFB12 /* ArenaAudioParityTests.swift in Sources */,
 				54599D64AC467AFAAC4737FE /* ArenaControlsTests.swift in Sources */,
+				E58D926F4CAB48E8081F0AFA /* ArenaEarningsTests.swift in Sources */,
 				4DB51B501DB4FB4C8105EAD0 /* ArenaExpressionTests.swift in Sources */,
 				F60F161D0BBCE3263C541E82 /* ArenaFeedbackTests.swift in Sources */,
 				21BC0AF78364318AC21DFB23 /* ArenaRecoveryTests.swift in Sources */,
@@ -491,6 +506,7 @@
 				1C03C52777587C828FF1AE0A /* CrossPlatformParityTests.swift in Sources */,
 				517AAED62F1E6DD723B87316 /* DillTests.swift in Sources */,
 				56F8C2300FE54183F331E631 /* FeedFoodTests.swift in Sources */,
+				96102A86B6C3E427A51D7C08 /* PlayRewardIntegrationTests.swift in Sources */,
 				86829ECB2B67B80471FCA104 /* WardrobeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

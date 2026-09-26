@@ -195,9 +195,26 @@ test('hidden pages preserve remaining game timers; leaving cancels old callbacks
   assert.ok(app.saved().happiness < happy, 'no ghost reward after exit');
 });
 
-test('sleep and dead states refuse care and games; storage failures do not stop play', () => {
-  const asleep = client({ sleeping: true }); asleep.click('play');
-  assert.match(asleep.get('message').textContent, /Wake/);
+test('Play wakes a sleeping pickle and charges energy when a game starts', () => {
+  const asleep = client({ sleeping: true, energy: 8 });
+  asleep.click('play');
+  assert.equal(asleep.saved().sleeping, false);
+  assert.equal(asleep.saved().energy, 8);
+  assert.equal(asleep.get('game').hidden, false);
+  asleep.key('1');
+  assert.equal(asleep.get('game-title').textContent, 'HEART HUNT');
+  assert.equal(asleep.saved().energy, 2);
+
+  const tired = client({ sleeping: true, energy: 2 });
+  tired.click('play');
+  assert.equal(tired.saved().sleeping, false);
+  assert.equal(tired.saved().energy, 2);
+  assert.equal(tired.get('game').hidden, false);
+  tired.key('1');
+  assert.match(tired.get('message').textContent, /6 energy/);
+});
+
+test('dead states refuse care and games; storage failures do not stop play', () => {
   const dead = client({ dead: true }); dead.key('p'); dead.key('2');
   assert.equal(dead.saved().happiness, 20);
   const blocked = client({}, { blockStorage: true }); blocked.click('pet'); blocked.start('memory');

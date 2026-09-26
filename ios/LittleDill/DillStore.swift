@@ -93,6 +93,15 @@ import SwiftUI
         if !result.message.isEmpty { speech = result.message }
         save(); return result
     }
+    func prepareArcade() -> Bool {
+        guard snackBites == nil, !arcadeActive else { return false }
+        let time = now
+        sync(at: time)
+        guard pet.prepareArcade(at: time) else { return false }
+        speech = nil
+        save()
+        return true
+    }
     /// Spends 6 energy to enter an arcade game, like the web startGame().
     func startArcade() -> Bool {
         guard snackBites == nil, !arcadeActive else { return false }
@@ -100,6 +109,7 @@ import SwiftUI
         sync(at: time)
         guard pet.startArcade(at: time) else {
             if pet.adopted && !pet.life.dead && !pet.life.sleeping { speech = "a little nap first! games need 6 energy." }
+            save()
             return false
         }
         arcadeActive = true; activeCircuit = nil; save(); return true
@@ -214,6 +224,16 @@ import SwiftUI
         pet.life.name = clean; save(); return true
     }
     func recordArena(best:Int) {guard best >= 0 else {return}; pet.arenaBest = max(pet.arenaBest ?? 0,best); save()}
+    var arenaCoinsToday: Int {
+        guard let progress = pet.arenaEarnings, progress.day == DailyChallenge.today(now) else { return 0 }
+        return Int(progress.mass / Double(ArenaEarnings.massPerCoin))
+    }
+    @discardableResult func recordArena(earnedMass: Double, session: String) -> Int {
+        let previous = pet.arenaEarnings
+        let earned = pet.recordArena(earnedMass: earnedMass, session: session, at: now)
+        if pet.arenaEarnings != previous { save() }
+        return earned
+    }
     func setHaptics(_ enabled: Bool) { pet.haptics = enabled; save() }
     func setSounds(_ enabled: Bool) { pet.soundEnabled = enabled; save(); if !enabled {DillAudio.shared.stop()} }
     func sound(_ cue:DillSound) {if pet.sounds {DillAudio.shared.play(cue)}}

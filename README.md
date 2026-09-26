@@ -42,6 +42,8 @@ The app automatically migrates old local saves and encrypted v1 backups to a sep
 
 Feeding rotates through carrot, strawberry, broccoli, apple, and cheese on web and iOS. Successful feeds advance the sequence, which is remembered on that device; refused feeds leave it unchanged.
 
+Play wakes a sleeping pickle and opens the arcade without spending energy. Starting a game costs 6 energy.
+
 The native arcade also has three full-screen action games: Countertop escape (run through seeded kitchen scenery with varied obstacle spacing and dill streaks), Cuke chop (slice cucumbers while sparing your pickle), and Jar toss (aim for a brine jar). Its Daily Circuit combines seeded runs of those games into a 300-point score with medals. Native arena controls include swappable thumbstick placement, cooldown indicators, and distinct haptic cues. See the [iOS guide](ios/README.md) for controls and native features.
 
 ## Brine Royale
@@ -51,6 +53,7 @@ Play at [arena.littledill.app](https://arena.littledill.app) or enter from the i
 - Split pieces of at least 60 mass, up to eight pieces, with a one-second split cooldown and a 12-second regroup timer. Dash requires 35 mass and costs 5 mass.
 - A hunter needs at least 1.22 times the prey's mass. Eating requires the prey's center to cross `hunterRadius - 0.6 * preyRadius`. Red body outlines indicate nearby threats; the drawn membrane is cosmetic.
 - Three kitchen gadgets, a slicer, salt shaker, and grater, slow touching pieces to half speed and spit leaked mass back into the garden. Gadget draining stops at 500 mass per piece. Touching pieces over 2,500 mass split automatically, subject to the eight-piece limit and a two-second gadget split cooldown.
+- iOS arena play earns one closet coin per 1,000 mass collected from food and opponents, up to 1,000 coins per UTC day. The server tracks earned mass separately from starting size; reconnects and split/regroup changes do not earn it again.
 - Six varieties have distinct shapes, colors, and smiles. Losing a piece makes the survivor sad for 15 seconds, with a 25% chance of one small tear. Zoom eases between sizes, and the outline dents at contacts.
 - Public gardens include bots at varied starting masses up to 5,000, with larger starts less common, and one harder opponent. Bots vary in awareness and risk-taking. Gadget encounters use committed routes, curiosity, retreat, and rare crossings.
 - Gadget sounds follow the same synthesis and timing on both platforms. Four shared pickup clips rotate at a quieter, limited cadence; losing a piece or being eaten uses a crunch.
