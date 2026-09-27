@@ -341,7 +341,8 @@ enum PickleArtist {
         drawParts(PetArt.worn(vibe + ".held"), in: held, accent: accent)
         drawParts(PetArt.worn(vibe + ".hand"), in: hand, accent: accent)
         if let prop = look.prop {
-            var stand = c; stand.translateBy(x: f.w + 16, y: f.h + 6)
+            let handTip = f.edgeX(at: f.arm + 13.5) + f.armWidth - 3
+            var stand = c; stand.translateBy(x: prop == "cane" ? handTip : f.w + 16, y: f.h + 6)
             drawParts(PetArt.prop(prop), in: stand, accent: accent, time: time)
         }
     }
