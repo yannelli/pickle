@@ -57,7 +57,6 @@
     .device { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; width: 390px; padding: 28px 31px 22px; border: 2px solid #7e9454; border-radius: 112px 112px 120px 120px / 89px 89px 117px 117px; background: linear-gradient(125deg, #d1dfac 3%, #becf8f 41%, #aabe78 100%); box-shadow: inset 4px 5px 5px #eff7d1a1, inset -7px -8px 3px #8b9f5b80, 0 7px 0 #7f9255, 0 9px 0 1px #71834c, 0 18px 24px #35492112; position: relative; }
     .device::before { content: ''; position: absolute; inset: 12px; border: 1px solid #dfe8b98c; border-radius: inherit; pointer-events: none; }
     .device-brand { display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 14px; font-weight: 850; letter-spacing: 5px; margin: 0 0 14px; text-shadow: 0 1px #e8eec4; color: #627c42; }
-    .device-brand span { letter-spacing: 0; font-size: 12px; opacity: .55; }
     .bezel { padding: 10px; background: #7a8d59; border-radius: 24px; box-shadow: 0 2px 0 #e6ecc5, inset 0 3px 3px #52613977; border: 1px solid #728353; }
     .screen { height: 365px; overflow: hidden; position: relative; background: var(--lcd); color: var(--pixel); border: 2px solid #526639; border-radius: 14px; padding: 13px 13px 0; box-shadow: inset 3px 4px 9px #53673539; font-family: 'Courier New', monospace; }
     .screen::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 3px, #30401d06 3px 4px); pointer-events: none; z-index: 5; }
@@ -508,7 +507,7 @@
         <div class="orbit" aria-hidden="true"></div>
         <div class="device-wrap"><div class="keychain" aria-hidden="true"></div>
           <div class="device">
-            <div class="device-brand" aria-hidden="true"><span>✳</span> PICKLE <span>✳</span></div>
+            <div class="device-brand" aria-hidden="true">PICKLE</div>
             <div class="bezel"><div class="screen" id="screen">
               <section class="nursery" id="nursery" data-phase="new" aria-labelledby="nursery-title">
                 <p class="nursery-kicker">ONE TINY BEGINNING</p><h2 id="nursery-title">A friend, freshly brined.</h2>
@@ -918,7 +917,7 @@
         $('screen').classList.toggle('asleep', state.sleeping);
         $('pet').hidden = state.dead || state.phase !== 'living';
         $('pet').setAttribute('aria-label', snack ? 'Spare your pickle' : state.sleeping ? 'Wake your pickle' : 'Pet your pickle for happiness');
-        $('sleep').textContent = state.sleeping ? 'Wake ☀' : 'Nap ☾';
+        $('sleep').textContent = state.sleeping ? 'Wake ☼' : 'Nap ☾';
         $('sleep').setAttribute('aria-pressed', String(state.sleeping));
         $('sleep').disabled = state.phase !== 'living' || state.dead || !!game || !!snack;
         $('take-photo').hidden = !photos || state.phase !== 'living' || state.dead;

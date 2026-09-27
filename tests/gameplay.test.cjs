@@ -261,7 +261,7 @@ test('restoring a backup clears the previous pickle eating prompt', async () => 
 test('Wake stays awake when the pickle reaches full energy between render and click', () => {
   const app = client({ sleeping: true, energy: 99.995 });
   app.run(1000);
-  assert.equal(app.get('sleep').textContent, 'Wake ☀');
+  assert.equal(app.get('sleep').textContent, 'Wake ☼');
   app.click('sleep');
   assert.equal(app.saved().energy, 100);
   assert.equal(app.saved().sleeping, false);
