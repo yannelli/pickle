@@ -49,7 +49,7 @@
     book: '<path d="M-23 21q11-4 22 4 11-8 22-4v18q-11-4-22 4-11-8-22-4z" fill="' + LIGHT + '"/><path d="M-1 25v18M-18 26h11M-18 32h11M4 26h11M4 32h11" stroke-width="1.6"/>'
   };
   const PROPS = {
-    cane: '<path d="M3 0v-30q0-10 9-10t8 9" stroke-width="5"/>',
+    cane: '<path d="M0 0v-30q0-10 9-10t8 9" stroke-width="5"/>',
     record: '<circle cx="8" cy="-16" r="15" fill="currentColor"/><circle cx="8" cy="-16" r="5.5" fill="' + LIGHT + '"/><circle cx="8" cy="-16" r="1.8" stroke="none"/>',
     scroll: '<path d="M0-40H20V-4H0Z" fill="' + LIGHT + '"/><path d="M3-33h14M3-25h14M3-17h11" stroke-width="1.8"/><rect x="-4" y="-44" width="28" height="6" rx="3" fill="currentColor"/><rect x="-4" y="-6" width="28" height="6" rx="3" fill="currentColor"/>',
     rake: '<path d="M5 0v-36M-7-36H19M-7-45v9M-1-45v9M5-45v9M11-45v9M19-45v9"/>',
@@ -112,6 +112,8 @@
       face: 'translate(' + number(body.w / 2) + ' ' + number(body.face) + ')',
       held: 'translate(' + number(body.w / 2) + ' ' + number(body.face) + ') scale(' + (body.w / BODY.adult.w).toFixed(3) + ')',
       prop: 'translate(' + number(body.w + 16) + ' ' + number(body.h + 6) + ')',
+      // Prop art sits outside the pickle's 3px border; the cane shaft meets the right hand tip.
+      cane: 'translate(' + number(body.w - body.armEdge + (stage === 'baby' ? 9 : 13) + 1.5) + ' ' + number(body.h + 6) + ')',
       hand: 'translate(' + number(body.armEdge - (stage === 'baby' ? 9 : 13)) + ' ' + number(body.arm + 15) + ')'
     };
   }
@@ -174,7 +176,7 @@
     paint(art, variety.id + ':' + (look?.id || '') + ':' + stage + ':' + (worn.face || worn.held || worn.hand ? vibe : ''), wornArt);
     art.style.color = look?.accent || '';
     const prop = document.getElementById('prop-art');
-    paint(prop, variety.id + ':' + (look?.id || '') + ':' + stage, look ? place(at.prop, PROPS[look.prop]) : '');
+    paint(prop, variety.id + ':' + (look?.id || '') + ':' + stage, look ? place(look.prop === 'cane' ? at.cane : at.prop, PROPS[look.prop]) : '');
     prop.style.color = look?.accent || '';
     paint(document.getElementById('scene-art'), SCENES[vibe] ? vibe : '', SCENES[vibe] || '');
   }

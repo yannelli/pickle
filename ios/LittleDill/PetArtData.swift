@@ -189,7 +189,7 @@ enum PetArt {
     static func prop(_ id: String) -> [ArtPart] {
         switch id {
         case "cane": return [
-            ArtPart(.path("M3 0v-30q0-10 9-10t8 9"), width: 5)
+            ArtPart(.path("M0 0v-30q0-10 9-10t8 9"), width: 5)
         ]
         case "record": return [
             ArtPart(.circle(8, -16, 15), fill: .accent),
