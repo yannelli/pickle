@@ -19,6 +19,8 @@ Configure these repository secrets in `yannelli/pickle`. Use an App Store Connec
 
 The profile must enable Associated Domains for `applinks:arena.littledill.app`. The workflow checks profile expiry, team, app identifier, distribution type, and the matching signing identity before archiving. Credentials are decoded into a private runner directory, imported into a temporary keychain, and removed in the cleanup step.
 
+The iOS app sets `ITSAppUsesNonExemptEncryption` to `false`, matching the existing App Store Connect builds. Backup encryption uses Apple's CryptoKit, and network encryption uses the operating system's networking APIs. Reassess the declaration if adding an encryption implementation or SDK. See [Apple's encryption export guidance](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations).
+
 Set the optional repository variable `TESTFLIGHT_GROUP` to an existing external group name; the default is `Public Beta`. Create an internal testing group before the external group. Complete beta review contact details, feedback email, any required demo credentials, and the app's encryption compliance information in App Store Connect. The automation does not create groups or answer encryption questions. Add testers or enable the group's public invitation link.
 
 Upload secret values through standard input. Substitute approved file paths and identifiers; keep secret values out of shell history and repository files:

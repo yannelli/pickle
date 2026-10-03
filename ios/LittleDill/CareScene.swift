@@ -245,139 +245,143 @@ private struct CareScenery: View {
     private var ink: Color {DillTheme.ink}
     var body: some View {
         Canvas { context,size in
-            context.translateBy(x:size.width/2,y:size.height/2)
-            func shape(_ path:Path,_ color:Color,_ width:Double = 2.5) {
-                context.fill(path,with:.color(color))
-                context.stroke(path,with:.color(ink),style:StrokeStyle(lineWidth:width,lineCap:.round,lineJoin:.round))
-            }
-            func oval(_ x:Double,_ y:Double,_ w:Double,_ h:Double,_ color:Color,outline:Bool = false) {
-                let p = Path(ellipseIn:CGRect(x:x,y:y,width:w,height:h))
-                if outline {shape(p,color,1.7)} else {context.fill(p,with:.color(color))}
-            }
-            func symbol(_ name:String,_ x:Double,_ y:Double,_ side:Double,_ color:Color) {
-                context.draw(Text(Image(systemName:name)).font(.system(size:side,weight:.bold)).foregroundStyle(color),at:CGPoint(x:x,y:y))
-            }
-            func sparkle(_ x:Double,_ y:Double,_ radius:Double,_ color:Color) {
-                var p = Path(); p.move(to:CGPoint(x:x,y:y-radius))
-                p.addQuadCurve(to:CGPoint(x:x+radius,y:y),control:CGPoint(x:x+2,y:y-2))
-                p.addQuadCurve(to:CGPoint(x:x,y:y+radius),control:CGPoint(x:x+2,y:y+2))
-                p.addQuadCurve(to:CGPoint(x:x-radius,y:y),control:CGPoint(x:x-2,y:y+2))
-                p.addQuadCurve(to:CGPoint(x:x,y:y-radius),control:CGPoint(x:x-2,y:y-2))
-                context.fill(p,with:.color(color))
-            }
-            switch action {
-            case .feed:
-                if !foreground {
-                    oval(-109,65,58,17,Color(hex:0xEBCB95),outline:true)
-                    shape(Path(roundedRect:CGRect(x:-109,y:52,width:58,height:22),cornerRadius:9),DillTheme.peach)
-                    for i in 0..<3 {oval(-101+Double(i)*15,46,15,12,DillTheme.lime,outline:true)}
-                } else {
-                    // The food's near end rests at the lips and loses a chunk on every chomp.
-                    let beat = FeedBeat(t:time), tilt = food == .carrot ? -14 - beat.squash*6 : 14 - beat.squash*3
-                    let swoop = 1 - Ease.springy(min(1,time/FeedBeat.arrive))
-                    if beat.eaten < FeedBeat.bites {
-                        let eaten = CGFloat(beat.eaten)*FeedBeat.chunk
-                        var morsel = context
-                        morsel.translateBy(x:mouth.x + 150*swoop,y:mouth.y - 80*swoop)
-                        morsel.rotate(by:.degrees(tilt + 50*swoop))
-                        morsel.translateBy(x:FeedBeat.rest - FeedBeat.chunk*beat.push - eaten,y:0)
-                        food.draw(morsel,eaten:eaten)
-                    }
-                    if !reduceMotion {
-                        let lips = CGPoint(x:mouth.x + cos(tilt * .pi/180)*4,y:mouth.y + sin(tilt * .pi/180)*4)
-                        for k in 0..<beat.eaten {
-                            let age = time - beat.chompTime(k)
-                            guard age < 0.6 else {continue}
-                            var bits = context; bits.opacity = 1 - age/0.6
-                            for i in 0..<6 {
-                                let angle = (-130 + Double(i)*30 + Double(k)*9) * .pi/180, speed = 70 + Double((i*37 + k*11)%50), side = 4 + Double(i%3)
-                                let x = lips.x + cos(angle)*speed*age, y = lips.y + sin(angle)*speed*age + 260*age*age
-                                let color = i%3 == 0 ? Color(hex:0xFFE5B1) : food.crumb
-                                let bit = Path(roundedRect:CGRect(x:x - side/2,y:y - side/2,width:side,height:side),cornerRadius:1.2)
-                                bits.fill(bit,with:.color(color)); bits.stroke(bit,with:.color(ink),lineWidth:1)
-                            }
-                        }
-                    }
-                    if time > FeedBeat.gulp {
-                        let offsetsX: [Double] = [52,70,36]
-                        let offsetsY: [Double] = [34,54,70]
-                        let sizes: [Double] = [24,15,12]
-                        let colors: [Color] = [DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)]
-                        for i in 0..<3 {
-                            let age = time - FeedBeat.gulp - Double(i)*0.14
-                            guard age > 0 else {continue}
-                            let pop = Ease.springy(min(1,age/0.3))
-                            let x = Double(mouth.x) + offsetsX[i]
-                            let y = Double(mouth.y) - offsetsY[i] - age*18
-                            symbol("heart.fill",x,y,max(1,sizes[i]*pop),colors[i])
-                        }
-                        sparkle(mouth.x - 62,mouth.y - 50,12*Ease.springy(min(1,(time - FeedBeat.gulp)/0.3)),DillTheme.lime)
-                    }
-                }
-            case .pet:
-                if foreground {
-                    // A soft cartoon mitten strokes the sprout, while hearts drift up.
-                    let x = reduceMotion ? 0 : sin(time*5)*14
-                    var hand = Path(); hand.move(to:CGPoint(x:x-14,y:-80)); hand.addLine(to:CGPoint(x:x-16,y:-97))
-                    hand.addQuadCurve(to:CGPoint(x:x-7,y:-99),control:CGPoint(x:x-12,y:-108))
-                    hand.addLine(to:CGPoint(x:x-3,y:-87)); hand.addLine(to:CGPoint(x:x+21,y:-87))
-                    hand.addQuadCurve(to:CGPoint(x:x+24,y:-66),control:CGPoint(x:x+33,y:-74))
-                    hand.addQuadCurve(to:CGPoint(x:x-10,y:-67),control:CGPoint(x:x+7,y:-57)); hand.closeSubpath()
-                    shape(hand,Color(hex:0xF2CAA5))
-                    for i in 0..<6 {
-                        let phase = (time*0.5 + Double(i)/6).truncatingRemainder(dividingBy:1)
-                        let x = (i%2 == 0 ? -1.0 : 1.0)*(58+Double(i%3)*12)
-                        symbol("heart.fill",x,48-phase*136,12+Double(i%3)*5,[DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)][i%3])
-                    }
-                    sparkle(-89,49,10,DillTheme.lime); sparkle(94,-61,8,DillTheme.peach)
-                }
-            case .wash:
-                if !foreground {
-                    shape(Path(roundedRect:CGRect(x:-78,y:48,width:156,height:46),cornerRadius:22),Color(hex:0x9BC9C7))
-                    var pipe = Path(); pipe.move(to:CGPoint(x:95,y:44)); pipe.addLine(to:CGPoint(x:95,y:-72)); pipe.addQuadCurve(to:CGPoint(x:60,y:-88),control:CGPoint(x:95,y:-102))
-                    context.stroke(pipe,with:.color(ink),style:StrokeStyle(lineWidth:6,lineCap:.round))
-                    shape(Path(roundedRect:CGRect(x:37,y:-89,width:36,height:10),cornerRadius:5),DillTheme.cream)
-                    if time < 3.5 {
-                        for i in 0..<9 {
-                            let phase = (time*1.6+Double(i)*0.17).truncatingRemainder(dividingBy:1)
-                            oval(30+Double(i%3)*13,-68+phase*106,3,9,Color(hex:0x7AAFAF))
-                        }
-                    }
-                } else {
-                    shape(Path(roundedRect:CGRect(x:-81,y:55,width:162,height:39),cornerRadius:19),Color(hex:0xCDE5DE))
-                    for i in 0..<10 {oval(-80+Double(i)*16,43+sin(time*3+Double(i))*3,23,20,.white,outline:true)}
-                    for i in 0..<12 {
-                        let phase = (time*0.23+Double(i)*0.13).truncatingRemainder(dividingBy:1)
-                        let x = sin(Double(i)*2.4)*92 + sin(time*2+Double(i))*5
-                        let r = 6 + Double(i%3)*4
-                        oval(x,43-phase*141,r*2,r*2,Color.white.opacity(0.65),outline:true)
-                        oval(x+r*0.5,46-phase*141,r*0.4,r*0.4,.white)
-                    }
-                    if time > 3.2 {for i in 0..<4 {sparkle(Double(i%2)*144-72,Double(i/2)*76-60,10+sin(time*7+Double(i))*3,Color(hex:0xF2D87D))}}
-                }
-            case .nap:
-                if !foreground {
-                    oval(68,-95,33,33,Color(hex:0xF4E4A2))
-                    oval(78,-101,31,31,Color(hex:0x344F50))
-                    for i in 0..<10 {sparkle(sin(Double(i)*5.2)*129,-90+Double(i%4)*47,2+Double(i%3),DillTheme.cream.opacity(0.65))}
-                    shape(Path(roundedRect:CGRect(x:-77,y:55,width:154,height:39),cornerRadius:18),Color(hex:0xE7D4B7))
-                } else {
-                    var blanket = Path(); blanket.move(to:CGPoint(x:-59,y:26)); blanket.addQuadCurve(to:CGPoint(x:57,y:34),control:CGPoint(x:5,y:45)); blanket.addLine(to:CGPoint(x:63,y:89)); blanket.addQuadCurve(to:CGPoint(x:-61,y:87),control:CGPoint(x:0,y:101)); blanket.closeSubpath()
-                    shape(blanket,Color(hex:0xB6C89C))
-                    for i in 0..<6 {sparkle(-39+Double(i%3)*37,54+Double(i/3)*24,4,DillTheme.cream)}
-                    for i in 0..<3 {
-                        let phase = (time*0.3+Double(i)*0.3).truncatingRemainder(dividingBy:1)
-                        context.draw(Text("z").font(.system(size:14+phase*10,weight:.bold,design:.rounded)).foregroundStyle(DillTheme.cream.opacity(1-phase*0.5)),at:CGPoint(x:58+phase*31,y:-8-phase*63))
-                    }
-                }
-            case nil:
-                if !foreground {
-                    oval(80,-77,48,48,Color(hex:0xF6E4A9))
-                    sparkle(-112,-47,12,DillTheme.muted.opacity(0.5)); sparkle(-102,68,9,DillTheme.muted.opacity(0.4))
-                    symbol("leaf",112,80,26,DillTheme.muted.opacity(0.5))
-                }
-            }
+            draw(&context, size: size)
         }.accessibilityHidden(true)
+    }
+
+    private func draw(_ context: inout GraphicsContext, size: CGSize) {
+        context.translateBy(x:size.width/2,y:size.height/2)
+        func shape(_ path:Path,_ color:Color,_ width:Double = 2.5) {
+            context.fill(path,with:.color(color))
+            context.stroke(path,with:.color(ink),style:StrokeStyle(lineWidth:width,lineCap:.round,lineJoin:.round))
+        }
+        func oval(_ x:Double,_ y:Double,_ w:Double,_ h:Double,_ color:Color,outline:Bool = false) {
+            let p = Path(ellipseIn:CGRect(x:x,y:y,width:w,height:h))
+            if outline {shape(p,color,1.7)} else {context.fill(p,with:.color(color))}
+        }
+        func symbol(_ name:String,_ x:Double,_ y:Double,_ side:Double,_ color:Color) {
+            context.draw(Text(Image(systemName:name)).font(.system(size:side,weight:.bold)).foregroundStyle(color),at:CGPoint(x:x,y:y))
+        }
+        func sparkle(_ x:Double,_ y:Double,_ radius:Double,_ color:Color) {
+            var p = Path(); p.move(to:CGPoint(x:x,y:y-radius))
+            p.addQuadCurve(to:CGPoint(x:x+radius,y:y),control:CGPoint(x:x+2,y:y-2))
+            p.addQuadCurve(to:CGPoint(x:x,y:y+radius),control:CGPoint(x:x+2,y:y+2))
+            p.addQuadCurve(to:CGPoint(x:x-radius,y:y),control:CGPoint(x:x-2,y:y+2))
+            p.addQuadCurve(to:CGPoint(x:x,y:y-radius),control:CGPoint(x:x-2,y:y-2))
+            context.fill(p,with:.color(color))
+        }
+        switch action {
+        case .feed:
+            if !foreground {
+                oval(-109,65,58,17,Color(hex:0xEBCB95),outline:true)
+                shape(Path(roundedRect:CGRect(x:-109,y:52,width:58,height:22),cornerRadius:9),DillTheme.peach)
+                for i in 0..<3 {oval(-101+Double(i)*15,46,15,12,DillTheme.lime,outline:true)}
+            } else {
+                // The food's near end rests at the lips and loses a chunk on every chomp.
+                let beat = FeedBeat(t:time), tilt = food == .carrot ? -14 - beat.squash*6 : 14 - beat.squash*3
+                let swoop = 1 - Ease.springy(min(1,time/FeedBeat.arrive))
+                if beat.eaten < FeedBeat.bites {
+                    let eaten = CGFloat(beat.eaten)*FeedBeat.chunk
+                    var morsel = context
+                    morsel.translateBy(x:mouth.x + 150*swoop,y:mouth.y - 80*swoop)
+                    morsel.rotate(by:.degrees(tilt + 50*swoop))
+                    morsel.translateBy(x:FeedBeat.rest - FeedBeat.chunk*beat.push - eaten,y:0)
+                    food.draw(morsel,eaten:eaten)
+                }
+                if !reduceMotion {
+                    let lips = CGPoint(x:mouth.x + cos(tilt * .pi/180)*4,y:mouth.y + sin(tilt * .pi/180)*4)
+                    for k in 0..<beat.eaten {
+                        let age = time - beat.chompTime(k)
+                        guard age < 0.6 else {continue}
+                        var bits = context; bits.opacity = 1 - age/0.6
+                        for i in 0..<6 {
+                            let angle = (-130 + Double(i)*30 + Double(k)*9) * .pi/180, speed = 70 + Double((i*37 + k*11)%50), side = 4 + Double(i%3)
+                            let x = lips.x + cos(angle)*speed*age, y = lips.y + sin(angle)*speed*age + 260*age*age
+                            let color = i%3 == 0 ? Color(hex:0xFFE5B1) : food.crumb
+                            let bit = Path(roundedRect:CGRect(x:x - side/2,y:y - side/2,width:side,height:side),cornerRadius:1.2)
+                            bits.fill(bit,with:.color(color)); bits.stroke(bit,with:.color(ink),lineWidth:1)
+                        }
+                    }
+                }
+                if time > FeedBeat.gulp {
+                    let offsetsX: [Double] = [52,70,36]
+                    let offsetsY: [Double] = [34,54,70]
+                    let sizes: [Double] = [24,15,12]
+                    let colors: [Color] = [DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)]
+                    for i in 0..<3 {
+                        let age = time - FeedBeat.gulp - Double(i)*0.14
+                        guard age > 0 else {continue}
+                        let pop = Ease.springy(min(1,age/0.3))
+                        let x = Double(mouth.x) + offsetsX[i]
+                        let y = Double(mouth.y) - offsetsY[i] - age*18
+                        symbol("heart.fill",x,y,max(1,sizes[i]*pop),colors[i])
+                    }
+                    sparkle(mouth.x - 62,mouth.y - 50,12*Ease.springy(min(1,(time - FeedBeat.gulp)/0.3)),DillTheme.lime)
+                }
+            }
+        case .pet:
+            if foreground {
+                // A soft cartoon mitten strokes the sprout, while hearts drift up.
+                let x = reduceMotion ? 0 : sin(time*5)*14
+                var hand = Path(); hand.move(to:CGPoint(x:x-14,y:-80)); hand.addLine(to:CGPoint(x:x-16,y:-97))
+                hand.addQuadCurve(to:CGPoint(x:x-7,y:-99),control:CGPoint(x:x-12,y:-108))
+                hand.addLine(to:CGPoint(x:x-3,y:-87)); hand.addLine(to:CGPoint(x:x+21,y:-87))
+                hand.addQuadCurve(to:CGPoint(x:x+24,y:-66),control:CGPoint(x:x+33,y:-74))
+                hand.addQuadCurve(to:CGPoint(x:x-10,y:-67),control:CGPoint(x:x+7,y:-57)); hand.closeSubpath()
+                shape(hand,Color(hex:0xF2CAA5))
+                for i in 0..<6 {
+                    let phase = (time*0.5 + Double(i)/6).truncatingRemainder(dividingBy:1)
+                    let x = (i%2 == 0 ? -1.0 : 1.0)*(58+Double(i%3)*12)
+                    symbol("heart.fill",x,48-phase*136,12+Double(i%3)*5,[DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)][i%3])
+                }
+                sparkle(-89,49,10,DillTheme.lime); sparkle(94,-61,8,DillTheme.peach)
+            }
+        case .wash:
+            if !foreground {
+                shape(Path(roundedRect:CGRect(x:-78,y:48,width:156,height:46),cornerRadius:22),Color(hex:0x9BC9C7))
+                var pipe = Path(); pipe.move(to:CGPoint(x:95,y:44)); pipe.addLine(to:CGPoint(x:95,y:-72)); pipe.addQuadCurve(to:CGPoint(x:60,y:-88),control:CGPoint(x:95,y:-102))
+                context.stroke(pipe,with:.color(ink),style:StrokeStyle(lineWidth:6,lineCap:.round))
+                shape(Path(roundedRect:CGRect(x:37,y:-89,width:36,height:10),cornerRadius:5),DillTheme.cream)
+                if time < 3.5 {
+                    for i in 0..<9 {
+                        let phase = (time*1.6+Double(i)*0.17).truncatingRemainder(dividingBy:1)
+                        oval(30+Double(i%3)*13,-68+phase*106,3,9,Color(hex:0x7AAFAF))
+                    }
+                }
+            } else {
+                shape(Path(roundedRect:CGRect(x:-81,y:55,width:162,height:39),cornerRadius:19),Color(hex:0xCDE5DE))
+                for i in 0..<10 {oval(-80+Double(i)*16,43+sin(time*3+Double(i))*3,23,20,.white,outline:true)}
+                for i in 0..<12 {
+                    let phase = (time*0.23+Double(i)*0.13).truncatingRemainder(dividingBy:1)
+                    let x = sin(Double(i)*2.4)*92 + sin(time*2+Double(i))*5
+                    let r = 6 + Double(i%3)*4
+                    oval(x,43-phase*141,r*2,r*2,Color.white.opacity(0.65),outline:true)
+                    oval(x+r*0.5,46-phase*141,r*0.4,r*0.4,.white)
+                }
+                if time > 3.2 {for i in 0..<4 {sparkle(Double(i%2)*144-72,Double(i/2)*76-60,10+sin(time*7+Double(i))*3,Color(hex:0xF2D87D))}}
+            }
+        case .nap:
+            if !foreground {
+                oval(68,-95,33,33,Color(hex:0xF4E4A2))
+                oval(78,-101,31,31,Color(hex:0x344F50))
+                for i in 0..<10 {sparkle(sin(Double(i)*5.2)*129,-90+Double(i%4)*47,2+Double(i%3),DillTheme.cream.opacity(0.65))}
+                shape(Path(roundedRect:CGRect(x:-77,y:55,width:154,height:39),cornerRadius:18),Color(hex:0xE7D4B7))
+            } else {
+                var blanket = Path(); blanket.move(to:CGPoint(x:-59,y:26)); blanket.addQuadCurve(to:CGPoint(x:57,y:34),control:CGPoint(x:5,y:45)); blanket.addLine(to:CGPoint(x:63,y:89)); blanket.addQuadCurve(to:CGPoint(x:-61,y:87),control:CGPoint(x:0,y:101)); blanket.closeSubpath()
+                shape(blanket,Color(hex:0xB6C89C))
+                for i in 0..<6 {sparkle(-39+Double(i%3)*37,54+Double(i/3)*24,4,DillTheme.cream)}
+                for i in 0..<3 {
+                    let phase = (time*0.3+Double(i)*0.3).truncatingRemainder(dividingBy:1)
+                    context.draw(Text("z").font(.system(size:14+phase*10,weight:.bold,design:.rounded)).foregroundStyle(DillTheme.cream.opacity(1-phase*0.5)),at:CGPoint(x:58+phase*31,y:-8-phase*63))
+                }
+            }
+        case nil:
+            if !foreground {
+                oval(80,-77,48,48,Color(hex:0xF6E4A9))
+                sparkle(-112,-47,12,DillTheme.muted.opacity(0.5)); sparkle(-102,68,9,DillTheme.muted.opacity(0.4))
+                symbol("leaf",112,80,26,DillTheme.muted.opacity(0.5))
+            }
+        }
     }
 
 }
