@@ -4,6 +4,8 @@ A native SwiftUI pet with **Brine Royale**, a real online survival arena shared 
 
 ## Run the app
 
+For automated GitHub builds and TestFlight distribution, see [release setup](../docs/ios-testflight.md).
+
 Open `LittleDill.xcodeproj`, choose **LittleDill**, select an iPhone or iPad simulator, and press Run. Targets iOS 17+. No third-party packages are needed.
 
 The committed Xcode project is ready to use. If `project.yml` changes, regenerate it with XcodeGen:

@@ -1,0 +1,114 @@
+name: TestFlight
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: testflight-com-littledill-ios
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+  release:
+    needs: checks
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check version and release notes
+        id: version
+        run: |
+          xcodebuild -version
+          node ios/scripts/release-config.mjs
+      - name: Preflight testing notes
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: node ios/scripts/distribute-testflight.mjs --version "$RELEASE_VERSION" --build 1 --check-notes
+      - name: Prepare App Store Connect key
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_BASE64: ${{ secrets.APPLE_API_KEY_BASE64 }}
+        run: bash ios/scripts/release.sh api-key
+      - name: Select unused build number
+        id: build
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          IOS_BUILD_NUMBER_MIN: ${{ vars.IOS_BUILD_NUMBER_MIN || '1' }}
+        run: node ios/scripts/build-number.mjs
+      - name: Check exact testing notes
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          BUILD_NUMBER: ${{ steps.build.outputs.build_number }}
+        run: node ios/scripts/distribute-testflight.mjs --version "$RELEASE_VERSION" --build "$BUILD_NUMBER" --check-notes
+      - name: Install signing identity
+        env:
+          IOS_CERTIFICATE: ${{ secrets.IOS_CERTIFICATE }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_MOBILE_PROVISION: ${{ secrets.IOS_MOBILE_PROVISION }}
+        run: bash ios/scripts/release.sh signing
+      - name: Archive, export, and verify IPA
+        env:
+          MARKETING_VERSION: ${{ steps.version.outputs.marketing_version }}
+          BUILD_NUMBER: ${{ steps.build.outputs.build_number }}
+        run: |
+          bash ios/scripts/release.sh archive
+          bash ios/scripts/release.sh verify
+      - name: Validate with Apple
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          xcrun altool --validate-app -t ios -f "$RUNNER_TEMP/little-dill-release/export/LittleDill.ipa" \
+            --apiKey "$APPLE_API_KEY" --apiIssuer "$APPLE_API_ISSUER"
+          echo 'Apple validation passed.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Save validated IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: LittleDill-${{ steps.version.outputs.version }}-${{ steps.build.outputs.build_number }}
+          path: |
+            ${{ runner.temp }}/little-dill-release/export/LittleDill.ipa
+            ${{ runner.temp }}/little-dill-release/export/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload to TestFlight
+        if: github.ref_type == 'tag'
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: |
+          xcrun altool --upload-app -t ios -f "$RUNNER_TEMP/little-dill-release/export/LittleDill.ipa" \
+            --apiKey "$APPLE_API_KEY" --apiIssuer "$APPLE_API_ISSUER"
+          echo 'Apple accepted the upload; processing is pending.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Process and distribute external beta
+        if: github.ref_type == 'tag'
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          TESTFLIGHT_GROUP: ${{ vars.TESTFLIGHT_GROUP || 'Public Beta' }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          BUILD_NUMBER: ${{ steps.build.outputs.build_number }}
+        run: |
+          node ios/scripts/distribute-testflight.mjs --version "$RELEASE_VERSION" --build "$BUILD_NUMBER" \
+            | tee "$RUNNER_TEMP/testflight-distribution.txt"
+          cat "$RUNNER_TEMP/testflight-distribution.txt" >> "$GITHUB_STEP_SUMMARY"
+      - name: Record validation-only run
+        if: github.ref_type != 'tag'
+        run: echo 'Branch validation completed. No TestFlight upload or distribution was requested.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove signing material
+        if: always()
+        run: bash ios/scripts/release.sh cleanup

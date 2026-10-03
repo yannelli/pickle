@@ -145,6 +145,8 @@ npx wrangler secret put ARENA_PROXY_SECRET -c wrangler.arena-legacy.jsonc
 
 The `CREW_JOINS` rate limit in `wrangler.arena.jsonc` allows 10 crew-room joins per client IP per 60 seconds in each Cloudflare location. See [`docs/INDEX.md`](docs/INDEX.md) for the researched Cloudflare docs and when to use them.
 
+GitHub Actions checks pull requests and releases iOS version tags to TestFlight. See the [TestFlight setup](docs/ios-testflight.md) for signing secrets, testing notes, and release steps. The [docs index](docs/INDEX.md) links the Apple and GitHub references used for this workflow.
+
 ## Validation
 
 ```sh

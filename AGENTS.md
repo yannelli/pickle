@@ -29,6 +29,8 @@
 
 Read [README.md](README.md) for player behavior and deployment targets, [ios/README.md](ios/README.md) for native workflows, and [docs/INDEX.md](docs/INDEX.md) for the Cloudflare rate-limit references.
 
+For GitHub TestFlight automation, follow the release setup and Apple/GitHub references linked from [docs/INDEX.md](docs/INDEX.md). Version tags release to TestFlight; manual branch runs validate without uploading.
+
 ## Shared behavior
 
 - Arena clients send intent. The server controls positions, mass, eating, splits, shields, and gadget effects.

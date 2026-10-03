@@ -1,0 +1,55 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  scripts:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --test tests/*.test.cjs
+      - run: python3 tests/ios_signing_test.py
+      - name: Check release script syntax
+        run: |
+          for script in ios/scripts/*.mjs; do node --check "$script"; done
+          bash -n ios/scripts/release.sh
+          git diff --check
+  ios:
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Select an available iPhone simulator
+        run: |
+          xcodebuild -version
+          xcrun simctl list devices available --json > "$RUNNER_TEMP/simulators.json"
+          python3 - "$RUNNER_TEMP/simulators.json" <<'PY'
+          import json, os, sys
+          devices = json.load(open(sys.argv[1]))['devices']
+          device = next(d for runtime, group in devices.items() if '.iOS-' in runtime
+                        for d in group if d['isAvailable'] and d['name'].startswith('iPhone'))
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write(f"SIMULATOR_ID={device['udid']}\n")
+          PY
+      - name: Run native unit tests
+        run: |
+          xcodebuild test -project ios/LittleDill.xcodeproj -scheme LittleDill \
+            -destination "platform=iOS Simulator,id=$SIMULATOR_ID" \
+            -derivedDataPath "$RUNNER_TEMP/little-dill-tests" \
+            -only-testing:LittleDillTests -parallel-testing-enabled NO CODE_SIGNING_ALLOWED=NO
