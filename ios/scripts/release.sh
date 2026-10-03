@@ -61,7 +61,7 @@ PY
     app="$signing_dir/ipa/Payload/LittleDill.app"
     codesign --verify --deep --strict "$app"
     codesign -d --entitlements :- "$app" > "$signing_dir/app-entitlements.plist"
-    codesign -d --extract-certificates "$signing_dir/signer" "$app"
+    codesign -d --extract-certificates="$signing_dir/signer" "$app"
     security cms -D -i "$app/embedded.mobileprovision" > "$signing_dir/profile.plist"
     cp "$app/Info.plist" "$signing_dir/app-info.plist"
     python3 ios/scripts/signing-profile.py verify "$signing_dir" "$MARKETING_VERSION" "$BUILD_NUMBER"
