@@ -299,11 +299,17 @@ private struct CareScenery: View {
                         }
                     }
                     if time > FeedBeat.gulp {
+                        let offsetsX: [Double] = [52,70,36]
+                        let offsetsY: [Double] = [34,54,70]
+                        let sizes: [Double] = [24,15,12]
+                        let colors: [Color] = [DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)]
                         for i in 0..<3 {
                             let age = time - FeedBeat.gulp - Double(i)*0.14
                             guard age > 0 else {continue}
                             let pop = Ease.springy(min(1,age/0.3))
-                            symbol("heart.fill",mouth.x + [52,70,36][i],mouth.y - [34,54,70][i] - age*18,max(1,[24,15,12][i]*pop),[DillTheme.peach,Color(hex:0xD8888D),Color(hex:0xEFAF9D)][i])
+                            let x = Double(mouth.x) + offsetsX[i]
+                            let y = Double(mouth.y) - offsetsY[i] - age*18
+                            symbol("heart.fill",x,y,max(1,sizes[i]*pop),colors[i])
                         }
                         sparkle(mouth.x - 62,mouth.y - 50,12*Ease.springy(min(1,(time - FeedBeat.gulp)/0.3)),DillTheme.lime)
                     }
