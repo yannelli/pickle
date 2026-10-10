@@ -124,9 +124,7 @@ struct ArenaPlayer: Decodable, Identifiable {
     }
     var radius: Double { Self.radius(for:mass) }
     static func radius(for mass:Double) -> Double {
-        let base = 13 + sqrt(max(0,mass)) * 3.4
-        let excess = max(0,base - 149)
-        return base <= 149 ? base : 149 + 260 * excess / (260 + excess)
+        mass <= 1600 ? 13 + sqrt(max(0,mass)) * 3.4 : 149 + 68 * log(mass / 1600)
     }
     static func cameraZoom(mass:Double,width:Double,height:Double) -> Double {
         min(1.08,min(width,height) / (radius(for:mass) * 8 + 340))

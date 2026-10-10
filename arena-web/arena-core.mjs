@@ -35,8 +35,7 @@ export function blinking(id, time) {
 }
 export const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
 export function radius(mass) {
-  const base = 13 + Math.sqrt(Math.max(0, mass)) * 3.4, excess = Math.max(0, base - 149);
-  return base <= 149 ? base : 149 + 260 * excess / (260 + excess);
+  return mass <= 1600 ? 13 + Math.sqrt(Math.max(0, mass)) * 3.4 : 149 + 68 * Math.log(mass / 1600);
 }
 export function viewportBounds(layoutWidth, layoutHeight, visual = null) {
   const positive = (value, fallback) => Number.isFinite(value) && value > 0 ? value : fallback;
@@ -115,6 +114,13 @@ export function direction(x, y) {
   if (!Number.isFinite(x) || !Number.isFinite(y)) return { x: 0, y: 0 };
   const length = Math.max(1, Math.hypot(x, y));
   return { x: x / length, y: y / length };
+}
+export function stickInput(dx, dy, reach) {
+  const length = Math.hypot(dx, dy);
+  if (!length) return { offsetX: 0, offsetY: 0, x: 0, y: 0, atEdge: false };
+  const travel = Math.min(length, reach), speed = Math.pow(clamp((length - 3) / (reach * .65 - 3), 0, 1), .75);
+  const x = dx / length, y = dy / length;
+  return { offsetX: x * travel, offsetY: y * travel, x: x * speed, y: y * speed, atEdge: speed >= .95 };
 }
 export function playerName(value) { return Array.from(String(value || '').replace(/[\p{C}]/gu, '').trim()).slice(0, 18).join('') || 'Dilly'; }
 const validResumeIdentity = value => !!value && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value.token) && /^(public-(?:[1-9]|1[0-6])|crew-[A-Z0-9]{6})$/.test(value.room);

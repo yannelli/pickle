@@ -14,12 +14,10 @@ export const BOT_NAMES = Object.freeze(['maya.j', 'alex_27', 'SophieK', 'noah', 
   'adrian', 'alina', 'amira', 'andrea', 'anjali', 'arjun', 'audrey', 'avery', 'benjamin', 'bianca', 'blake', 'camila', 'carter', 'celeste', 'daphne', 'david', 'diego', 'elijah', 'elise', 'felicity', 'frankie', 'gabriel', 'gianna', 'grayson', 'helen', 'imogen', 'ines', 'iris', 'jamal', 'javier', 'joanna', 'jonah', 'julian', 'kiran', 'lara', 'layla', 'lena.p', 'luca', 'lucia', 'malik', 'marina', 'matilda', 'micah', 'nadia', 'nina', 'omar', 'orla', 'parker', 'priya', 'quinn', 'rafael', 'ramona', 'renee', 'rhea', 'rohan', 'rosa', 'sabrina', 'selena', 'simone', 'soren', 'talia.m', 'tariq', 'tessa.k', 'uma', 'valerie', 'vera', 'victor', 'willa', 'yara', 'yasmin', 'yusuf', 'zara', 'zeke', 'zuri']);
 export const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 export const radius = mass => {
-  const base = 13 + Math.sqrt(Math.max(0, mass)) * 3.4;
-  // Mass keeps growing. Taper giant bodies so the fixed garden remains navigable.
-  const excess = Math.max(0, base - 149);
-  return base <= 149 ? base : 149 + 260 * excess / (260 + excess);
+  // Match the small-body curve and its slope at 1,600 without a fixed radius ceiling.
+  return mass <= 1600 ? 13 + Math.sqrt(Math.max(0, mass)) * 3.4 : 149 + 68 * Math.log(mass / 1600);
 };
-export const speed = mass => Math.max(55, 195 / Math.pow(Math.max(25, mass) / 25, 0.16));
+export const speed = mass => 55 + 240 / (1 + Math.pow(Math.max(25, mass) / 3000, 0.7));
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const hazardFor = cell => HAZARDS.find(h => distance(cell, h) < h.r + radius(cell.mass));
 const crossesField = (start, end, field, clearance) => {

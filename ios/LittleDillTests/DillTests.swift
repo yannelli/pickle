@@ -55,9 +55,9 @@ final class DillTests: XCTestCase {
         XCTAssertEqual(ArenaPlayer.radius(for:25),30,accuracy:0.001)
         XCTAssertEqual(ArenaPlayer.radius(for:1600),149,accuracy:0.001)
         var last = 0.0
-        for mass in [25.0,1600,10000,1000000,1e12] {
+        for mass in [25.0,1600,10000,30000,1000000,2000000,10000000,1e12] {
             let radius = ArenaPlayer.radius(for:mass)
-            XCTAssertGreaterThan(radius,last); XCTAssertLessThan(radius,409)
+            XCTAssertGreaterThan(radius,last); XCTAssertLessThan(radius * 2,4500)
             for (width,height) in [(320.0,568.0),(852.0,393.0)] {
                 let zoom = ArenaPlayer.cameraZoom(mass:mass,width:width,height:height)
                 XCTAssertGreaterThan(zoom,0)
@@ -65,6 +65,10 @@ final class DillTests: XCTestCase {
             }
             last = radius
         }
+        for mass in [10000.0,100000,1000000] {
+            XCTAssertGreaterThan(ArenaPlayer.radius(for:mass * 10) / ArenaPlayer.radius(for:mass),1.25)
+        }
+        XCTAssertGreaterThan(ArenaPlayer.radius(for:2000000) / ArenaPlayer.radius(for:1000000),1.08)
     }
     private func arenaPlayer(_ additions:[String:Any] = [:]) throws -> ArenaPlayer {
         var state:[String:Any] = ["id":"you","name":"Dilly","brine":"classic","outfit":"sprout","bot":false,"x":100,"y":200,"mass":90,"best":120,"kills":0,"alive":true,"shield":0,"dash":0,"cooldown":0,"respawn":0,"eatenBy":""]
