@@ -4,10 +4,18 @@ const fixture = require('./fixtures/arena-parity.json');
 
 test('web and server follow the shared arena gameplay fixtures', async () => {
   const web = await import('../arena-web/arena-core.mjs');
-  const { RULES } = await import('../server/arena-engine.mjs');
+  const { RULES, radius } = await import('../server/arena-engine.mjs');
   for (const [key, value] of Object.entries(fixture.rules)) assert.equal(RULES[key], value, key);
   for (const row of fixture.splits) assert.equal(web.splitState(row.player).enabled, row.enabled, row.name);
-  for (const row of fixture.radii) assert.ok(Math.abs(web.radius(row.mass) - row.radius) < 1e-9, `radius ${row.mass}`);
+  for (const row of fixture.radii) {
+    assert.ok(Math.abs(web.radius(row.mass) - row.radius) < 1e-9, `web radius ${row.mass}`);
+    assert.ok(Math.abs(radius(row.mass) - row.radius) < 1e-9, `server radius ${row.mass}`);
+  }
+  for (const row of fixture.joystick) {
+    const input = web.stickInput(row.dx, row.dy, row.reach);
+    for (const key of ['offsetX', 'offsetY', 'x', 'y']) assert.ok(Math.abs(input[key] - row[key]) < 1e-9, key);
+    assert.equal(input.atEdge, row.atEdge);
+  }
   for (const row of fixture.zoom) assert.ok(Math.abs(web.easeZoom(row.current, row.target, row.dt) - row.result) < 1e-9);
   for (const row of fixture.food) {
     const sorted = values => [...values].sort((a, b) => a[0] - b[0]);

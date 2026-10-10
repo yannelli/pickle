@@ -9,10 +9,10 @@ struct ArenaStickInput {
         let length = hypot(delta.width, delta.height)
         guard length > 0 else { return Self(offset: .zero, direction: .zero, atEdge: false) }
         let amount = min(1, length / reach)
-        let speed = pow(max(0, (amount - 0.12) / 0.88), 1.35)
+        let speed = pow(min(1, max(0, (length - 3) / (reach * 0.65 - 3))), 0.75)
         let x = delta.width / length, y = delta.height / length
         return Self(offset: CGSize(width: x * amount * reach, height: y * amount * reach),
-                    direction: CGVector(dx: x * speed, dy: y * speed), atEdge: amount >= 0.95)
+                    direction: CGVector(dx: x * speed, dy: y * speed), atEdge: speed >= 0.95)
     }
 }
 

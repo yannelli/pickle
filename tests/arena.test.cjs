@@ -163,16 +163,56 @@ test('food and absorbing rivals keep increasing mass beyond 1600 and save the tr
 test('giant pickles keep growing visibly, moving and staying inside the garden', async () => {
   const { engine, radius, speed, RULES } = await setup(); const p = engine.addPlayer('a');
   for (const [id,other] of engine.players) if (other.bot) engine.players.delete(id);
-  engine.food = []; let previousRadius = 0;
-  for (const mass of [25,1600,10000,1000000,1e12]) {
+  engine.food = []; p.hazardSplitReady = Infinity; let previousRadius = 0;
+  for (const mass of [25,1600,10000,30000,1000000,2000000,10000000,1e12]) {
     const r = radius(mass); assert.ok(r > previousRadius); previousRadius = r;
-    assert.ok(r < RULES.height/4); assert.ok(speed(mass) >= 55);
+    assert.ok(r * 2 < RULES.height); assert.ok(speed(mass) >= 55);
     p.mass = mass; p.lastMeal = engine.time; p.x = RULES.width/2; p.y = RULES.height/2;
     engine.input(p.id,{type:'input',seq:mass,x:1,y:0}); engine.step(.1);
     assert.ok(p.x > RULES.width/2); assert.ok(Number.isFinite(p.x+p.y+p.mass));
     p.x = 0; p.y = RULES.height; engine.step();
     assert.ok(p.x >= radius(p.mass)); assert.ok(p.y <= RULES.height-radius(p.mass));
   }
+});
+test('large-body growth is smooth at 1600 and keeps million-mass differences visible', async () => {
+  const { radius, RULES } = await engineModule;
+  const below = radius(1600) - radius(1599), above = radius(1601) - radius(1600);
+  assert.ok(Math.abs(above - below) < .0001);
+  for (const mass of [10000, 100000, 1000000]) assert.ok(radius(mass * 10) > radius(mass) * 1.25);
+  assert.ok(radius(2e6) > radius(1e6) * 1.08);
+  assert.ok(radius(Number.MAX_SAFE_INTEGER) * 2 < Math.min(RULES.width, RULES.height));
+});
+test('smaller pickles gain speed below 30000 while giants retain a gradual penalty', async () => {
+  const { engine, speed } = await setup(), p = engine.addPlayer('runner');
+  for (const [id, other] of engine.players) if (other.bot) engine.players.delete(id);
+  engine.food = [];
+  assert.ok(speed(1000) > 210);
+  assert.ok(speed(10000) > 120);
+  assert.ok(speed(30000) > 90);
+  assert.ok(speed(1000) > speed(30000) * 2);
+  assert.ok(speed(10000) > speed(30000) * 1.3);
+  assert.ok(Math.abs(speed(29999) - speed(30001)) < .01);
+  let previousSpeed = Infinity, seq = 0;
+  for (const mass of [25, 1000, 10000, 30000, 100000, 1000000, 10000000]) {
+    assert.ok(speed(mass) < previousSpeed && speed(mass) > 55);
+    previousSpeed = speed(mass);
+    p.mass = mass; p.x = 3000; p.y = 2250; p.lastMeal = engine.time;
+    engine.input(p.id, { type: 'input', seq: ++seq, x: 1, y: 0 });
+    engine.step(.1);
+    assert.ok(Math.abs(p.x - 3000 - speed(mass) * .1) < 1e-8, `authoritative speed at ${mass}`);
+  }
+});
+test('million-mass absorption uses the growing body radius', async () => {
+  const { engine, radius, RULES } = await setup(), hunter = engine.addPlayer('hunter'), prey = engine.addPlayer('prey');
+  for (const [id, other] of engine.players) if (other.bot) engine.players.delete(id);
+  engine.food = []; hunter.mass = 2e6; prey.mass = 1e6;
+  hunter.x = 3000; hunter.y = prey.y = 1800;
+  hunter.shieldUntil = prey.shieldUntil = 0;
+  const boundary = radius(hunter.mass) - RULES.eatOverlap * radius(prey.mass);
+  prey.x = hunter.x + boundary + .1; engine.step(0);
+  assert.ok(prey.alive);
+  prey.x = hunter.x + boundary - .1; engine.step(0);
+  assert.equal(prey.alive, false);
 });
 test('respawn has a server cooldown and resets mass, but preserves session best', async () => {
   const { engine, RULES } = await setup(); const p = engine.addPlayer('a');

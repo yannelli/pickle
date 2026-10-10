@@ -15,6 +15,7 @@ async function browserHarness({ saved = null, storageUnavailable = false, shared
     addEventListener(type, fn) { const all = this.listeners.get(type) || []; all.push(fn); this.listeners.set(type, all); }
     fire(type, value = {}) { for (const fn of this.listeners.get(type) || []) fn({ target: this, preventDefault() {}, ...value }); }
     setAttribute(name, value) { this[name] = value; }
+    setPointerCapture(pointerID) { this.capturedPointer = pointerID; }
     focus() { document.activeElement = this; }
     blur() { document.activeElement = null; }
     append() {} replaceChildren() {}
@@ -144,9 +145,9 @@ test('web pickle size matches authoritative collision geometry above the former 
   const { radius } = await import(modulePath);
   const { radius: authoritativeRadius } = await import('../server/arena-engine.mjs');
   let previous = 0;
-  for (const mass of [25, 1600, 10000, 1e6, 1e12]) {
+  for (const mass of [25, 1600, 10000, 30000, 1e5, 1e6, 2e6, 1e7, 1e12]) {
     assert.equal(radius(mass), authoritativeRadius(mass));
-    assert.ok(radius(mass) > previous && radius(mass) < 409);
+    assert.ok(radius(mass) > previous && radius(mass) * 2 < 4500);
     previous = radius(mass);
   }
   assert.equal(radius(1600), 149);
@@ -155,7 +156,7 @@ test('web camera fits uncapped dills on compact, zoomed and desktop viewports', 
   const { cameraZoom, radius } = await import(modulePath);
   for (const [width, height] of [[320, 568], [195, 360], [844, 390], [1440, 900]]) {
     let previousZoom = Infinity;
-    for (const mass of [25, 1600, 10000, 1e6, 1e12]) {
+    for (const mass of [25, 1600, 10000, 30000, 1e6, 2e6, 1e7, 1e12]) {
       const zoom = cameraZoom(width, height, mass);
       assert.ok(Number.isFinite(zoom) && zoom > 0);
       assert.ok(zoom <= previousZoom);
@@ -164,6 +165,43 @@ test('web camera fits uncapped dills on compact, zoomed and desktop viewports', 
     }
   }
   assert.ok(cameraZoom(320, 568, 1e12) < .1, 'large dills must not hit the old .38 minimum zoom');
+});
+test('large mass differences stay visible in the same camera view', async () => {
+  const { cameraZoom, radius } = await import(modulePath);
+  for (const [width, height] of [[320, 568], [844, 390], [1440, 900]]) {
+    for (const mass of [10000, 100000, 1000000]) {
+      const zoom = cameraZoom(width, height, mass * 10);
+      assert.ok(radius(mass * 10) * zoom > radius(mass) * zoom * 1.25, `${mass} versus ${mass * 10}`);
+    }
+    assert.ok(radius(2e6) / radius(1e6) > 1.08);
+  }
+});
+test('web joystick reaches full speed within its base and releases captured input', async () => {
+  for (const release of ['pointerup', 'pointercancel', 'lostpointercapture', 'blur']) {
+    const app = await browserHarness(); app.node('join-form').fire('submit'); app.welcome(app.sockets[0]); app.snapshot(app.sockets[0]);
+    const joystick = app.node('joystick');
+    joystick.getBoundingClientRect = () => ({ left: 10, top: 20, width: 100, height: 100 });
+    joystick.fire('pointerdown', { pointerId: 1, clientX: 60, clientY: 70 });
+    assert.equal(app.read('movement.x'), 0);
+    assert.equal(joystick.capturedPointer, 1);
+    joystick.fire('pointermove', { pointerId: 1, clientX: 75.5, clientY: 70 });
+    assert.ok(app.read('movement.x') >= .75);
+    assert.equal(app.node('stick').style.transform, 'translate(15.5px, 0px)');
+    joystick.fire('pointerdown', { pointerId: 2, clientX: 10, clientY: 70 });
+    assert.equal(app.read('stickPointer'), 1);
+    joystick.fire('pointermove', { pointerId: 1, clientX: 81, clientY: 70 });
+    app.advance(60);
+    const input = app.sockets[0].sent.filter(packet => packet.type === 'input').at(-1);
+    assert.equal(input.x, 1); assert.equal(input.y, 0);
+    assert.equal(app.node('stick').style.transform, 'translate(21px, 0px)');
+    joystick.fire('pointermove', { pointerId: 1, clientX: -60, clientY: -50 });
+    assert.ok(Math.abs(app.read('Math.hypot(movement.x, movement.y)') - 1) < 1e-9);
+    if (release === 'blur') app.window.fire(release); else joystick.fire(release, { pointerId: 1 });
+    app.advance(60);
+    const stopped = app.sockets[0].sent.filter(packet => packet.type === 'input').at(-1);
+    assert.equal(stopped.x, 0); assert.equal(stopped.y, 0);
+    assert.equal(app.read('stickPointer'), null); assert.equal(app.node('stick').style.transform, '');
+  }
 });
 test('web HUD uses bounded mass labels without imposing a gameplay cap', async () => {
   const { massLabel } = await import(modulePath);
@@ -220,6 +258,15 @@ test('web camera contains every launched piece inside the unobscured viewport', 
     }
     const together = { ...player, cells: player.cells.map(cell => ({ ...cell, x: 700, y: 600 })) };
     assert.ok(cameraFrame(width, height, together, insets).zoom > frame.zoom);
+    const giants = { ...player, mass: 8e6, cells: player.cells.map(cell => ({ ...cell, mass: 1e6 })) };
+    const giantFrame = cameraFrame(width, height, giants, insets);
+    for (const cell of giants.cells) {
+      const x = (cell.x - giantFrame.x) * giantFrame.zoom + giantFrame.screenX;
+      const y = (cell.y - giantFrame.y) * giantFrame.zoom + giantFrame.screenY;
+      const r = radius(cell.mass) * giantFrame.zoom;
+      assert.ok(x - r * 1.7 >= insets.left && x + r * 1.7 <= width - insets.right);
+      assert.ok(y - r * 1.9 >= insets.top && y + r * 1.9 <= height - insets.bottom);
+    }
   }
 });
 test('web resume credentials have a strict 30-second deadline and never enter share links', async () => {

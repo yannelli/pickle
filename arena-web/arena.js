@@ -1,4 +1,4 @@
-import { BRINES, OUTFITS, VARIETIES, varietyOf, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, cellKey, threatenedCellIDs, splitState, massLabel, roomCode, direction, playerName, socketURL, applyFoodUpdate, readResumeRecord, refreshResumeRecord, resumeFromWelcome, resumeRetryDelay, shareURL, interpolate, drawPickle, easeZoom, killRings, bodyShape, membraneSize, resizeMembrane, stepMembrane, membraneOutline, hazardFor, drainDroplets, spitFlight, drawDroplet, drawHazard, hazardKind, scheduleStrokes, pickupCue } from './arena-core.mjs';
+import { BRINES, OUTFITS, VARIETIES, varietyOf, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, cellKey, threatenedCellIDs, splitState, massLabel, roomCode, direction, stickInput, playerName, socketURL, applyFoodUpdate, readResumeRecord, refreshResumeRecord, resumeFromWelcome, resumeRetryDelay, shareURL, interpolate, drawPickle, easeZoom, killRings, bodyShape, membraneSize, resizeMembrane, stepMembrane, membraneOutline, hazardFor, drainDroplets, spitFlight, drawDroplet, drawHazard, hazardKind, scheduleStrokes, pickupCue } from './arena-core.mjs';
 
 const $ = id => document.getElementById(id);
 const canvas = $('arena'), ctx = canvas.getContext('2d'), map = $('minimap').getContext('2d');
@@ -371,9 +371,10 @@ canvas.addEventListener('pointerdown', () => unlockAudio());
 function moveStick(event) {
   const rect = $('joystick').getBoundingClientRect(), max = rect.width * .31;
   const dx = event.clientX - rect.left - rect.width / 2, dy = event.clientY - rect.top - rect.height / 2;
-  movement = direction(dx / max, dy / max); $('stick').style.transform = `translate(${movement.x * max}px, ${movement.y * max}px)`;
+  const input = stickInput(dx, dy, max);
+  movement = { x: input.x, y: input.y }; $('stick').style.transform = `translate(${input.offsetX}px, ${input.offsetY}px)`;
 }
-$('joystick').addEventListener('pointerdown', event => { if (phase !== 'playing' || overlayMode) return; event.preventDefault(); unlockAudio(); stickPointer = event.pointerId; $('joystick').setPointerCapture(event.pointerId); pointer = null; moveStick(event); });
+$('joystick').addEventListener('pointerdown', event => { if (phase !== 'playing' || overlayMode || stickPointer !== null) return; event.preventDefault(); unlockAudio(); stickPointer = event.pointerId; $('joystick').setPointerCapture(event.pointerId); pointer = null; moveStick(event); });
 $('joystick').addEventListener('pointermove', event => { if (stickPointer === event.pointerId) moveStick(event); });
 for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) $('joystick').addEventListener(type, event => { if (stickPointer === event.pointerId) { stickPointer = null; movement = { x: 0, y: 0 }; $('stick').style.transform = ''; } });
 window.addEventListener('keydown', event => {
