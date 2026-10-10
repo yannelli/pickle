@@ -20,7 +20,7 @@ struct ArenaView: View {
             ZStack {
                 Color(hex:0xE7ECD8).ignoresSafeArea()
                 if let snapshot = client.snapshot, let me = client.me {
-                    TimelineView(.animation(minimumInterval:1/60,paused:client.status != .playing)) { timeline in
+                    TimelineView(.animation(minimumInterval:nil,paused:client.status != .playing)) { timeline in
                         ArenaCanvas(snapshot:snapshot,previous:client.previous,food:client.food,me:me,spitAt:client.spitAt,received:client.receivedAt,now:timeline.date,motion:motion)
                     }.ignoresSafeArea().accessibilityLabel("Live Brine Royale arena. You are \(me.name), mass \(Int(me.mass)), rank \(client.rank), \(me.pieces.count) \(me.isCucumber ? "cucumbers" : "pickle").")
                 }
@@ -290,6 +290,25 @@ final class ArenaMotion {
     var tick = Int.min
     var membranes: [String:ArenaMembrane] = [:]
     var membraneClock = 0.0
+    var playback = ArenaPlayback()
+}
+
+/// Name and sector labels drawn as Canvas symbols, so SwiftUI lays out each string once instead of every frame.
+struct ArenaLabel: Hashable {
+    enum Kind: Hashable {case sector, name, own}
+    let string: String
+    let kind: Kind
+    var view: some View {
+        Text(string).font(.system(size:11,weight:kind == .own ? .bold : .medium,design:kind == .sector ? .monospaced : .rounded))
+            .foregroundStyle(kind == .sector ? DillTheme.ink.opacity(0.13) : DillTheme.ink)
+    }
+    static func sector(row:Int,column:Int) -> ArenaLabel {ArenaLabel(string:String(UnicodeScalar(65+column)!) + "\(row+1)",kind:.sector)}
+    static func player(_ player:ArenaPlayer,me:String) -> ArenaLabel {player.id == me ? ArenaLabel(string:"you",kind:.own) : ArenaLabel(string:player.name,kind:.name)}
+    static func all(snapshot:ArenaSnapshot,me:String) -> [ArenaLabel] {
+        var seen = Set<ArenaLabel>()
+        let sectors = (0..<Int(ceil(snapshot.height/900))).flatMap {row in (0..<Int(ceil(snapshot.width/900))).map {sector(row:row,column:$0)}}
+        return (sectors + snapshot.players.map {player($0,me:me)}).filter {seen.insert($0).inserted}
+    }
 }
 
 struct ArenaKillRing {
@@ -420,22 +439,31 @@ struct ArenaCanvas: View {
     static let danger = Color(hex:0xC8553D)
     static let brine = Color(hex:0x9CC26B)
     static let steel = Color(hex:0xD5DEE1)
+    static let backdrop = Color(hex:0xE7ECD8)
+    static let field = Color(hex:0xEDF1E3)
+    static let patches = [Color(hex:0xDDE7CC).opacity(0.22),Color(hex:0xD9E3D3).opacity(0.22)]
+    static let pellets = [Color(hex:0xA6BF70),Color(hex:0xD1BC74),Color(hex:0xA4B8A0)]
+    static let spitShine = Color(hex:0xD4EB85)
 
     var body: some View {
         let still = reduceMotion
-        Canvas { context,size in
+        Canvas(opaque:true,rendersAsynchronously:true) { context,size in
             let time = now.timeIntervalSinceReferenceDate
-            let blend = min(1,max(0,now.timeIntervalSince(received) / 0.1))
+            if previous == nil {motion.playback = ArenaPlayback()}
+            if let previous, motion.playback.history.isEmpty {motion.playback.receive(previous,at:received)}
+            motion.playback.receive(snapshot,at:received)
+            let frame = motion.playback.time(at:now).flatMap {motion.playback.frame(at:$0)} ?? (snapshot,snapshot,1)
+            let blend = frame.blend
             func keyed(_ players:[ArenaPlayer]) -> [String:ArenaCell] {
                 Dictionary(players.flatMap {player in player.pieces.map {(player.id + ":" + $0.id,$0)}},uniquingKeysWith:{first,_ in first})
             }
-            let old = keyed(previous?.players ?? []), raw = keyed(snapshot.players)
-            let players = snapshot.players.map { player -> ArenaPlayer in
+            let old = keyed(frame.from.players), raw = keyed(frame.to.players)
+            let players = frame.to.players.map { player -> ArenaPlayer in
                 guard player.alive else {return player}
                 var moving = player
                 moving.cells = player.pieces.map { cell in
                     guard let before = old[player.id + ":" + cell.id], hypot(cell.x-before.x,cell.y-before.y) < 400 else {return cell}
-                    return ArenaCell(id:cell.id,x:before.x + (cell.x-before.x)*blend,y:before.y + (cell.y-before.y)*blend,mass:before.mass + (cell.mass-before.mass)*blend,drain:cell.drain)
+                    return ArenaCell(id:cell.id,x:before.x + (cell.x-before.x)*blend,y:before.y + (cell.y-before.y)*blend,mass:before.mass + (cell.mass-before.mass)*min(1,blend),drain:cell.drain)
                 }
                 return moving
             }
@@ -455,33 +483,35 @@ struct ArenaCanvas: View {
             func onScreen(_ p:CGPoint,margin:Double) -> Bool {p.x > -margin && p.y > -margin && p.x < size.width+margin && p.y < size.height+margin}
             let worldOrigin = screen(.zero)
             let world = CGRect(x:worldOrigin.x,y:worldOrigin.y,width:snapshot.width*zoom,height:snapshot.height*zoom)
-            context.fill(Path(roundedRect:world,cornerRadius:30),with:.color(Color(hex:0xEDF1E3)))
+            context.fill(Path(CGRect(origin:.zero,size:size)),with:.color(ArenaCanvas.backdrop))
+            context.fill(Path(roundedRect:world,cornerRadius:30),with:.color(ArenaCanvas.field))
             var scenery = context
             scenery.clip(to:Path(roundedRect:world,cornerRadius:30))
             let leafOffsets = [CGPoint(x:160,y:230),CGPoint(x:690,y:640),CGPoint(x:330,y:750)]
+            var leafShape = Path(); leafShape.move(to:CGPoint(x:-21,y:0)); leafShape.addQuadCurve(to:CGPoint(x:21,y:0),control:CGPoint(x:0,y:-18)); leafShape.addQuadCurve(to:CGPoint(x:-21,y:0),control:CGPoint(x:0,y:18)); leafShape.closeSubpath()
+            var stemShape = Path(); stemShape.move(to:CGPoint(x:-18,y:0)); stemShape.addLine(to:CGPoint(x:18,y:0))
+            var patches = [Path(),Path()], leaves = Path(), stems = Path()
             for row in 0..<Int(ceil(snapshot.height/900)) {
                 for column in 0..<Int(ceil(snapshot.width/900)) {
                     let origin = CGPoint(x:Double(column)*900,y:Double(row)*900)
                     let tile = screen(origin)
                     guard tile.x < size.width && tile.y < size.height && tile.x+900*zoom > 0 && tile.y+900*zoom > 0 else {continue}
                     let patch = screen(CGPoint(x:origin.x+450,y:origin.y+450))
-                    let tint = Color(hex:(row+column)%2 == 0 ? 0xDDE7CC : 0xD9E3D3)
-                    scenery.fill(Path(ellipseIn:CGRect(x:patch.x-330*zoom,y:patch.y-240*zoom,width:660*zoom,height:480*zoom)),with:.color(tint.opacity(0.22)))
-                    let label = String(UnicodeScalar(65+column)!) + "\(row+1)"
-                    scenery.draw(Text(label).font(.system(size:11,weight:.medium,design:.monospaced)).foregroundStyle(DillTheme.ink.opacity(0.13)),at:screen(CGPoint(x:origin.x+30,y:origin.y+40)),anchor:.topLeading)
+                    patches[(row+column)%2].addEllipse(in:CGRect(x:patch.x-330*zoom,y:patch.y-240*zoom,width:660*zoom,height:480*zoom))
+                    if let label = context.resolveSymbol(id:ArenaLabel.sector(row:row,column:column)) {
+                        scenery.draw(label,at:screen(CGPoint(x:origin.x+30,y:origin.y+40)),anchor:.topLeading)
+                    }
                     for (index,offset) in leafOffsets.enumerated() {
                         let point = screen(CGPoint(x:origin.x+offset.x,y:origin.y+offset.y))
-                        var leaf = scenery
-                        leaf.translateBy(x:point.x,y:point.y)
-                        leaf.rotate(by:.degrees(Double((column*37+row*53+index*71)%180)))
-                        leaf.scaleBy(x:zoom,y:zoom)
-                        var shape = Path(); shape.move(to:CGPoint(x:-21,y:0)); shape.addQuadCurve(to:CGPoint(x:21,y:0),control:CGPoint(x:0,y:-18)); shape.addQuadCurve(to:CGPoint(x:-21,y:0),control:CGPoint(x:0,y:18)); shape.closeSubpath()
-                        leaf.fill(shape,with:.color(DillTheme.ink.opacity(0.055)))
-                        var stem = Path(); stem.move(to:CGPoint(x:-18,y:0)); stem.addLine(to:CGPoint(x:18,y:0))
-                        leaf.stroke(stem,with:.color(DillTheme.ink.opacity(0.06)),lineWidth:1)
+                        let placement = CGAffineTransform(translationX:point.x,y:point.y)
+                            .rotated(by:Double((column*37+row*53+index*71)%180) * .pi / 180).scaledBy(x:zoom,y:zoom)
+                        leaves.addPath(leafShape,transform:placement); stems.addPath(stemShape,transform:placement)
                     }
                 }
             }
+            for (index,patch) in patches.enumerated() {scenery.fill(patch,with:.color(ArenaCanvas.patches[index]))}
+            scenery.fill(leaves,with:.color(DillTheme.ink.opacity(0.055)))
+            scenery.stroke(stems,with:.color(DillTheme.ink.opacity(0.06)),lineWidth:zoom)
             var grid = Path()
             for x in stride(from:0.0,through:snapshot.width,by:90) {let a = screen(CGPoint(x:x,y:0)); let b = screen(CGPoint(x:x,y:snapshot.height)); grid.move(to:a); grid.addLine(to:b)}
             for y in stride(from:0.0,through:snapshot.height,by:90) {let a = screen(CGPoint(x:0,y:y)); let b = screen(CGPoint(x:snapshot.width,y:y)); grid.move(to:a); grid.addLine(to:b)}
@@ -492,6 +522,7 @@ struct ArenaCanvas: View {
             context.stroke(sectors,with:.color(DillTheme.ink.opacity(0.065)),lineWidth:1)
             context.stroke(Path(roundedRect:world,cornerRadius:30),with:.color(DillTheme.ink.opacity(0.18)),style:StrokeStyle(lineWidth:3,dash:[6,8]))
             let hazards = (snapshot.hazards ?? []).filter {$0.r > 0}
+            var pellets = [Path(),Path(),Path()], bonuses = Path(), rings = Path(), spits = Path(), shines = Path()
             for pellet in food {
                 var spot = CGPoint(x:pellet[1],y:pellet[2])
                 let spit = pellet[3] == 4
@@ -504,16 +535,22 @@ struct ArenaCanvas: View {
                 guard onScreen(position,margin:20) else {continue}
                 if spit {
                     let r = 6 * zoom
-                    context.fill(ArenaCanvas.dot(position,r),with:.color(ArenaCanvas.brine))
-                    context.fill(ArenaCanvas.dot(CGPoint(x:position.x-r*0.3,y:position.y-r*0.3),r*0.38),with:.color(Color(hex:0xD4EB85)))
-                    continue
+                    spits.addEllipse(in:CGRect(x:position.x-r,y:position.y-r,width:r*2,height:r*2))
+                    shines.addEllipse(in:CGRect(x:position.x-r*0.68,y:position.y-r*0.68,width:r*0.76,height:r*0.76))
+                } else if pellet[3] >= 9 {
+                    let r = 8 * zoom
+                    bonuses.addEllipse(in:CGRect(x:position.x-r,y:position.y-r,width:r*2,height:r*2))
+                    rings.addEllipse(in:CGRect(x:position.x-r-2,y:position.y-r-2,width:r*2+4,height:r*2+4))
+                } else {
+                    let r = 5 * zoom
+                    pellets[Int(pellet[0]) % 3].addEllipse(in:CGRect(x:position.x-r,y:position.y-r,width:r*2,height:r*2))
                 }
-                let bonus = pellet[3] >= 9
-                let r = (bonus ? 8.0 : 5.0) * zoom
-                let color = bonus ? DillTheme.peach : [Color(hex:0xA6BF70),Color(hex:0xD1BC74),Color(hex:0xA4B8A0)][Int(pellet[0]) % 3]
-                context.fill(Path(ellipseIn:CGRect(x:position.x-r,y:position.y-r,width:r*2,height:r*2)),with:.color(color))
-                if bonus {context.stroke(Path(ellipseIn:CGRect(x:position.x-r-2,y:position.y-r-2,width:r*2+4,height:r*2+4)),with:.color(color.opacity(0.35)),lineWidth:2)}
             }
+            for (index,batch) in pellets.enumerated() {context.fill(batch,with:.color(ArenaCanvas.pellets[index]))}
+            context.fill(bonuses,with:.color(DillTheme.peach))
+            context.stroke(rings,with:.color(DillTheme.peach.opacity(0.35)),lineWidth:2)
+            context.fill(spits,with:.color(ArenaCanvas.brine))
+            context.fill(shines,with:.color(ArenaCanvas.spitShine))
             let pieces = players.filter(\.alive).flatMap {player in player.pieces.map {(player,$0)}}.sorted {$0.1.mass < $1.1.mass}
             let drains = pieces.compactMap { _,cell -> (cell:ArenaCell,hazard:ArenaHazard)? in
                 guard cell.draining, let field = hazards.min(by:{hypot($0.x-cell.x,$0.y-cell.y) - $0.r < hypot($1.x-cell.x,$1.y-cell.y) - $1.r}) else {return nil}
@@ -546,7 +583,7 @@ struct ArenaCanvas: View {
                 ArenaCanvas.drawGadget(worldAt(hazard),hazard:hazard,gadget:hazard.gadget(index:index),time:still ? 0 : time,
                                        hungry:drains.contains {$0.hazard.id == hazard.id},look:look)
             }
-            if snapshot.tick != motion.tick {motion.membranes = motion.membranes.filter {raw[$0.key] != nil}}
+            if frame.to.tick != motion.tick {motion.membranes = motion.membranes.filter {raw[$0.key] != nil}}
             let danger = Dictionary(ArenaCanvas.killRings(players:players,me:mine).map {($0.hunter,$0.alpha)},uniquingKeysWith:max)
             let visible = pieces.compactMap { p,cell -> (player:ArenaPlayer,cell:ArenaCell,body:ArenaBody)? in
                 guard onScreen(screen(CGPoint(x:cell.x,y:cell.y)),margin:cell.radius*zoom*2) else {return nil}
@@ -561,6 +598,7 @@ struct ArenaCanvas: View {
                 motion.membraneClock -= 1/60
                 ArenaBody.step(bodies,bounds:CGSize(width:snapshot.width,height:snapshot.height),jitter:still ? 0 : ArenaBody.jitter)
             }
+            var hats:[Outfit:GraphicsContext.ResolvedImage] = [:]
             for (p,cell,body) in visible {
                 var gaze = CGVector.zero
                 if let before = old[body.key], let current = raw[body.key] {
@@ -570,12 +608,16 @@ struct ArenaCanvas: View {
                 let position = screen(CGPoint(x:cell.x,y:cell.y)), r = cell.radius * zoom
                 var piece = context
                 piece.translateBy(x:position.x,y:position.y)
+                if p.outfit != .original, !WardrobeArt.newOutfits.contains(p.outfit), hats[p.outfit] == nil {
+                    hats[p.outfit] = context.resolve(Image(systemName:p.outfit.symbol).resizable())
+                }
                 ArenaCanvas.drawPiece(piece,player:p,r:r,own:p.id == me.id,mood:ArenaCanvas.mood(p,cell:cell,pieces:pieces),gaze:gaze,time:time,
-                                      danger:danger[body.key] ?? 0,outline:body.outline(scale:zoom),reduceMotion:still,showTear:p.pieces.first?.id == cell.id)
-                let label = p.id == me.id ? "you" : p.name
-                context.draw(Text(label).font(.system(size:11,weight:p.id == me.id ? .bold : .medium,design:.rounded)).foregroundStyle(DillTheme.ink),at:CGPoint(x:position.x,y:position.y+r+14))
+                                      danger:danger[body.key] ?? 0,outline:body.outline(scale:zoom),reduceMotion:still,showTear:p.pieces.first?.id == cell.id,hat:hats[p.outfit])
+                if let label = context.resolveSymbol(id:ArenaLabel.player(p,me:me.id)) {context.draw(label,at:CGPoint(x:position.x,y:position.y+r+14))}
             }
-            motion.tick = snapshot.tick
+            motion.tick = frame.to.tick
+        } symbols: {
+            ForEach(ArenaLabel.all(snapshot:snapshot,me:me.id),id:\.self) {$0.view.tag($0)}
         }
     }
 
@@ -797,7 +839,7 @@ struct ArenaCanvas: View {
 
     /// One piece at the context origin, matching `drawPickle` in arena-web/arena-core.mjs.
     /// `outline` holds membrane points in the piece's rotated frame; without it the undeformed shape is drawn.
-    static func drawPiece(_ context:GraphicsContext,player p:ArenaPlayer,r:Double,own:Bool,mood:Mood,gaze:CGVector,time:Double,danger:Double = 0,outline:[CGPoint]? = nil,reduceMotion:Bool = false,showTear:Bool = true) {
+    static func drawPiece(_ context:GraphicsContext,player p:ArenaPlayer,r:Double,own:Bool,mood:Mood,gaze:CGVector,time:Double,danger:Double = 0,outline:[CGPoint]? = nil,reduceMotion:Bool = false,showTear:Bool = true,hat:GraphicsContext.ResolvedImage? = nil) {
         let ink = DillTheme.ink, variety = p.look, cucumber = p.isCucumber
         let shape = ArenaShape(p,r:r), halfWidth = shape.hw, halfHeight = shape.hh
         var c = context
@@ -878,7 +920,7 @@ struct ArenaCanvas: View {
             hat.scaleBy(x:halfWidth/28,y:halfWidth/28)
             WardrobeArt.draw(hat,outfit:p.outfit)
         } else if p.outfit != .original {
-            let symbol = c.resolve(Image(systemName:p.outfit.symbol).resizable())
+            let symbol = hat ?? c.resolve(Image(systemName:p.outfit.symbol).resizable())
             c.draw(symbol,in:CGRect(x:-r*0.28,y:-halfHeight-r*0.28,width:r*0.56,height:r*0.45))
         }
     }
