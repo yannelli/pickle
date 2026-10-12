@@ -17,6 +17,7 @@ struct ArenaStickInput {
 }
 
 struct ArenaControls: View {
+    static let swappedKey = "little-dill.arena-controls-swapped"
     let me: ArenaPlayer
     let compact: Bool
     let swapped: Bool
@@ -24,7 +25,6 @@ struct ArenaControls: View {
     let steer: (CGVector) -> Void
     let split: () -> Void
     let dash: () -> Void
-    let swap: () -> Void
     let feedback: (ArenaFeedbackCue) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var dragging = false
@@ -39,23 +39,16 @@ struct ArenaControls: View {
                 if swapped { actions; Spacer(minLength: 0); joystick }
                 else { joystick; Spacer(minLength: 0); actions }
             }
-            HStack(spacing: 8) {
-                Text(me.regroupHint)
-                    .font(.system(size: compact ? 10 : 11, weight: .medium, design: .rounded))
-                    .lineLimit(2).minimumScaleFactor(0.8)
-                    .padding(.horizontal, 12).padding(.vertical, 7)
-                    .background(DillTheme.cream.opacity(0.85), in: Capsule())
-                    .accessibilityIdentifier("arenaRegroup")
-                Spacer(minLength: 0)
-                Button { release(); swap(); feedback(.stick) } label: {
-                    Label("Swap", systemImage: "arrow.left.arrow.right")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .padding(.horizontal, 12).frame(minHeight: 44)
-                        .background(DillTheme.cream.opacity(0.9), in: Capsule())
+            if let regroupHint = me.regroupHint {
+                HStack(spacing: 8) {
+                    Text(regroupHint)
+                        .font(.system(size: compact ? 10 : 11, weight: .medium, design: .rounded))
+                        .lineLimit(2).minimumScaleFactor(0.8)
+                        .padding(.horizontal, 12).padding(.vertical, 7)
+                        .background(DillTheme.cream.opacity(0.85), in: Capsule())
+                        .accessibilityIdentifier("arenaRegroup")
+                    Spacer(minLength: 0)
                 }
-                .accessibilityLabel("Swap arena controls")
-                .accessibilityValue(swapped ? "Joystick on right" : "Joystick on left")
-                .accessibilityIdentifier("arenaSwapControls")
             }
         }
         .padding(.horizontal, 20).padding(.bottom, compact ? 2 : 8)

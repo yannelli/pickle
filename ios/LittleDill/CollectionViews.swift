@@ -65,6 +65,7 @@ struct SettingsView: View {
     @State private var name = ""
     @State private var nameError: String?
     @State private var confirmReset = false
+    @AppStorage(ArenaControls.swappedKey,store:ArenaResume.defaults) private var arenaControlsSwapped = false
     var body: some View {
         NavigationStack {
             Form {
@@ -87,6 +88,9 @@ struct SettingsView: View {
                     Text("Crunches, bubbles, sleepy chimes, and arena pops. Sounds respect Silent Mode and mix with your music.").font(.footnote).foregroundStyle(.secondary)
                     Text("Little Dill follows your text-size and Reduce Motion settings. Your pickle will always be here, even after time away.").font(.footnote).foregroundStyle(.secondary)
                 }
+                Section {
+                    Toggle("Joystick on the right",isOn:$arenaControlsSwapped).accessibilityIdentifier("arenaControlsSwapped")
+                } header: { Text("Brine Royale") } footer: { Text("Split and dash move to your left thumb.") }
                 Section("Play with your people") {
                     Text("Pass & play works on one phone. Brine Royale connects up to 64 players across iPhone and the web. Collect food, grow, absorb smaller pickles, and split or dash to chase. Your pieces regroup after a little time. Create a crew room to invite friends.")
                     Text("Challenge links open the same daily course on a friend’s installed app. Scorecards can be saved or shared anywhere. Arena room links join your friends in the same online garden.")
@@ -122,7 +126,7 @@ struct Scorecard: View {
             Text(score == nil ? "Meet \(pet.name)." : "Kind of a big dill.").font(DillTheme.display(37)).tracking(-1).multilineTextAlignment(.center)
             PickleCharacter(pet:pet,happy:true).frame(width:210,height:210)
             if let score {
-                HStack(alignment:.firstTextBaseline,spacing:4) { Text("\(score)").font(.system(size:76,weight:.black,design:.rounded)); Text(arenaScore ? "mass" : "/ 300").font(.title3).foregroundStyle(DillTheme.muted) }
+                HStack(alignment:.firstTextBaseline,spacing:4) { Text("\(score)").font(.system(size:76,weight:.black,design:.rounded)).lineLimit(1).minimumScaleFactor(0.3); Text(arenaScore ? "mass" : "/ 300").font(.title3).foregroundStyle(DillTheme.muted).fixedSize() }
                 Text(arenaScore ? "\(pet.name) grew into a very big dill. Beat that." : "\(pet.name) brought the crunch. Your turn.").font(.system(size:14,weight:.medium,design:.rounded)).multilineTextAlignment(.center)
             } else { Text("Small pickle. Enormous personality.").font(.system(size:15,weight:.medium,design:.rounded)) }
             HStack(spacing:6) { ForEach(0..<7) { _ in Image(systemName:"sparkle").font(.system(size:9)) } }.foregroundStyle(DillTheme.muted)
@@ -161,7 +165,7 @@ struct ShareCardButton: View {
             .alert("Couldn’t make the scorecard",isPresented:$failure) { Button("OK",role:.cancel) {} } message: { Text("Please try sharing again.") }
     }
     private var shareText: String {
-        if arenaScore, let score {return "\(pet.name) grew to \(score) mass in Brine Royale. Can you beat my pickle? \(ArenaLaunch.shareURL(room:arenaRoom).absoluteString) · https://littledill.app"}
+        if arenaScore, let score {return "\(pet.name) grew to \(score.formatted()) mass in Brine Royale. Can you beat my pickle? \(ArenaLaunch.shareURL(room:arenaRoom).absoluteString) · https://littledill.app"}
         return (score.map {"\(pet.name) scored \($0)/300 in Little Dill. Can you beat it? Open the same course: \(DailyChallenge(day:day).url.absoluteString)"} ?? "Meet \(pet.name), my Little Dill. Tiny pet. Big dill energy.") + " · https://littledill.app"
     }
 }

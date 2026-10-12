@@ -13,7 +13,7 @@ struct ArenaView: View {
     @State private var pickups = ArenaPickupCadence()
     @State private var tactile = ArenaFeedback()
     @State private var feedbackEvents = ArenaFeedbackEvents()
-    @AppStorage("little-dill.arena-controls-swapped",store:ArenaResume.defaults) private var controlsSwapped = false
+    @AppStorage(ArenaControls.swappedKey,store:ArenaResume.defaults) private var controlsSwapped = false
     var body: some View {
         GeometryReader { geometry in
             let compact = geometry.size.height < 430
@@ -31,8 +31,7 @@ struct ArenaView: View {
                         Spacer(minLength:0)
                         if me.alive {
                             ArenaControls(me:me,compact:compact,swapped:controlsSwapped,stick:$stick,
-                                          steer:client.steer,split:client.split,dash:client.dash,
-                                          swap:{controlsSwapped.toggle()},feedback:tactile.play)
+                                          steer:client.steer,split:client.split,dash:client.dash,feedback:tactile.play)
                                 .disabled(client.status != .playing)
                         }
                     } else {Spacer()}
@@ -79,7 +78,7 @@ struct ArenaView: View {
     }
     /// Sounds from one snapshot to the next while alive; death and respawn are handled by the `alive` change.
     private func listen() {
-        updateGadgetSound(); updateHaptics(); saveEarnings()
+        updateGadgetSound(); updateHaptics(); saveBest()
         guard let snapshot = client.snapshot else {feedbackEvents.reset(); return}
         let at = client.receivedAt.timeIntervalSinceReferenceDate
         let gadget = Self.drainingGadget(player:client.me,hazards:snapshot.hazards ?? [],enabled:tactile.enabled)
@@ -254,7 +253,7 @@ struct ArenaView: View {
     }
     private func saveBest() {
         saveEarnings()
-        if client.best > 0 {store.recordArena(best:client.best)}
+        if client.best > (store.pet.arenaBest ?? 0) {store.recordArena(best:client.best)}
     }
 }
 

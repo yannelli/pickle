@@ -77,33 +77,45 @@ final class ContinuityUITests: XCTestCase {
         XCTAssertTrue(app.buttons["tab.Friends"].waitForExistence(timeout:5))
     }
 
-    func testArenaThumbControlsSwapAndPersistOnCompactPhone() {
-        tap("tab.Friends"); tap("createArenaRoom")
-        let joystick = app.otherElements["arenaJoystick"]
-        XCTAssertTrue(joystick.waitForExistence(timeout:20))
-        let split = app.buttons["arenaSplit"], dash = app.buttons["arenaDash"]
+    func testArenaThumbControlsSwapFromSettingsAndPersistOnCompactPhone() {
+        let joystick = app.otherElements["arenaJoystick"], split = app.buttons["arenaSplit"], dash = app.buttons["arenaDash"]
+        func enterArena() {tap("tab.Friends"); tap("createArenaRoom"); XCTAssertTrue(joystick.waitForExistence(timeout:20))}
+        func leaveArena() {tap("arenaLeave"); app.buttons["Leave arena"].tap()}
+        func toggleSwap() {
+            tap("Settings")
+            let toggle = app.switches["arenaControlsSwapped"]
+            XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout:5))
+            for _ in 0..<6 where !(toggle.exists && toggle.isHittable) {app.swipeUp()}
+            XCTAssertTrue(toggle.isHittable)
+            let before = toggle.value as? String
+            toggle.coordinate(withNormalizedOffset:CGVector(dx:0.9,dy:0.5)).tap()
+            let changed = XCTNSPredicateExpectation(predicate:NSPredicate(format:"value != %@",before ?? ""),object:toggle)
+            XCTAssertEqual(XCTWaiter.wait(for:[changed],timeout:3),.completed)
+            tap("Done")
+        }
+        enterArena()
         let initiallyLeft = joystick.frame.midX < split.frame.midX
-        tap("arenaSwapControls")
+        XCTAssertFalse(app.buttons["arenaSwapControls"].exists)
+        leaveArena(); toggleSwap(); enterArena()
         XCTAssertEqual(joystick.frame.midX < split.frame.midX,!initiallyLeft)
-        for item in [joystick,split,dash,app.buttons["arenaSwapControls"]] {
+        for item in [joystick,split,dash] {
             XCTAssertTrue(app.frame.insetBy(dx:-1,dy:-1).contains(item.frame))
         }
         XCTAssertFalse(split.frame.intersects(dash.frame))
         capture("arena-swapped-controls")
-        tap("arenaLeave"); app.buttons["Leave arena"].tap()
+        leaveArena()
         app.terminate()
         app.launchArguments = ["--ui-testing","--fast-hatch"]
         app.launch()
-        tap("tab.Friends"); tap("createArenaRoom")
-        XCTAssertTrue(joystick.waitForExistence(timeout:20))
+        enterArena()
         XCTAssertEqual(joystick.frame.midX < split.frame.midX,!initiallyLeft)
         let center = joystick.coordinate(withNormalizedOffset:CGVector(dx:0.5,dy:0.5))
         let edge = joystick.coordinate(withNormalizedOffset:CGVector(dx:0.8,dy:0.3))
         center.press(forDuration:0.1,thenDragTo:edge,withVelocity:.slow,thenHoldForDuration:0.2)
-        tap("arenaSwapControls")
+        leaveArena(); toggleSwap(); enterArena()
         XCTAssertEqual(joystick.frame.midX < split.frame.midX,initiallyLeft)
         capture("arena-default-controls")
-        tap("arenaLeave"); app.buttons["Leave arena"].tap()
+        leaveArena()
     }
 
     private func tap(_ id:String,file:StaticString = #filePath,line:UInt = #line) {

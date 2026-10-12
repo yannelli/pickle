@@ -76,8 +76,8 @@ final class LittleDillUITests: XCTestCase {
         let joystick = app.otherElements["arenaJoystick"]
         XCTAssertTrue(joystick.waitForExistence(timeout:20),"Online arena did not connect")
         let split = app.buttons["arenaSplit"], dash = app.buttons["arenaDash"]
-        let regroup = app.staticTexts["arenaRegroup"]
-        for element in [joystick,split,dash,regroup,app.buttons["arenaLeave"]] {
+        XCTAssertFalse(app.staticTexts["arenaRegroup"].exists)
+        for element in [joystick,split,dash,app.buttons["arenaLeave"]] {
             XCTAssertTrue(element.exists)
             XCTAssertGreaterThan(element.frame.width,0)
             XCTAssertTrue(app.frame.insetBy(dx:-1,dy:-1).contains(element.frame),"Arena control extends outside the screen: \(element.identifier), \(element.frame)")

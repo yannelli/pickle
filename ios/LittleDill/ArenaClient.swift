@@ -118,8 +118,8 @@ struct ArenaPlayer: Decodable, Identifiable {
         if let splitCooldown, splitCooldown > 0 {return "Ready in \(Int(ceil(splitCooldown)))s"}
         return pieces.contains {$0.mass >= 60} ? "Launch a half" : isCucumber ? "One cucumber needs 60" : "One pickle needs 60"
     }
-    var regroupHint: String {
-        guard pieces.count > 1 else {return "Split to chase. Regroup to grow."}
+    var regroupHint: String? {
+        guard pieces.count > 1 else {return nil}
         return (merge ?? 0) > 0 ? "\(pieces.count) cucumbers · regroup in \(Int(ceil(merge ?? 0)))s" : "\(pieces.count) cucumbers · regrouping"
     }
     var radius: Double { Self.radius(for:mass) }

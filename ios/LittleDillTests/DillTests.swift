@@ -85,7 +85,7 @@ final class DillTests: XCTestCase {
         XCTAssertEqual(split.mass,90); XCTAssertTrue(split.canSplit)
         XCTAssertEqual(split.regroupHint,"2 cucumbers · regroup in 10s")
         let survivor = try arenaPlayer(["cells":[["id":"b","x":110,"y":205,"mass":60]],"mass":60,"merge":0])
-        XCTAssertTrue(survivor.alive); XCTAssertEqual(survivor.pieces.count,1)
+        XCTAssertTrue(survivor.alive); XCTAssertEqual(survivor.pieces.count,1); XCTAssertNil(survivor.regroupHint)
         XCTAssertEqual(survivor.pieces.first?.id,"b")
         XCTAssertTrue(try arenaPlayer(["alive":false]).pieces.isEmpty)
     }
