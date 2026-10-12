@@ -54,7 +54,7 @@ function connect(modern, name) {
     assert.deepEqual(newcomer.history.get(tick),legacy.history.get(tick),`join synchronization at tick ${tick}`);
   }
   assert.equal(modern.full,1);assert.ok(legacy.full>5);assert.ok(modern.delta>5);
-  assert.equal(modern.food.size,3375);
+  assert.equal(modern.food.size,6615);
   assert.ok(modern.bytes<legacy.bytes*.65,'delta transport must substantially reduce traffic');
   console.log(`PASS: full join sync, foraging deltas, relocated spawn trails, mid-stream newcomer and legacy inventory parity at ${common.length} ticks; delta traffic ${Math.round(modern.bytes/legacy.bytes*100)}% of legacy.`);
 })().catch(error => {console.error(error);process.exitCode=1;}).finally(() => {for(const socket of sockets) socket.close();});

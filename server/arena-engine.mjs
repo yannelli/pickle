@@ -1,8 +1,8 @@
 // Dependency-free authoritative simulation. Clients send intent, never position or mass.
-export const RULES = Object.freeze({ width: 6000, height: 4500, tickRate: 20, maxHumans: 64, population: 32, foodCount: 3375, foodMass: 3, bonusFoodMass: 9, startMass: 25, shieldSeconds: 4, respawnSeconds: 2, decayFloor: 300, decayGraceSeconds: 8, decayPerSecond: 0.001, maxCells: 8, reconnectGraceSeconds: 30, splitMinMass: 60, splitCooldown: 1, mergeSeconds: 12, eatOverlap: 0.6, hazardRadius: 150, hazardSlow: 0.5, hazardSplitMass: 2500, hazardSplitCooldown: 2, leakRate: 0.05, leakMin: 4, leakMax: 60, leakFloor: 500, spitMass: 4, hurtSeconds: 15, tearSeconds: 1.4 });
+export const RULES = Object.freeze({ width: 8400, height: 6300, tickRate: 20, maxHumans: 64, population: 32, foodCount: 6615, foodMass: 3, bonusFoodMass: 9, startMass: 25, shieldSeconds: 4, respawnSeconds: 2, decayFloor: 300, decayGraceSeconds: 8, decayPerSecond: 0.001, maxCells: 8, reconnectGraceSeconds: 30, splitMinMass: 60, splitCooldown: 1, mergeSeconds: 12, eatOverlap: 0.6, hazardRadius: 150, hazardSlow: 0.5, hazardSplitMass: 2500, hazardSplitCooldown: 2, leakRate: 0.05, leakMin: 4, leakMax: 60, leakFloor: 500, spitMass: 4, hurtSeconds: 15, tearSeconds: 1.4 });
 // Kitchen gadgets sit at fixed garden positions, so checkpoints carry no hazard state.
 export const HAZARDS = Object.freeze([
-  { id: 'slicer-1', kind: 'slicer', x: 1650, y: 1300 }, { id: 'shaker-1', kind: 'shaker', x: 4350, y: 1300 }, { id: 'grater-1', kind: 'grater', x: 3000, y: 3250 }
+  { id: 'slicer-1', kind: 'slicer', x: 2310, y: 1820 }, { id: 'shaker-1', kind: 'shaker', x: 6090, y: 1820 }, { id: 'grater-1', kind: 'grater', x: 4200, y: 4550 }
 ].map(h => Object.freeze({ ...h, r: RULES.hazardRadius })));
 export const BRINES = ['classic', 'garlic', 'spicy'];
 export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party', 'beanie', 'beret', 'headphones', 'sunhat', 'chef', 'cowboy', 'pirate', 'mushroom', 'wizard', 'rainhat', 'halo', 'helmet'];
@@ -129,6 +129,8 @@ export class ArenaEngine {
       Object.assign(this,structuredClone(checkpoint));
       this.publicRoom = checkpoint.publicRoom ?? publicRoom;
       this.players = new Map(this.players.map(p => [p.id,restorePlayer(p)]));
+      // Checkpoints saved before a garden expansion carry fewer pellets.
+      while (this.food.length < RULES.foodCount) this.food.push(this.makeFood());
       this.assignHardBot();
       return;
     }

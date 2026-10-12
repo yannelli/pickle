@@ -22,7 +22,7 @@ test('human room capacity is enforced independently of bots', async () => {
 test('expanded gardens retain food density and use varied, unique everyday handles', async () => {
   const { engine, RULES } = await setup();
   engine.addPlayer('human', { name: 'maya.j' });
-  assert.equal(RULES.width * RULES.height / (2400 * 1800), 6.25);
+  assert.equal(RULES.width * RULES.height / (2400 * 1800), 12.25);
   assert.equal(RULES.foodCount / (RULES.width * RULES.height), 540 / (2400 * 1800));
   assert.equal(RULES.maxHumans, 64);
   const names = [...engine.players.values()].map(p => p.name.toLowerCase());
@@ -183,7 +183,7 @@ test('large-body growth is smooth at 1600 and keeps million-mass differences vis
   assert.ok(radius(Number.MAX_SAFE_INTEGER) * 2 < Math.min(RULES.width, RULES.height));
 });
 test('smaller pickles gain speed below 30000 while giants retain a gradual penalty', async () => {
-  const { engine, speed } = await setup(), p = engine.addPlayer('runner');
+  const { engine, speed, RULES } = await setup(), p = engine.addPlayer('runner'), x = RULES.width / 2;
   for (const [id, other] of engine.players) if (other.bot) engine.players.delete(id);
   engine.food = [];
   assert.ok(speed(1000) > 210);
@@ -196,17 +196,17 @@ test('smaller pickles gain speed below 30000 while giants retain a gradual penal
   for (const mass of [25, 1000, 10000, 30000, 100000, 1000000, 10000000]) {
     assert.ok(speed(mass) < previousSpeed && speed(mass) > 55);
     previousSpeed = speed(mass);
-    p.mass = mass; p.x = 3000; p.y = 2250; p.lastMeal = engine.time;
+    p.mass = mass; p.x = x; p.y = RULES.height / 2; p.lastMeal = engine.time;
     engine.input(p.id, { type: 'input', seq: ++seq, x: 1, y: 0 });
     engine.step(.1);
-    assert.ok(Math.abs(p.x - 3000 - speed(mass) * .1) < 1e-8, `authoritative speed at ${mass}`);
+    assert.ok(Math.abs(p.x - x - speed(mass) * .1) < 1e-8, `authoritative speed at ${mass}`);
   }
 });
 test('million-mass absorption uses the growing body radius', async () => {
   const { engine, radius, RULES } = await setup(), hunter = engine.addPlayer('hunter'), prey = engine.addPlayer('prey');
   for (const [id, other] of engine.players) if (other.bot) engine.players.delete(id);
   engine.food = []; hunter.mass = 2e6; prey.mass = 1e6;
-  hunter.x = 3000; hunter.y = prey.y = 1800;
+  hunter.x = RULES.width / 2; hunter.y = prey.y = RULES.height / 2;
   hunter.shieldUntil = prey.shieldUntil = 0;
   const boundary = radius(hunter.mass) - RULES.eatOverlap * radius(prey.mass);
   prey.x = hunter.x + boundary + .1; engine.step(0);
@@ -420,7 +420,7 @@ async function fieldPair(mass = 25) {
 const snapCells = (engine,id) => engine.snapshot(false).players.find(p => p.id === id).cells;
 test('kitchen gadget fields appear in every snapshot with the fixed contract', async () => {
   const {engine,HAZARDS,RULES} = await setup();
-  const expected = [{id:'slicer-1',kind:'slicer',x:1650,y:1300,r:150},{id:'shaker-1',kind:'shaker',x:4350,y:1300,r:150},{id:'grater-1',kind:'grater',x:3000,y:3250,r:150}];
+  const expected = [{id:'slicer-1',kind:'slicer',x:2310,y:1820,r:150},{id:'shaker-1',kind:'shaker',x:6090,y:1820,r:150},{id:'grater-1',kind:'grater',x:4200,y:4550,r:150}];
   assert.deepEqual(HAZARDS,expected); assert.ok(Object.isFrozen(HAZARDS) && HAZARDS.every(Object.isFrozen));
   assert.deepEqual(engine.snapshot().hazards,expected); assert.deepEqual(engine.snapshot(false).hazards,expected);
   assert.deepEqual(JSON.parse(JSON.stringify(engine.snapshot(false))).hazards,expected);
@@ -533,12 +533,20 @@ test('an engine restored from a checkpoint without hazard state still drains and
   assert.equal(restored.food.length,RULES.foodCount);
   assert.ok(restored.hazardLeak['grater-1'] < RULES.spitMass);
 });
+test('a checkpoint from the smaller garden restores with the full pellet count', async () => {
+  const {engine,ArenaEngine,RULES} = await setup();
+  const saved = engine.checkpoint(); saved.food = saved.food.slice(0,3375);
+  const restored = new ArenaEngine({checkpoint:saved,random:seeded(9)}), ids = restored.food.map(f => f.id);
+  assert.equal(restored.food.length,RULES.foodCount); assert.equal(new Set(ids).size,ids.length);
+  assert.deepEqual(restored.food.slice(0,3375),saved.food);
+  assert.ok(restored.food.every(f => f.x >= 20 && f.x <= RULES.width-20 && f.y >= 20 && f.y <= RULES.height-20));
+});
 test('worker health reports gadget fields alongside existing capabilities', async () => {
   const worker = (await import('../server/arena-worker.mjs')).default;
   const body = await (await worker.fetch(new Request('https://arena.test/health'),{})).json();
   assert.deepEqual(body.hazards,['slicer','shaker','grater']); assert.equal(body.hazardRadius,150);
   assert.equal(body.protocol,1); assert.equal(body.durableRecovery,true); assert.equal(body.foodDeltas,true);
-  assert.equal(body.maxCells,8); assert.equal(body.reconnectGraceSeconds,30); assert.equal(body.foodCount,3375);
+  assert.equal(body.maxCells,8); assert.equal(body.reconnectGraceSeconds,30); assert.equal(body.foodCount,6615);
 });
 
 test('a giant pickle leaks at most leakMax per second', async () => {
@@ -684,6 +692,7 @@ test('gadget routes keep a direction across food, threat, and split-body traject
     if(scenario==='threat') {
       const predator=engine.addPlayer('predator',{name:'Predator'});
       predator.mass=10000;predator.x=bot.x+180;predator.y=bot.y;predator.shieldUntil=Infinity;
+      for(const [id,other] of engine.players) if(other.bot&&other!==bot) engine.players.delete(id);
     } else engine.food=[{id:1,x:field.x-field.r-radius(bot.cells[0].mass)-115,y:field.y,value:3}];
     const startX=bot.x, headings=[];
     for(let tick=0;tick<240;tick++) {
