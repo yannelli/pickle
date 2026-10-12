@@ -375,8 +375,7 @@ enum PickleArtist {
             c.fill(Path(ellipseIn: CGRect(x: 2, y: -6, width: 6, height: 6)), with: .color(DillTheme.cream))
             let pom = Path(ellipseIn: CGRect(x: -4.5, y: -35.5, width: 9, height: 9))
             c.fill(pom, with: .color(DillTheme.lime)); c.stroke(pom, with: .color(ink), style: thin)
-        case .beanie, .beret, .headphones, .sunhat, .chef, .cowboy,
-             .pirate, .mushroom, .wizard, .rainhat, .halo, .helmet:
+        default:
             WardrobeArt.draw(c, outfit: outfit)
         }
     }

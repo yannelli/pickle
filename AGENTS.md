@@ -49,7 +49,7 @@ For GitHub TestFlight automation, follow the release setup and Apple/GitHub refe
 - Unexpected disconnects hold runs outside combat for 30 seconds. Resume tokens are secret credentials; player IDs do not authorize recovery.
 - Preserve one-second Durable Object checkpoints, paused timers, room identity, monotonic ticks, expiry, and explicit-leave revocation. Active sessions have no fixed age limit.
 - Preserve crew join rate limiting, name validation, per-IP connection limits, socket input budgets, and trusted proxy-header checks.
-- Keep the 18 wardrobe IDs accepted by the server and rendered on both arena clients. Native coin ownership remains local.
+- Keep the 36 wardrobe IDs accepted by the server and rendered on both arena clients. The last six are premium native unlocks (500 to 3,000 coins) that bots do not wear. Native coin ownership remains local.
 - Arena `earnedMass` counts collected food and absorbed opponent mass across respawns and recovery. Native rewards use one coin per 1,000 earned mass, capped at 1,000 per UTC day; persist the daily total and credited cursor together with coins. Exclude starting mass, splits, and regrouping.
 - Play wakes living pets without care coins or energy cost; the six-energy charge applies when a game starts.
 - Native save additions need optional fields or decoding defaults. Preserve the `hop` score key used by Countertop escape.

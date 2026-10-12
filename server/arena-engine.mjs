@@ -5,7 +5,11 @@ export const HAZARDS = Object.freeze([
   { id: 'slicer-1', kind: 'slicer', x: 2310, y: 1820 }, { id: 'shaker-1', kind: 'shaker', x: 6090, y: 1820 }, { id: 'grater-1', kind: 'grater', x: 4200, y: 4550 }
 ].map(h => Object.freeze({ ...h, r: RULES.hazardRadius })));
 export const BRINES = ['classic', 'garlic', 'spicy'];
-export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party', 'beanie', 'beret', 'headphones', 'sunhat', 'chef', 'cowboy', 'pirate', 'mushroom', 'wizard', 'rainhat', 'halo', 'helmet'];
+export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party', 'beanie', 'beret', 'headphones', 'sunhat', 'chef', 'cowboy', 'pirate', 'mushroom', 'wizard', 'rainhat', 'halo', 'helmet',
+  'cap', 'backcap', 'headband', 'antenna', 'captain', 'bonnet', 'deerstalker', 'mortarboard', 'witch', 'tophat', 'headset', 'shako',
+  'viking', 'tiara', 'jester', 'unicorn', 'phoenix', 'emperor'];
+// The last six are premium native unlocks; bots leave them to players.
+export const BOT_OUTFITS = OUTFITS.slice(0, -6);
 // Pet varieties in brine order: two per brine, matching PickleVariety in the iOS app.
 export const VARIETIES = ['dill', 'gherkin', 'garlic', 'butter', 'chili', 'pepper'];
 export const BOT_NAMES = Object.freeze(['maya.j', 'alex_27', 'SophieK', 'noah', 'emilyrose', 'Leo99', 'itsChloe', 'sam.r', 'oliver', 'NoraB', 'luke_7', 'isabel', 'Theo', 'grace.m', 'Jules', 'benji', 'zoe17', 'henry', 'mila_', 'jackson', 'AvaGrace', 'rylee', 'ethan_42', 'sienna', 'Finn', 'ellie.j', 'Caleb', 'rubyroo', 'oscar', 'lucy.h', 'daniel', 'Freya', 'Maxwell', 'tess', 'will_8', 'amelia', 'joshua', 'violet', 'Nathan', 'eve_22', 'charlie', 'Leah', 'aaron_7', 'poppy', 'Dylan', 'lilymae', 'owen', 'amber.k', 'Archie', 'hannah', 'eli_19', 'clara', 'mason', 'Sadie', 'jamie', 'alice.w', 'isaac', 'Eva', 'nico_5', 'summer', 'Jordan', 'holly', 'felix', 'rosie', 'miles', 'erin_23', 'seb', 'Maddie', 'cole', 'lauren', 'kai_11', 'Harper',
@@ -207,7 +211,7 @@ export class ArenaEngine {
       const availableNames = BOT_NAMES.filter(name => !usedNames.has(name.toLowerCase()));
       const name = availableNames[Math.floor(this.random()*availableNames.length)] || `guest_${n}`;
       const variety = VARIETIES[(n + Math.floor(n / VARIETIES.length)) % VARIETIES.length];
-      const bot = this.addPlayer(`bot-${n}`, { bot: true, name, brine: BRINES[Math.floor(VARIETIES.indexOf(variety) / 2)], outfit: OUTFITS[n % OUTFITS.length], variety });
+      const bot = this.addPlayer(`bot-${n}`, { bot: true, name, brine: BRINES[Math.floor(VARIETIES.indexOf(variety) / 2)], outfit: BOT_OUTFITS[n % BOT_OUTFITS.length], variety });
       bots.push(bot);
     }
     this.assignHardBot();

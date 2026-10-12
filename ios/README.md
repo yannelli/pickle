@@ -81,7 +81,7 @@ The server accepts bounded direction inputs and monotonic sequence numbers rathe
 - Care, dash, bites, respawns, and games have distinct sounds. Native gadget loops are rendered from the web synthesis; pickup WAVs are identical across platforms. Settings → Sound effects persists across launches; native sounds honor Silent Mode and mix with music. Old saves default to sounds enabled without losing progress.
 - Play **Daily Crunch**, three six-second precision rounds with a shared UTC-date seed. Earn up to 300 points and 25 coins for the first completion that day. Replay to improve your personal best.
 - Play **Pass the Pickle** with 2–4 people sharing one phone, including turn handoffs, rankings, and joint winners. This mode and the daily game work offline.
-- Unlock 18 outfits with earned coins, including two free looks. Arena players on web and iOS see the same equipped accessories. No purchases or ads.
+- Unlock 36 outfits with earned coins, including two free looks and six premium looks at 500, 1,000, 1,500, 2,000, 2,500, and 3,000 coins. Arena players on web and iOS see the same equipped accessories. No purchases or ads.
 - Share a rendered PNG pet/score card using the native share sheet. Daily links use `littledill://challenge/YYYY-MM-DD`. Custom-scheme links require the installed app; they do not install it. Arena invitations use HTTPS Universal Links and fall back to browser play. Daily challenge links still require the installed app. No App Store listing is configured yet.
 
 ## Data and privacy

@@ -4,17 +4,23 @@ import XCTest
 final class WardrobeTests: XCTestCase {
     func testNewLooksHaveStableIDsAndDrawableHats() {
         let ids = ["beanie", "beret", "headphones", "sunhat", "chef", "cowboy",
-                   "pirate", "mushroom", "wizard", "rainhat", "halo", "helmet"]
-        XCTAssertEqual(Outfit.allCases.count, 18)
+                   "pirate", "mushroom", "wizard", "rainhat", "halo", "helmet",
+                   "cap", "backcap", "headband", "antenna", "captain", "bonnet",
+                   "deerstalker", "mortarboard", "witch", "tophat", "headset", "shako",
+                   "viking", "tiara", "jester", "unicorn", "phoenix", "emperor"]
+        XCTAssertEqual(Outfit.allCases.count, 36)
         XCTAssertEqual(WardrobeArt.newOutfits.map(\.rawValue), ids)
         for outfit in WardrobeArt.newOutfits {
             XCTAssertNotNil(WardrobeArt.accent(outfit))
-            XCTAssertFalse(PetArt.hat(outfit.rawValue).isEmpty, outfit.rawValue)
+            XCTAssertFalse(WardrobeArt.parts(outfit).isEmpty, outfit.rawValue)
             XCTAssertGreaterThan(outfit.cost, 0)
             XCTAssertFalse(outfit.title.isEmpty)
         }
         XCTAssertEqual([Outfit.original, .sprout, .bow, .shades, .crown, .party].map(\.cost),
                        [0, 0, 30, 50, 90, 120])
+        XCTAssertEqual(WardrobeArt.premium, Array(Outfit.allCases.suffix(6)))
+        XCTAssertEqual(WardrobeArt.premium.map(\.cost), [500, 1000, 1500, 2000, 2500, 3000])
+        XCTAssertTrue(Outfit.allCases.dropLast(6).allSatisfy { $0.cost < 500 })
     }
 
     func testNewLooksPurchaseEquipAndDecode() throws {

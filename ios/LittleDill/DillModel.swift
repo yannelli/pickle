@@ -19,6 +19,9 @@ enum Outfit: String, Codable, CaseIterable, Identifiable {
     case original, sprout, bow, shades, crown, party
     case beanie, beret, headphones, sunhat, chef, cowboy
     case pirate, mushroom, wizard, rainhat, halo, helmet
+    case cap, backcap, headband, antenna, captain, bonnet
+    case deerstalker, mortarboard, witch, tophat, headset, shako
+    case viking, tiara, jester, unicorn, phoenix, emperor
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -40,6 +43,24 @@ enum Outfit: String, Codable, CaseIterable, Identifiable {
         case .rainhat: return "Rainy day"
         case .halo: return "Sweet angel"
         case .helmet: return "Space cadet"
+        case .cap: return "Game day"
+        case .backcap: return "Skate park"
+        case .headband: return "Gym class"
+        case .antenna: return "Beep boop"
+        case .captain: return "Ship shape"
+        case .bonnet: return "Garden party"
+        case .deerstalker: return "Super sleuth"
+        case .mortarboard: return "Dill graduate"
+        case .witch: return "Spooky season"
+        case .tophat: return "Dapper dill"
+        case .headset: return "On the air"
+        case .shako: return "Drum major"
+        case .viking: return "Brine raider"
+        case .tiara: return "Pickle princess"
+        case .jester: return "Court jester"
+        case .unicorn: return "Dillicorn"
+        case .phoenix: return "Hot brine"
+        case .emperor: return "Dill emperor"
         }
     }
     var symbol: String {
@@ -62,6 +83,24 @@ enum Outfit: String, Codable, CaseIterable, Identifiable {
         case .rainhat: return "cloud.rain.fill"
         case .halo: return "circle.dashed"
         case .helmet: return "moon.stars.fill"
+        case .cap: return "sportscourt.fill"
+        case .backcap: return "arrow.uturn.backward"
+        case .headband: return "figure.run"
+        case .antenna: return "antenna.radiowaves.left.and.right"
+        case .captain: return "ferry.fill"
+        case .bonnet: return "camera.macro"
+        case .deerstalker: return "magnifyingglass"
+        case .mortarboard: return "graduationcap.fill"
+        case .witch: return "moon.fill"
+        case .tophat: return "theatermasks.fill"
+        case .headset: return "mic.fill"
+        case .shako: return "music.note"
+        case .viking: return "shield.fill"
+        case .tiara: return "sparkle"
+        case .jester: return "theatermasks"
+        case .unicorn: return "wand.and.stars"
+        case .phoenix: return "flame.fill"
+        case .emperor: return "crown"
         }
     }
     var cost: Int {
@@ -83,6 +122,24 @@ enum Outfit: String, Codable, CaseIterable, Identifiable {
         case .rainhat: return 70
         case .halo: return 130
         case .helmet: return 140
+        case .cap: return 150
+        case .backcap: return 175
+        case .headband: return 200
+        case .antenna: return 225
+        case .captain: return 250
+        case .bonnet: return 275
+        case .deerstalker: return 300
+        case .mortarboard: return 325
+        case .witch: return 350
+        case .tophat: return 375
+        case .headset: return 400
+        case .shako: return 450
+        case .viking: return 500
+        case .tiara: return 1000
+        case .jester: return 1500
+        case .unicorn: return 2000
+        case .phoenix: return 2500
+        case .emperor: return 3000
         }
     }
 }
