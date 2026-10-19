@@ -2,9 +2,7 @@ import SwiftUI
 
 struct NestView: View {
     @EnvironmentObject private var store: DillStore
-    let play: () -> Void
     let closet: () -> Void
-    let arena: () -> Void
     var revealCare: () -> Void = {}
     @StateObject private var stage = PetStage()
     @State private var performance: CarePerformance?
@@ -20,26 +18,22 @@ struct NestView: View {
     private var canPlay: Bool { store.pet.adopted && !life.dead && !snacking }
 
     var body: some View {
-        VStack(spacing:22) {
+        VStack(spacing:16) {
             header
             VStack(spacing:12) {
                 NestMeters(life:life)
-                if let wish = PetLife.activeWish(life,now:nowMs) { WishChip(wish:wish,now:nowMs) }
                 PetGarden(pet:store.pet,bites:store.snackBites,stage:stage,performance:performance,message:message,
                           hint:NestText.hint(life,bites:store.snackBites),onTap:tapPickle,onHold:startSnack,restart:restart)
                 careButtons
+                if let wish = PetLife.activeWish(life,now:nowMs) { WishChip(wish:wish,now:nowMs) }
                 Button { pet(performing:true) } label: {
                     Text("Pet +8 ♥").font(.system(size:12,weight:.semibold,design:.rounded)).padding(.horizontal,16).frame(minHeight:40)
                         .background(.white.opacity(0.6),in:Capsule()).overlay(Capsule().stroke(DillTheme.line,lineWidth:1))
                 }.disabled(!store.pet.adopted || life.dead || life.sleeping || snacking).accessibilityIdentifier("care.pet")
             }.id("careStage")
-            HStack { Text("\(store.pet.dailyCare.count)/4 little acts of love today").font(.caption); Spacer(); Text("+5 coins each").font(.system(size:10,weight:.semibold)).foregroundStyle(DillTheme.muted) }
+            HStack { Text("\(store.pet.dailyCare.count)/4 care actions today").font(.caption); Spacer(); Text("+5 coins each").font(.system(size:10,weight:.semibold)).foregroundStyle(DillTheme.muted) }
             PetProfileCard(life:life)
-            ElderClub(life:life)
-            RoyaleCard(play:arena)
-            dailyCard
-            HStack { Image(systemName:"book.closed"); Text("Every big day, kept.").font(.caption); Spacer(); Button("Scrapbook") { scrapbook = true }.font(.caption.bold()).accessibilityIdentifier("openScrapbook") }.foregroundStyle(DillTheme.muted)
-            HStack { Image(systemName:"tshirt"); Text("A new look, a whole new dill.").font(.caption); Spacer(); Button("Dress up",action:closet).font(.caption.bold()) }.foregroundStyle(DillTheme.muted)
+            HStack { Image(systemName:"tshirt"); Text("Change your pickle’s outfit.").font(.caption); Spacer(); Button("Dress up",action:closet).font(.caption.bold()) }.foregroundStyle(DillTheme.muted)
         }
         .sheet(isPresented:$scrapbook) { ScrapbookView().environmentObject(store) }
         .fullScreenCover(isPresented:$arcade,onDismiss:arcadeClosed) { ArcadeSheet().environmentObject(store) }
@@ -66,7 +60,14 @@ struct NestView: View {
                     .font(.system(size:11,weight:.semibold)).padding(.horizontal,10).padding(.vertical,7)
                     .background(DillTheme.peach.opacity(0.6),in:Capsule()).accessibilityLabel("\(store.pet.streak) day visit streak")
             }
-            Text(store.pet.name).font(DillTheme.display(33)).tracking(-1.4).lineLimit(2).minimumScaleFactor(0.6)
+            HStack(alignment:.center,spacing:12) {
+                Text(store.pet.name).font(DillTheme.display(33)).tracking(-1.4).lineLimit(2).minimumScaleFactor(0.6)
+                Spacer(minLength:4)
+                Button { scrapbook = true } label: {
+                    Label("Scrapbook",systemImage:"book.closed.fill").font(.system(size:12,weight:.semibold,design:.rounded))
+                        .padding(.horizontal,12).frame(minHeight:44).background(.white.opacity(0.7),in:Capsule()).overlay(Capsule().stroke(DillTheme.line,lineWidth:1))
+                }.accessibilityIdentifier("openScrapbook")
+            }
         }.frame(maxWidth:.infinity,alignment:.leading)
     }
 
@@ -76,9 +77,9 @@ struct NestView: View {
                        label:snacking ? "Spare your pickle" : "Feed brine") { snacking ? cancelSnack() : care(.feed) }
                 .disabled(!store.pet.adopted || life.dead)
             careButton(snacking ? "NOPE" : "Play",symbol:snacking ? "xmark" : "gamecontroller.fill",id:"care.play",done:false,
-                       label:snacking ? "Spare your pickle" : "Open the dill arcade") { snacking ? cancelSnack() : openArcade() }
+                       label:snacking ? "Spare your pickle" : "Open the arcade") { snacking ? cancelSnack() : openArcade() }
                 .disabled(!snacking && !canPlay)
-            careButton(snacking ? "CHOMP" : "Clean",symbol:snacking ? "mouth.fill" : "sparkles",id:"care.wash",done:store.pet.dailyCare.contains("wash"),
+            careButton(snacking ? "CHOMP" : "Clean",symbol:snacking ? "mouth.fill" : "bathtub.fill",id:"care.wash",done:store.pet.dailyCare.contains("wash"),
                        label:snacking ? ((store.snackBites ?? 0) > 0 ? "Take another bite" : "Take a bite") : "Clean your pickle") { snacking ? chomp() : care(.wash) }
                 .disabled(!store.pet.adopted || life.dead)
             careButton(life.sleeping ? "Wake" : "Nap",symbol:life.sleeping ? "sun.max.fill" : Care.nap.symbol,id:"care.nap",done:store.pet.dailyCare.contains("nap"),
@@ -98,27 +99,13 @@ struct NestView: View {
         }.accessibilityLabel(label).accessibilityIdentifier(id)
     }
 
-    private var dailyCard: some View {
-        Button(action:play) {
-            HStack(spacing:15) {
-                VStack(alignment:.leading,spacing:9) {
-                    Text("TODAY’S TINY CHALLENGE").font(.system(size:9,weight:.bold,design:.monospaced)).tracking(1.4).foregroundStyle(DillTheme.lime)
-                    Text("The daily crunch.").font(DillTheme.display(26)).tracking(-0.6)
-                    Text("Three taps. One score. Bragging rights.").font(.system(size:12)).foregroundStyle(DillTheme.cream.opacity(0.75))
-                }
-                Spacer(minLength:0)
-                Image(systemName:"arrow.up.right").font(.system(size:19,weight:.semibold)).frame(width:44,height:44).foregroundStyle(DillTheme.ink).background(DillTheme.lime,in:Circle())
-            }.padding(22).frame(maxWidth:.infinity,alignment:.leading).foregroundStyle(DillTheme.cream).background(DillTheme.ink,in:RoundedRectangle(cornerRadius:26))
-        }.accessibilityIdentifier("dailyChallenge")
-    }
-
     private var message: String {
         if life.dead { return NestText.defaultMessage(life,now:nowMs) }
         if snacking { return store.speech ?? "" }
         return stage.line ?? NestText.defaultMessage(life,now:nowMs)
     }
 
-    private func line(_ result: CareResult) -> String { result.message + (result.coins > 0 ? " +\(result.coins) ✦" : "") }
+    private func line(_ result: CareResult) -> String { result.message + (result.coins > 0 ? " +\(result.coins) coins" : "") }
 
     private func care(_ action: Care) {
         let before = life.fullness
@@ -129,11 +116,11 @@ struct NestView: View {
         store.feedback()
         stage.happyUntil = Date().addingTimeInterval(5)
         if action == .feed {
-            stage.pop(result.favorite ? "★ favorite snack ★" : "+\(Int((life.fullness - before).rounded())) food",hearts:result.favorite)
+            stage.pop(result.favorite ? "favorite snack!" : "+\(Int((life.fullness - before).rounded())) food",hearts:result.favorite)
             perform(action, food: food)
             successfulFeeds = (successfulFeeds + 1) % FeedFood.allCases.count
         } else {
-            stage.pop("✧ squeaky clean ✧")
+            stage.pop("squeaky clean!")
             perform(action)
         }
         celebrate(result)
@@ -141,7 +128,7 @@ struct NestView: View {
 
     private func celebrate(_ result: CareResult) {
         guard result.wish else { return }
-        stage.pop("★ wish granted ★",hearts:true)
+        stage.pop("wish granted!",hearts:true)
         store.feedback(.medium)
     }
 
@@ -152,7 +139,7 @@ struct NestView: View {
         guard result.applied else { store.feedback(.soft); return }
         let added = Int((life.happiness - before).rounded())
         stage.happyUntil = Date().addingTimeInterval(5)
-        stage.pop(added > 0 ? "+\(added) happy ♥" : "♥ so loved ♥",hearts:true)
+        stage.pop(added > 0 ? "+\(added) happy ♥" : "so loved!",hearts:true)
         store.feedback()
         if performing { perform(.pet) } else { stage.play(.hop); store.sound(.pet) }
         celebrate(result)
@@ -255,7 +242,7 @@ struct WishChip: View {
     var body: some View {
         let hours = max(1, Int((Double(wish.expiresAt - now) / Double(PetLife.HOUR)).rounded(.up)))
         HStack(spacing:6) {
-            Image(systemName:"sparkles").font(.system(size:11,weight:.semibold))
+            Image(systemName:"gift.fill").font(.system(size:11,weight:.semibold))
             Text("wish: " + PetLife.wishText(wish)).font(.system(size:12,weight:.semibold,design:.rounded))
             Spacer(minLength:4)
             Text("\(hours)h left").font(.system(size:10,weight:.semibold,design:.monospaced)).foregroundStyle(DillTheme.muted)
@@ -276,6 +263,8 @@ struct PetGarden: View {
     let onHold: () -> Void
     let restart: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// Shrinks the 260-point care scene so the care buttons fit above the tab bar on a 6.1-inch phone.
+    static let sceneScale: CGFloat = 0.82
     private var dark: Bool { pet.life.sleeping && !pet.life.dead }
     private var roomColor: Color {
         if dark { return Color(hex:0x344F50) }
@@ -288,8 +277,7 @@ struct PetGarden: View {
                 Label(performance?.caption ?? (dark ? "SHHH. DREAMING" : "YOUR HAPPY PLACE"),systemImage:performance?.action.symbol ?? (dark ? "moon.zzz.fill" : "sun.max"))
                     .font(.system(size:9,weight:.bold,design:.monospaced)).tracking(1.5)
                 Spacer()
-                Image(systemName:"sparkle")
-            }.padding(.horizontal,20).padding(.top,18).padding(.bottom,10)
+            }.padding(.horizontal,20).padding(.top,14).padding(.bottom,8)
                 .foregroundStyle(dark ? DillTheme.cream : DillTheme.ink)
             Text(message).font(.system(size:12,weight:.medium,design:.rounded)).multilineTextAlignment(.center).padding(.horizontal,16).padding(.vertical,10)
                 .foregroundStyle(DillTheme.ink).background(DillTheme.cream.opacity(0.92),in:Capsule()).padding(.horizontal,16)
@@ -297,6 +285,7 @@ struct PetGarden: View {
             ZStack(alignment:.top) {
                 TimelineView(.animation(minimumInterval:reduceMotion ? 0.1 : nil)) { timeline in
                     CareScene(pet:pet,bites:bites,stage:stage,performance:performance,now:timeline.date,reduceMotion:reduceMotion)
+                        .scaleEffect(PetGarden.sceneScale,anchor:.top).frame(height:260 * PetGarden.sceneScale,alignment:.top)
                 }
                 .contentShape(Rectangle())
                 .gesture(LongPressGesture(minimumDuration:0.8).onEnded { _ in onHold() }.exclusively(before:TapGesture().onEnded { onTap() }))
@@ -312,7 +301,7 @@ struct PetGarden: View {
                 }
             }
             HStack(spacing:6) { Circle().frame(width:5,height:5); Text(hint).font(.system(size:11,weight:.medium,design:.rounded)) }
-                .padding(.bottom,18).foregroundStyle(dark ? DillTheme.cream : DillTheme.ink).accessibilityIdentifier("petHint")
+                .padding(.top,4).padding(.bottom,14).foregroundStyle(dark ? DillTheme.cream : DillTheme.ink).accessibilityIdentifier("petHint")
         }.background(roomColor,in:RoundedRectangle(cornerRadius:32)).animation(.easeInOut(duration:0.6),value:dark)
     }
 }

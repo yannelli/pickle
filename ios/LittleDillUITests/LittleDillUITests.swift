@@ -38,12 +38,13 @@ final class LittleDillUITests: XCTestCase {
         screenshot("01-welcome")
         adopt(); screenshot("02-nest")
         for action in ["feed","pet","wash","nap"] {tap("care.\(action)")}
-        XCTAssertTrue(app.staticTexts["4/4 little acts of love today"].exists)
+        XCTAssertTrue(app.staticTexts["4/4 care actions today"].exists)
         tap("tab.Closet"); screenshot("03-closet"); tap("outfit.bow")
         app.alerts.buttons["Unlock for 30 coins"].tap()
         XCTAssertTrue(app.buttons["outfit.bow"].label.contains("wearing"))
         app.terminate(); app.launchArguments = ["--ui-testing","--fast-hatch"]; app.launch()
         tap("tab.Closet")
+        for _ in 0..<5 where !app.buttons["outfit.bow"].exists {app.scrollViews.firstMatch.swipeUp()}
         XCTAssertTrue(app.buttons["outfit.bow"].label.contains("wearing"))
         tap("tab.Friends"); screenshot("04-friends"); tap("Share your pickle")
         XCTAssertTrue(app.otherElements["ActivityListView"].waitForExistence(timeout:5) || app.buttons["Copy"].waitForExistence(timeout:5))
@@ -57,6 +58,17 @@ final class LittleDillUITests: XCTestCase {
         completePlayer(); tap("gameHandoff"); completePlayer(); screenshot("09-party-results")
         XCTAssertTrue(app.staticTexts["Player 1"].exists); XCTAssertTrue(app.staticTexts["Player 2"].exists)
     }
+    func testPlayTabOpensArcadeAndNestOpensScrapbook() {
+        adopt()
+        XCTAssertTrue(app.buttons["care.feed"].isHittable,"Care buttons need scrolling on the first Nest screen")
+        tap("openScrapbook")
+        XCTAssertTrue(app.navigationBars["Scrapbook"].waitForExistence(timeout:5))
+        tap("Done")
+        tap("tab.Play"); tap("playArcade")
+        XCTAssertTrue(app.buttons["arcade.game.hunt"].waitForExistence(timeout:5))
+        tap("arcade.close")
+        XCTAssertTrue(app.buttons["playArcade"].waitForExistence(timeout:5))
+    }
     func testOnlineArenaMovementAndReturn() {
         adopt(); tap("tab.Play"); tap("joinArena")
         let joystick = app.otherElements["arenaJoystick"]
@@ -69,7 +81,7 @@ final class LittleDillUITests: XCTestCase {
         origin.press(forDuration:0.1,thenDragTo:destination,withVelocity:.slow,thenHoldForDuration:2)
         screenshot("11-live-arena-movement")
         XCTAssertFalse(app.descendants(matching:.any)["arenaGoals"].exists)
-        tap("arenaLeave"); app.buttons["Leave arena"].tap()
+        tap("arenaLeave"); app.buttons["Leave"].tap()
         XCTAssertTrue(app.buttons["arenaRecapDone"].waitForExistence(timeout:5),"No run recap after leaving")
         XCTAssertTrue(app.staticTexts["RUN RECAP"].exists)
         screenshot("12-arena-recap")
@@ -91,7 +103,7 @@ final class LittleDillUITests: XCTestCase {
         XCTAssertFalse(joystick.frame.intersects(split.frame))
         XCTAssertEqual(split.label,"Split your pickle")
         screenshot("split-controls-compact")
-        tap("arenaLeave"); app.buttons["Leave arena"].tap(); tap("arenaRecapDone")
+        tap("arenaLeave"); app.buttons["Leave"].tap(); tap("arenaRecapDone")
         XCTAssertTrue(app.buttons["tab.Friends"].waitForExistence(timeout:5))
     }
     func testDistinctCareScenesAndSoundSetting() {

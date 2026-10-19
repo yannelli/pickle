@@ -17,7 +17,7 @@ Configure these repository secrets in `yannelli/pickle`. Use an App Store Connec
 | `IOS_CERTIFICATE_PASSWORD` | Password for the `.p12` |
 | `IOS_MOBILE_PROVISION` | Base64 manual App Store provisioning profile for this app and certificate |
 
-The profile must enable Associated Domains for `applinks:arena.littledill.app`. The workflow checks profile expiry, team, app identifier, distribution type, and the matching signing identity before archiving. Credentials are decoded into a private runner directory, imported into a temporary keychain, and removed in the cleanup step.
+The profile must enable Associated Domains for `applinks:arena.littledill.app` and Game Center. Changing App ID capabilities invalidates existing profiles; create a new one and update this secret. The workflow checks profile expiry, team, app identifier, distribution type, and the matching signing identity before archiving. Credentials are decoded into a private runner directory, imported into a temporary keychain, and removed in the cleanup step.
 
 The iOS app sets `ITSAppUsesNonExemptEncryption` to `false`, matching the existing App Store Connect builds. Backup encryption uses Apple's CryptoKit, and network encryption uses the operating system's networking APIs. Reassess the declaration if adding an encryption implementation or SDK. See [Apple's encryption export guidance](https://developer.apple.com/documentation/security/complying-with-encryption-export-regulations).
 

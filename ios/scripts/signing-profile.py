@@ -9,6 +9,7 @@ import sys
 BUNDLE_ID = "com.littledill.ios"
 TEAM_ID = "2P58V89SR7"
 DOMAIN = "applinks:arena.littledill.app"
+GAME_CENTER = "com.apple.developer.game-center"
 
 
 def validate_profile(profile, now=None):
@@ -28,6 +29,8 @@ def validate_profile(profile, now=None):
     domains = entitlements.get("com.apple.developer.associated-domains", [])
     if "*" not in domains and DOMAIN not in domains:
         raise ValueError("The profile must support Little Dill's Associated Domains")
+    if not entitlements.get(GAME_CENTER):
+        raise ValueError("The profile must include Game Center")
     if not re.fullmatch(r"[A-Fa-f0-9-]{36}", profile["UUID"]):
         raise ValueError("Invalid provisioning profile UUID")
     return profile["UUID"]
@@ -52,7 +55,8 @@ def validate_app(info, entitlements, version, build):
             or entitlements.get("com.apple.developer.team-identifier") != TEAM_ID
             or entitlements.get("get-task-allow")
             or not entitlements.get("beta-reports-active")
-            or DOMAIN not in entitlements.get("com.apple.developer.associated-domains", [])):
+            or DOMAIN not in entitlements.get("com.apple.developer.associated-domains", [])
+            or not entitlements.get(GAME_CENTER)):
         raise ValueError("Exported IPA has incorrect distribution entitlements")
 
 

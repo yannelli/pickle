@@ -27,7 +27,7 @@
 | `tests/fixtures/arena-parity.json` | Shared values checked by JavaScript and Swift tests |
 | `website/` | Official landing site (`pickle-website`), deployed by Cloudflare Git integration on pushes to `main` |
 
-Read [README.md](README.md) for player behavior and deployment targets, [ios/README.md](ios/README.md) for native workflows, and [docs/INDEX.md](docs/INDEX.md) for the Cloudflare rate-limit references.
+Read [README.md](README.md) for player behavior and deployment targets, [ios/README.md](ios/README.md) for native workflows, and [docs/INDEX.md](docs/INDEX.md) for the Cloudflare rate-limit and Game Center references. Keep leaderboard IDs in `ios/scripts/game-center.mjs` and `ios/LittleDill/GameCenter.swift` in sync.
 
 For GitHub TestFlight automation, follow the release setup and Apple/GitHub references linked from [docs/INDEX.md](docs/INDEX.md). Version tags release to TestFlight; manual branch runs validate without uploading.
 

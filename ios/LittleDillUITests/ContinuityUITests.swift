@@ -73,14 +73,14 @@ final class ContinuityUITests: XCTestCase {
         XCTAssertTrue(joystick.isHittable)
         XCTAssertFalse(app.buttons["arenaReconnect"].exists)
         capture("arena-restored")
-        tap("arenaLeave"); app.buttons["Leave arena"].tap(); tap("arenaRecapDone")
+        tap("arenaLeave"); app.buttons["Leave"].tap(); tap("arenaRecapDone")
         XCTAssertTrue(app.buttons["tab.Friends"].waitForExistence(timeout:5))
     }
 
     func testArenaThumbControlsSwapFromSettingsAndPersistOnCompactPhone() {
         let joystick = app.otherElements["arenaJoystick"], split = app.buttons["arenaSplit"], dash = app.buttons["arenaDash"]
         func enterArena() {tap("tab.Friends"); tap("createArenaRoom"); XCTAssertTrue(joystick.waitForExistence(timeout:20))}
-        func leaveArena() {tap("arenaLeave"); app.buttons["Leave arena"].tap(); tap("arenaRecapDone")}
+        func leaveArena() {tap("arenaLeave"); app.buttons["Leave"].tap(); tap("arenaRecapDone")}
         func toggleSwap() {
             tap("Settings")
             let toggle = app.switches["arenaControlsSwapped"]

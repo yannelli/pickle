@@ -910,7 +910,7 @@
         const days = Math.floor(Life.age(state) / Life.DAY);
         $('profile-name').textContent = state.name;
         $('profile-kind').textContent = variety.name + ' · ' + (elder ? elder.name : (teen ? teen.name.toLowerCase() : stage()) + ' pickle') + ' · ' + days + (days === 1 ? ' day old' : ' days old');
-        $('profile-quip').textContent = state.dead ? (state.eaten ? 'A good dill. A great snack. A questionable choice.' : 'A good dill. A very good friend.') : elder ? elder.quip : teen ? teen.quip : { baby: 'Small pickle. Enormous feelings.', young: 'Growing into those big dill dreams.', adult: 'Thriving. Mostly thinking about snacks.' }[stage()];
+        $('profile-quip').textContent = state.dead ? (state.eaten ? 'You ate this pickle.' : 'A very good friend, missed.') : elder ? elder.quip : teen ? teen.quip : { baby: 'Brand new and curious about everything.', young: 'Growing a little every day.', adult: 'Thriving. Mostly thinking about snacks.' }[stage()];
         const hours = Math.max(0, Math.round((Life.nextCareAt(state) - Date.now()) / Life.HOUR));
         $('care-outlook').textContent = state.dead ? 'You can start a new little life whenever you’re ready.' : state.sick ? 'A little care will help: bring all four meters to 30.' : 'A daily check-in is plenty. ' + (hours <= 2 ? 'A little care would be lovely now.' : 'Comfortably brined for about ' + hours + ' more hours.');
         $('growth-outlook').textContent = elder ? 'A new elder look every 3 days. No age limit. Lap ' + elder.lap + '.' : teen ? 'A new teen phase every day. Adult at 7 days, elder at 14.' : 'Baby → young at 1 day → teen at 3 days → adult at 7 days → elder at 14 days.';
@@ -919,7 +919,7 @@
         const key = unlocked + ':' + (elder?.id || '');
         if (collectionKey !== key) {
           collectionKey = key;
-          $('elder-grid').innerHTML = Life.ELDERS.map((form, index) => '<div class="elder-card' + (index >= unlocked ? ' locked' : '') + '"><b>' + (index < unlocked ? '✦ ' : '') + form.name + '</b><small>' + (index < unlocked ? form.quip : 'Day ' + (14 + index * 3)) + '</small></div>').join('');
+          $('elder-grid').innerHTML = Life.ELDERS.map((form, index) => '<div class="elder-card' + (index >= unlocked ? ' locked' : '') + '"><b>' + form.name + '</b><small>' + (index < unlocked ? form.quip : 'Day ' + (14 + index * 3)) + '</small></div>').join('');
         }
         renderScrapbook();
       }
@@ -934,7 +934,7 @@
         $('scrapbook-page').innerHTML = '<p class="scrapbook-note">Loves ' + Life.FOOD_NAMES[favorite.food] + ' and ' + Life.GAME_NAMES[favorite.game] + '.</p>' +
           '<h3>Streak stickers</h3><div class="stickers">' + page.stickers.map(sticker => '<div class="sticker' + (sticker.earned ? ' earned' : '') + '">' + (sticker.earned ? '★ ' : '') + sticker.days + ' days</div>').join('') + '</div>' +
           '<h3>Life so far</h3><ul class="moments">' + page.moments.map(moment => '<li><span>' + Life.MOMENTS[moment.id] + '</span><time>' + date(moment.at) + '</time></li>').join('') + '</ul>' +
-          '<h3>Elder album · ' + page.unlocked + '/32</h3><div class="elder-grid">' + page.album.map((slot, index) => '<div class="elder-card' + (slot.unlocked ? '' : ' locked') + '"><b>' + (slot.unlocked ? '✦ ' + Life.ELDERS[index].name : 'Locked') + '</b><small>' + (slot.unlocked ? date(slot.at) : 'Day ' + slot.day) + '</small></div>').join('') + '</div>';
+          '<h3>Elder album · ' + page.unlocked + '/32</h3><div class="elder-grid">' + page.album.map((slot, index) => '<div class="elder-card' + (slot.unlocked ? '' : ' locked') + '"><b>' + (slot.unlocked ? Life.ELDERS[index].name : 'Locked') + '</b><small>' + (slot.unlocked ? date(slot.at) : 'Day ' + slot.day) + '</small></div>').join('') + '</div>';
       }
       function renderWish() {
         const wish = Life.activeWish(state, Date.now());
@@ -948,7 +948,7 @@
         const added = Life.grantWish(state, kind, target, Date.now());
         if (added === null) return '';
         happyUntil = Date.now() + 5000;
-        if (!game) effect('★ wish granted ★');
+        if (!game) effect('wish granted!');
         sfx('win');
         return ' wish granted! +' + added + ' happy.';
       }
@@ -992,7 +992,7 @@
         if (state.hygiene < 40) return 'a little funky in here. clean up?';
         if (state.happiness < 30) return 'a little pet or play would help. ♥';
         if (Life.teen(state)) return ['ugh. whatever. (still loves you.)', 'it’s not a phase. okay, it’s a phase.', 'do not talk to me before brine.', 'can i get a bigger jar.'][Math.floor(Life.age(state) / Life.HOUR) % 4];
-        return ['just a pickle. having a day.', 'life is pretty dill-ightful.', 'small, salty, and so loved.', 'no thoughts. just brine.'][Math.floor(Life.age(state) / Life.HOUR) % 4];
+        return ['just a pickle. having a day.', 'life is pretty good today.', 'small, salty, and so loved.', 'no thoughts. just brine.'][Math.floor(Life.age(state) / Life.HOUR) % 4];
       }
       function render() {
         renderLife();
@@ -1144,7 +1144,7 @@
         if (Date.now() - lastPet < 2000) { say('so loved. another pet in a moment. ♥'); render(); return; }
         lastPet = Date.now(); lastAction = Date.now();
         const added = addHappy(8);
-        effect(added ? '+' + added + ' happy ♥' : '♥ so loved ♥'); act('hop', 650); sfx('pet');
+        effect(added ? '+' + added + ' happy ♥' : 'so loved!'); act('hop', 650); sfx('pet');
         say((added ? '+' + added + ' happy. you’re my favorite human.' : '100% happy. maximum pickle joy!') + grantWish('pet'));
         assessHealth(); recordCare(); save(); render();
       }
@@ -1174,14 +1174,14 @@
             const food = showFood();
             const favorite = food.id === Life.favorite(state.variety).food;
             const happy = addHappy(3 + (favorite ? Life.FAVORITE_BONUS : 0));
-            effect(favorite ? '★ favorite snack ★' : '+' + Math.round(added) + ' food'); act('munch', 2900); sfx('feed');
+            effect(favorite ? 'favorite snack!' : '+' + Math.round(added) + ' food'); act('munch', 2900); sfx('feed');
             say((favorite ? food.name + '! my favorite! +' : food.name + ' time! +') + Math.round(added) + ' food, +' + happy + ' happy.' + grantWish('feed'));
           }
         } else if (state.hygiene >= 99) { say('already sparkling. how about a game?'); sfx('blocked'); }
         else {
           state.hygiene = 100;
           const happy = addHappy(4);
-          effect('✧ squeaky clean ✧'); act('bath', 2800); sfx('clean');
+          effect('squeaky clean!'); act('bath', 2800); sfx('clean');
           say('a sudsy little bath. +' + happy + ' happy, too.' + grantWish('clean'));
         }
         assessHealth(); recordCare(); save(); render();

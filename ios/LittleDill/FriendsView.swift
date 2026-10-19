@@ -4,11 +4,9 @@ struct FriendsView: View {
     @EnvironmentObject private var store: DillStore
     let arena: (ArenaLaunch) -> Void
     @State private var code = ""
-    @State private var party = false
-    @State private var game: GameLaunch?
     var body: some View {
         VStack(spacing:24) {
-            PageHeading(eyebrow:"Good things come in jars",title:"Your people.\nYour pickle chaos.",detail:"Across the couch or across the world. There’s always room for a little rivalry.")
+            PageHeading(eyebrow:"Friends",title:"Play with\nyour people.",detail:"Meet up online in a private Brine Royale crew room.")
             ZStack {
                 RoundedRectangle(cornerRadius:28).fill(DillTheme.sage)
                 HStack(spacing:-35) {
@@ -20,8 +18,8 @@ struct FriendsView: View {
             VStack(alignment:.leading,spacing:18) {
                 HStack {Label("ONLINE WITH YOUR CREW",systemImage:"globe").font(.system(size:10,weight:.bold,design:.monospaced)).tracking(1); Spacer(); Image(systemName:"person.2.fill")}.foregroundStyle(DillTheme.lime)
                 Text("Same garden.\nDifferent zip codes.").font(DillTheme.display(29)).foregroundStyle(DillTheme.cream)
-                Text("Create a private arena and share its room code. Your friends can join from iPhone or the web.").font(.subheadline).foregroundStyle(DillTheme.cream.opacity(0.8))
-                Button {arena(ArenaLaunch(room:ArenaLaunch.newRoom()))} label: {Label("Make a crew room",systemImage:"plus.circle")}.buttonStyle(DillButton(light:true)).accessibilityIdentifier("createArenaRoom")
+                Text("Create a private Brine Royale room and share its code. Friends can join from iPhone or the web.").font(.subheadline).foregroundStyle(DillTheme.cream.opacity(0.8))
+                Button {arena(ArenaLaunch(room:ArenaLaunch.newRoom()))} label: {Label("Create a crew room",systemImage:"plus.circle")}.buttonStyle(DillButton(light:true)).accessibilityIdentifier("createArenaRoom")
             }.padding(23).background(DillTheme.ink,in:RoundedRectangle(cornerRadius:28))
             SoftCard {
                 VStack(alignment:.leading,spacing:14) {
@@ -30,19 +28,15 @@ struct FriendsView: View {
                         .padding(15).background(DillTheme.sage,in:RoundedRectangle(cornerRadius:16)).accessibilityIdentifier("arenaRoomCode")
                         .onChange(of:code) {_,value in code = String(value.uppercased().filter {$0.isASCII && ($0.isLetter || $0.isNumber)}.prefix(6))}
                         .onSubmit {if ArenaLaunch.validRoom(code) {arena(ArenaLaunch(room:code))}}
-                    Button {arena(ArenaLaunch(room:code))} label: {Text("Join their garden")}.buttonStyle(DillButton()).disabled(!ArenaLaunch.validRoom(code)).opacity(ArenaLaunch.validRoom(code) ? 1 : 0.5).accessibilityIdentifier("joinArenaRoom")
+                    Button {arena(ArenaLaunch(room:code))} label: {Text("Join crew room")}.buttonStyle(DillButton()).disabled(!ArenaLaunch.validRoom(code)).opacity(ArenaLaunch.validRoom(code) ? 1 : 0.5).accessibilityIdentifier("joinArenaRoom")
                 }
             }
-            Button {party = true} label: {
-                SoftCard {HStack(spacing:15) {Image(systemName:"person.3.fill").font(.title2); VStack(alignment:.leading,spacing:6) {Text("Pass & play").font(DillTheme.display(23)); Text("One phone. 2–4 friends. Offline fun.").font(.caption).foregroundStyle(DillTheme.muted)}; Spacer(); Image(systemName:"arrow.up.right")}}
-            }
             VStack(alignment:.leading,spacing:14) {
-                Text("Meet my little dill.").font(DillTheme.display(26))
-                Text("Your pickle was born to be in the group chat.").font(.subheadline).foregroundStyle(DillTheme.muted)
+                Text("Meet my pickle.").font(DillTheme.display(26))
+                Text("Share a picture card of your pickle with friends.").font(.subheadline).foregroundStyle(DillTheme.muted)
                 ShareCardButton(pet:store.pet,title:"Share your pickle")
             }
-        }.sheet(isPresented:$party) {PartySetup {names in party = false; game = GameLaunch(challenge:DailyChallenge(day:DailyChallenge.today()),mode:.party,players:names)}}
-            .fullScreenCover(item:$game) {GameView(launch:$0).environmentObject(store)}
+        }
     }
 }
 
@@ -66,7 +60,7 @@ struct RoyaleCard: View {
                 }.frame(width:130,height:180)
             }
             Text("Earn 1 coin per 1,000 mass collected, up to 1,000 coins daily. Resets at 00:00 UTC.").font(.system(size:11,weight:.medium)).fixedSize(horizontal:false,vertical:true)
-            Button(action:play) {HStack {Text("Jump into the garden"); Image(systemName:"arrow.up.right")}}.buttonStyle(DillButton()).accessibilityIdentifier("joinArena")
+            Button(action:play) {HStack {Text("Join Brine Royale"); Image(systemName:"arrow.up.right")}}.buttonStyle(DillButton()).accessibilityIdentifier("joinArena")
             HStack(spacing:5) {Image(systemName:"person.2.fill"); Text("Up to 64 players. A whole garden to grow.")}.font(.system(size:10,weight:.medium,design:.rounded))
         }.padding(23).background(DillTheme.lime,in:RoundedRectangle(cornerRadius:28))
     }

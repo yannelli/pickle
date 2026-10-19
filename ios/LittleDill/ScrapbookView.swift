@@ -60,7 +60,7 @@ struct ScrapbookView: View {
             if moments.isEmpty { Text("The first page is waiting for a hatchling.").font(.caption).foregroundStyle(DillTheme.muted) }
             ForEach(moments, id: \.id) { moment in
                 HStack(spacing: 10) {
-                    Image(systemName: "sparkle").font(.system(size: 11))
+                    Image(systemName: "circle.fill").font(.system(size: 6))
                     Text(PetLife.MOMENTS[moment.id] ?? moment.id).font(.system(size: 13, weight: .semibold, design: .rounded))
                     Spacer(minLength: 6)
                     Text(PetLife.date(moment.at).formatted(date: .abbreviated, time: .omitted)).font(.system(size: 11)).foregroundStyle(DillTheme.muted)
@@ -76,7 +76,7 @@ struct ScrapbookView: View {
                 ForEach(Array(page.album.enumerated()), id: \.element.id) { index, slot in
                     let form = ElderLook.all[index]
                     VStack(alignment: .leading, spacing: 5) {
-                        Text((slot.unlocked ? "✦ " : "") + (slot.unlocked ? form.name : "Locked")).font(.system(size: 11, weight: .bold))
+                        Text(slot.unlocked ? form.name : "Locked").font(.system(size: 11, weight: .bold))
                         Text(slot.unlocked ? PetLife.date(slot.at).formatted(date: .abbreviated, time: .omitted) : "Day \(slot.day)")
                             .font(.system(size: 10)).foregroundStyle(DillTheme.muted)
                     }.padding(11).frame(maxWidth: .infinity, alignment: .leading)

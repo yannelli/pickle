@@ -149,6 +149,7 @@ import SwiftUI
             progress.record(game: circuit.game, score: score)
             pet.arcadeCircuit = progress
         }
+        if eligible, let board = GameCenter.Board.arcade(game) { GameCenter.shared.submit(score, to: board) }
         save(); return added
     }
     /// Opens the web "are you going to EAT me?!" prompt without biting.
@@ -225,13 +226,22 @@ import SwiftUI
         pet = state; pet.lastPetAt = nil
         sync(at: time); save()
     }
-    @discardableResult func record(score: Int, day: String) -> Int { let reward = pet.record(score: score, day: day, at: now); save(); return reward }
+    @discardableResult func record(score: Int, day: String) -> Int {
+        let reward = pet.record(score: score, day: day, at: now); save()
+        if (0...300).contains(score) { GameCenter.shared.submit(score, to: .daily) }
+        return reward
+    }
     func equip(_ outfit: Outfit) -> Bool { let result = pet.equip(outfit); save(); return result }
     @discardableResult func rename(_ name: String) -> Bool {
         guard pet.adopted, let clean = PetLife.cleanName(name) else { return false }
         pet.life.name = clean; save(); return true
     }
-    func recordArena(best:Int) {guard best >= 0 else {return}; pet.arenaBest = max(pet.arenaBest ?? 0,best); save()}
+    func recordArena(best:Int) {guard best >= 0 else {return}; pet.arenaBest = max(pet.arenaBest ?? 0,best); save(); GameCenter.shared.submit(best, to: .arena)}
+    var gameCenterBests: [GameCenter.Board: Int] {
+        var bests: [GameCenter.Board: Int] = [.arena: pet.arenaBest ?? 0, .daily: pet.scores.map(\.score).max() ?? 0]
+        for (game, score) in pet.arcadeRecords { if let board = GameCenter.Board.arcade(game) { bests[board] = score } }
+        return bests
+    }
     var arenaCoinsToday: Int {
         guard let progress = pet.arenaEarnings, progress.day == DailyChallenge.today(now) else { return 0 }
         return Int(progress.mass / Double(ArenaEarnings.massPerCoin))

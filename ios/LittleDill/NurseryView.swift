@@ -14,16 +14,35 @@ struct NurseryView: View {
     var body: some View {
         ScrollView {
             VStack(spacing:22) {
-                HStack { Text("little dill.").font(DillTheme.display(29)).tracking(-1); Spacer(); Eyebrow(text:"One tiny beginning") }
                 VStack(spacing:8) {
                     Text(title).font(DillTheme.display(38)).tracking(-1.6).multilineTextAlignment(.center).accessibilityIdentifier("nurseryTitle")
                     Text(detail).font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center).accessibilityIdentifier("nurseryMessage")
                 }
                 BrineJar(phase:life.phase,variety:variety).frame(height:250).accessibilityHidden(true)
                 controls
-                Text("No account. No pressure. Just a little joy.").font(.caption).foregroundStyle(DillTheme.muted)
-            }.padding(26).frame(maxWidth:540).frame(maxWidth:.infinity)
+                Text("No account needed.").font(.caption).foregroundStyle(DillTheme.muted)
+            }.padding(.horizontal,26).padding(.vertical,16).frame(maxWidth:540).frame(maxWidth:.infinity)
         }.scrollIndicators(.hidden).scrollDismissesKeyboard(.interactively)
+            .safeAreaInset(edge:.top,spacing:0) {
+                HStack { Text("little dill.").font(DillTheme.display(29)).tracking(-1); Spacer(); Eyebrow(text:"One tiny beginning") }
+                    .padding(.horizontal,26).padding(.vertical,10).frame(maxWidth:540).frame(maxWidth:.infinity)
+                    .background(DillTheme.cream.ignoresSafeArea(edges:.top))
+            }
+            .safeAreaInset(edge:.bottom,spacing:0) {
+                if life.phase == .naming {
+                    VStack(spacing:14) {
+                        VStack(alignment:.leading,spacing:10) {
+                            Text("What shall we call this little one?").font(.system(size:13,weight:.semibold,design:.rounded))
+                            TextField("Sir Crunch, perhaps?",text:$name).font(.system(.title3,design:.rounded,weight:.semibold)).padding(16)
+                                .background(.white.opacity(0.7),in:RoundedRectangle(cornerRadius:18))
+                                .focused($editing).submitLabel(.done).onSubmit(submit).autocorrectionDisabled().accessibilityIdentifier("petName")
+                            if !error.isEmpty { Text(error).font(.caption).foregroundStyle(Color(hex:0x993E24)).accessibilityIdentifier("nameError") }
+                        }
+                        Button(action:submit) { Text("Hello, little friend ♥") }.buttonStyle(DillButton()).accessibilityIdentifier("adopt")
+                    }.padding(.horizontal,26).padding(.vertical,10).frame(maxWidth:540).frame(maxWidth:.infinity)
+                        .background(DillTheme.cream.ignoresSafeArea(edges:.bottom))
+                }
+            }
             .animation(.spring(response:0.5,dampingFraction:0.8),value:life.phase)
             .onAppear { if life.phase == .naming { editing = true } }
             .onChange(of:life.phase) { _,phase in if phase == .naming { editing = true } }
@@ -68,14 +87,7 @@ struct NurseryView: View {
                 .animation(.linear(duration:1),value:remaining)
                 .accessibilityLabel("Brining progress").accessibilityValue("\(remaining) seconds left").accessibilityIdentifier("hatchProgress")
         default:
-            VStack(alignment:.leading,spacing:10) {
-                Text("What shall we call this little one?").font(.system(size:13,weight:.semibold,design:.rounded))
-                TextField("Sir Crunch, perhaps?",text:$name).font(.system(.title3,design:.rounded,weight:.semibold)).padding(16)
-                    .background(.white.opacity(0.7),in:RoundedRectangle(cornerRadius:18))
-                    .focused($editing).submitLabel(.done).onSubmit(submit).autocorrectionDisabled().accessibilityIdentifier("petName")
-                if !error.isEmpty { Text(error).font(.caption).foregroundStyle(Color(hex:0x993E24)).accessibilityIdentifier("nameError") }
-            }
-            Button(action:submit) { Text("Hello, little friend ♥") }.buttonStyle(DillButton()).accessibilityIdentifier("adopt")
+            EmptyView()
         }
     }
 

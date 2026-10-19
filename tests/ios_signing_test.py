@@ -24,6 +24,7 @@ class SigningTests(unittest.TestCase):
                 "get-task-allow": False,
                 "beta-reports-active": True,
                 "com.apple.developer.associated-domains": [signing.DOMAIN],
+                signing.GAME_CENTER: True,
             },
         }
 
@@ -41,7 +42,8 @@ class SigningTests(unittest.TestCase):
 
     def test_rejects_wrong_entitlements(self):
         for key, value in [("application-identifier", "other.app"), ("get-task-allow", True),
-                           ("beta-reports-active", False), ("com.apple.developer.associated-domains", [])]:
+                           ("beta-reports-active", False), ("com.apple.developer.associated-domains", []),
+                           (signing.GAME_CENTER, False)]:
             profile = copy.deepcopy(self.profile)
             profile["Entitlements"][key] = value
             with self.subTest(key=key), self.assertRaises(ValueError):

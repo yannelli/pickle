@@ -104,7 +104,7 @@ struct BackupShare: Identifiable {
                 if let outcome { outcomeSection(outcome) } else { pickSections }
             }
             .accessibilityIdentifier("backup.preview")
-            .navigationTitle("Welcome back, little dill.").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Restore your pickle").navigationBarTitleDisplayMode(.inline)
         }
     }
 
