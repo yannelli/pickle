@@ -51,6 +51,7 @@ import SwiftUI
     private func sync(at time: Date) {
         let before = PetLife.stage(pet.life, now: pet.life.updatedAt)
         pet.refresh(at: time)
+        pet.rollWish(at: time, food: FeedFood.at(defaults.integer(forKey: FeedFood.turnKey)).rawValue)
         if pet.life.dead { arcadeActive = false; activeCircuit = nil; snackBites = nil; snackUntil = nil }
         let after = PetLife.stage(pet.life, now: PetLife.ms(time))
         if after != before && pet.life.phase == .living && !pet.life.dead { speech = "look at you grow. hello, \(after.rawValue)!" }
@@ -75,13 +76,14 @@ import SwiftUI
         speech = "welcome home, \(pet.name)."
         save(); return true
     }
-    @discardableResult func care(_ action: Care) -> CareResult {
+    /// `food` is the food shown for a feed, which decides the favorite-food bonus.
+    @discardableResult func care(_ action: Care, food: FeedFood? = nil) -> CareResult {
         if snackBites != nil { cancelBite(); return CareResult(applied: false, coins: 0, message: speech ?? "") }
         if action == .nap { return toggleSleep() }
         guard !arcadeActive else { return CareResult(applied: false, coins: 0, message: "") }
         let time = now
         sync(at: time)
-        let result = pet.care(action, at: time)
+        let result = pet.care(action, at: time, food: food?.rawValue)
         if !result.message.isEmpty { speech = result.message }
         save(); return result
     }
@@ -134,7 +136,13 @@ import SwiftUI
         let circuit = activeCircuit
         activeCircuit = nil
         let eligible = completed && pet.adopted && !pet.life.dead
+        let wished = PetLife.activeWish(pet.life, now: PetLife.ms(time)).map { $0.kind == "play" && $0.target == game } ?? false
         let added = pet.finishArcade(game: game, score: score, completed: completed, at: time)
+        if eligible {
+            let favorite = PetLife.favorite(pet.life.variety).game == game
+            if wished { speech = "wish granted! that was exactly the game i wanted." }
+            else if favorite { speech = "my favorite game! +\(Int(PetLife.FAVORITE_BONUS)) bonus happy." }
+        }
         if eligible, let circuit, circuit.game.rawValue == game,
            pet.arcadeCircuit.map({ $0.day <= circuit.day }) ?? true {
             var progress = pet.arcadeCircuit.flatMap { $0.day == circuit.day ? $0 : nil } ?? ArcadeCircuit(day: circuit.day)
@@ -231,7 +239,8 @@ import SwiftUI
     @discardableResult func recordArena(earnedMass: Double, session: String, goalsDone: Int? = nil) -> Int {
         let previous = pet.arenaEarnings
         let earned = pet.recordArena(earnedMass: earnedMass, session: session, goalsDone: goalsDone, at: now)
-        if pet.arenaEarnings != previous { save() }
+        let firstRun = PetLife.recordEvent(&pet.life, "arena", now: PetLife.ms(now))
+        if pet.arenaEarnings != previous || firstRun { save() }
         return earned
     }
     func setHaptics(_ enabled: Bool) { pet.haptics = enabled; save() }

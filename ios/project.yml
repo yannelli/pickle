@@ -33,6 +33,8 @@ targets:
       - LittleDillTests
       - path: ../tests/fixtures/arena-parity.json
         buildPhase: resources
+      - path: ../tests/fixtures/pet-parity.json
+        buildPhase: resources
     dependencies:
       - target: LittleDill
     settings:

@@ -160,6 +160,8 @@ struct CareResult: Equatable {
     var applied: Bool
     var coins: Int
     var message: String
+    var favorite = false
+    var wish = false
 }
 
 struct ScoreEntry: Codable, Identifiable, Equatable {
@@ -235,7 +237,7 @@ struct PetState: Codable {
         arcadeRecords = try c.decodeIfPresent([String: Int].self, forKey: .arcadeRecords) ?? [:]
         arcadeCircuit = try? c.decodeIfPresent(ArcadeCircuit.self, forKey: .arcadeCircuit)
         switch version {
-        case 2: life = try c.decode(WebPet.self, forKey: .life)
+        case 2: life = try c.decode(WebPet.self, forKey: .life); PetLife.cleanOptionals(&life)
         case 1:
             // Native v1 saves keep their pickle and restart the care clock at the moment of migration.
             let now = PetLife.ms(decoder.userInfo[Self.nowKey] as? Date ?? Date())
@@ -295,10 +297,20 @@ struct PetState: Codable {
         PetLife.advance(&life, now: PetLife.ms(now))
         let day = Self.dayKey(now, calendar: calendar)
         if careDay < day { careDay = day; dailyCare = [] }
-        guard adopted, lastVisitDay != day, day > lastVisitDay else { return }
+        guard adopted else { return }
         let yesterday = Self.dayKey(calendar.date(byAdding: .day, value: -1, to: now) ?? now, calendar: calendar)
-        streak = lastVisitDay == yesterday ? min(streak, Self.maxStreak - 1) + 1 : 1
-        lastVisitDay = day
+        PetLife.visit(streak: &streak, lastVisitDay: &lastVisitDay, day: day, yesterday: yesterday)
+    }
+
+    /// Rolls a wish for the local day and hour. `food` is the next food in this device's feeding rotation.
+    mutating func rollWish(at now: Date, calendar: Calendar = PetState.localCalendar, food: String) {
+        PetLife.rollWish(&life, now: PetLife.ms(now), day: Self.dayKey(now, calendar: calendar), hour: calendar.component(.hour, from: now), food: food)
+    }
+
+    /// Grants an active wish of this kind: +10 happy from the shared rule plus iOS coins, with the reply line.
+    private mutating func grantWish(_ kind: String, target: String = "", at ms: Int64) -> (added: Int, coins: Int, line: String)? {
+        guard let added = PetLife.grantWish(&life, kind: kind, target: target, now: ms) else { return nil }
+        return (added, addCoins(PetLife.WISH_COINS), " wish granted! +\(added) happy.")
     }
 
     private mutating func addHappy(_ amount: Double) -> Int {
@@ -322,7 +334,7 @@ struct PetState: Codable {
     }
 
     // Mirrors the web care(), petPickle() and toggleSleep() handlers. Wash follows the web Clean rules.
-    @discardableResult mutating func care(_ action: Care, at now: Date = Date()) -> CareResult {
+    @discardableResult mutating func care(_ action: Care, at now: Date = Date(), food: String? = nil) -> CareResult {
         if action == .nap { return toggleSleep(at: now) }
         refresh(at: now)
         guard life.phase == .living, !life.dead else { return CareResult(applied: false, coins: 0, message: restingMessage) }
@@ -331,14 +343,16 @@ struct PetState: Codable {
             return CareResult(applied: false, coins: 0, message: "zzZ... use Wake to rise & brine.")
         }
         let ms = PetLife.ms(now)
-        var applied = true, message = ""
+        var applied = true, message = "", favorite = false
         switch action {
         case .feed:
             if life.fullness >= 99 { applied = false; message = "full to the brim. try a little pet!" }
             else {
                 let added = min(40, 100 - life.fullness)
                 life.fullness = PetLife.clamp(life.fullness + 40)
-                message = "finest brine. +\(Int(added.rounded(.toNearestOrAwayFromZero))) food, +\(addHappy(3)) happy."
+                favorite = food != nil && food == PetLife.favorite(life.variety).food
+                let gain = "+\(Int(added.rounded(.toNearestOrAwayFromZero))) food, +\(addHappy(favorite ? 3 + PetLife.FAVORITE_BONUS : 3)) happy."
+                message = (favorite ? "my favorite snack! " : "finest brine. ") + gain
             }
         case .pet:
             if let last = lastPetAt, ms - last < 2000 { return CareResult(applied: false, coins: 0, message: "so loved. another pet in a moment. ♥") }
@@ -350,9 +364,11 @@ struct PetState: Codable {
             else { life.hygiene = 100; message = "a sudsy little bath. +\(addHappy(4)) happy, too." }
         case .nap: break
         }
+        let wish = applied ? grantWish(action == .wash ? "clean" : action.rawValue, at: ms) : nil
         PetLife.assess(&life)
         life.lastCareAt = ms
-        return CareResult(applied: applied, coins: applied ? reward(action) : 0, message: message)
+        return CareResult(applied: applied, coins: (applied ? reward(action) : 0) + (wish?.coins ?? 0), message: message + (wish?.line ?? ""),
+                          favorite: favorite, wish: wish != nil)
     }
 
     @discardableResult mutating func toggleSleep(at now: Date = Date()) -> CareResult { setSleeping(!life.sleeping, at: now) }
@@ -362,7 +378,9 @@ struct PetState: Codable {
         guard life.phase == .living, !life.dead else { return CareResult(applied: false, coins: 0, message: restingMessage) }
         life.sleeping = sleeping
         life.lastCareAt = PetLife.ms(now)
-        return CareResult(applied: true, coins: reward(action), message: sleeping ? "night night. don’t let the dill bugs bite." : "rise & brine, sleepyhead.")
+        let wish = sleeping ? grantWish("nap", at: life.lastCareAt) : nil
+        return CareResult(applied: true, coins: reward(action) + (wish?.coins ?? 0),
+                          message: (sleeping ? "night night. don’t let the dill bugs bite." : "rise & brine, sleepyhead.") + (wish?.line ?? ""), wish: wish != nil)
     }
 
     mutating func prepareArcade(at now: Date = Date()) -> Bool {
@@ -404,11 +422,15 @@ struct PetState: Codable {
     mutating func finishArcade(game: String, score: Int, completed: Bool, at now: Date = Date()) -> Int {
         refresh(at: now)
         guard completed, Self.arcadeGames.contains(game), life.phase == .living, !life.dead else { return 0 }
-        let added = addHappy(Double(Self.arcadeReward(game: game, score: score)))
+        let ms = PetLife.ms(now)
+        let bonus = PetLife.favorite(life.variety).game == game ? PetLife.FAVORITE_BONUS : 0
+        let added = addHappy(Double(Self.arcadeReward(game: game, score: score)) + bonus)
         arcadeRecords[game] = max(arcadeRecords[game] ?? 0, max(0, score))
+        PetLife.recordEvent(&life, "game", now: ms)
+        let wish = grantWish("play", target: game, at: ms)
         PetLife.assess(&life)
-        life.lastCareAt = PetLife.ms(now)
-        return added
+        life.lastCareAt = ms
+        return added + (wish?.added ?? 0)
     }
 
     @discardableResult mutating func record(score: Int, day: String, at now: Date = Date()) -> Int {

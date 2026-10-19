@@ -1,0 +1,1604 @@
+{
+ "favorites": {
+  "dill": {
+   "food": "strawberry",
+   "game": "catch"
+  },
+  "gherkin": {
+   "food": "carrot",
+   "game": "memory"
+  },
+  "garlic": {
+   "food": "broccoli",
+   "game": "hunt"
+  },
+  "butter": {
+   "food": "cheese",
+   "game": "memory"
+  },
+  "chili": {
+   "food": "apple",
+   "game": "hunt"
+  },
+  "pepper": {
+   "food": "carrot",
+   "game": "catch"
+  }
+ },
+ "favoriteBonus": 4,
+ "foods": [
+  "carrot",
+  "strawberry",
+  "broccoli",
+  "apple",
+  "cheese"
+ ],
+ "foodNames": {
+  "carrot": "carrot",
+  "strawberry": "strawberry",
+  "broccoli": "broccoli",
+  "apple": "apple slice",
+  "cheese": "cheese wedge"
+ },
+ "games": [
+  "hunt",
+  "memory",
+  "catch"
+ ],
+ "gameNames": {
+  "hunt": "Heart hunt",
+  "memory": "Dill says",
+  "catch": "Brine catch"
+ },
+ "wish": {
+  "kinds": [
+   "feed",
+   "clean",
+   "pet",
+   "play",
+   "nap"
+  ],
+  "ms": 21600000,
+  "perDay": 2,
+  "happiness": 10,
+  "coins": 5,
+  "hours": [
+   9,
+   15
+  ],
+  "quietHour": 22
+ },
+ "wishTexts": [
+  {
+   "wish": {
+    "kind": "feed",
+    "target": "apple",
+    "issuedAt": 0,
+    "expiresAt": 1
+   },
+   "text": "a apple slice"
+  },
+  {
+   "wish": {
+    "kind": "clean",
+    "target": "",
+    "issuedAt": 0,
+    "expiresAt": 1
+   },
+   "text": "a bubble bath"
+  },
+  {
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 0,
+    "expiresAt": 1
+   },
+   "text": "a little pet"
+  },
+  {
+   "wish": {
+    "kind": "play",
+    "target": "memory",
+    "issuedAt": 0,
+    "expiresAt": 1
+   },
+   "text": "a round of Dill says"
+  },
+  {
+   "wish": {
+    "kind": "nap",
+    "target": "",
+    "issuedAt": 0,
+    "expiresAt": 1
+   },
+   "text": "a cozy nap"
+  }
+ ],
+ "moments": {
+  "hatch": "Hatched from the brine",
+  "name": "Got a name",
+  "young": "Grew up: young pickle",
+  "teen": "Became a teen",
+  "adult": "All grown up",
+  "elder": "Joined the elder club",
+  "game": "First arcade game",
+  "wish": "First wish granted",
+  "arena": "First arena run"
+ },
+ "streakStickers": [
+  3,
+  7,
+  14,
+  30
+ ],
+ "maxStreak": 100000,
+ "rolls": [
+  {
+   "name": "morning slot opens at nine",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 9,
+   "food": "apple",
+   "wish": {
+    "kind": "play",
+    "target": "memory",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "quiet before nine",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 8,
+   "food": "apple",
+   "wish": null,
+   "wishes": null
+  },
+  {
+   "name": "quiet from ten at night",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 22,
+   "food": "apple",
+   "wish": null,
+   "wishes": null
+  },
+  {
+   "name": "asleep",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": true,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 12,
+   "food": "apple",
+   "wish": null,
+   "wishes": null
+  },
+  {
+   "name": "dead",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": true
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 12,
+   "food": "apple",
+   "wish": null,
+   "wishes": null
+  },
+  {
+   "name": "second slot waits for three",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wishes": {
+     "day": "2027-01-15",
+     "count": 1
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 14,
+   "food": "apple",
+   "wish": null,
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "second slot at three",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wishes": {
+     "day": "2027-01-15",
+     "count": 1
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 15,
+   "food": "apple",
+   "wish": {
+    "kind": "play",
+    "target": "catch",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 2
+   }
+  },
+  {
+   "name": "daily cap",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wishes": {
+     "day": "2027-01-15",
+     "count": 2
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 18,
+   "food": "apple",
+   "wish": null,
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 2
+   }
+  },
+  {
+   "name": "new day resets the count",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wishes": {
+     "day": "2027-01-14",
+     "count": 2
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 10,
+   "food": "broccoli",
+   "wish": {
+    "kind": "play",
+    "target": "memory",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "clock rollback",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wishes": {
+     "day": "2027-01-16",
+     "count": 1
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 10,
+   "food": "apple",
+   "wish": null,
+   "wishes": {
+    "day": "2027-01-16",
+    "count": 1
+   }
+  },
+  {
+   "name": "active wish stays",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wish": {
+     "kind": "pet",
+     "target": "",
+     "issuedAt": 1799996400000,
+     "expiresAt": 1800018000000
+    },
+    "wishes": {
+     "day": "2027-01-15",
+     "count": 1
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 16,
+   "food": "apple",
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 1799996400000,
+    "expiresAt": 1800018000000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "expired wish clears before the next slot",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false,
+    "wish": {
+     "kind": "pet",
+     "target": "",
+     "issuedAt": 1799978400000,
+     "expiresAt": 1800000000000
+    },
+    "wishes": {
+     "day": "2027-01-15",
+     "count": 1
+    }
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 16,
+   "food": "cheese",
+   "wish": {
+    "kind": "play",
+    "target": "catch",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 2
+   }
+  },
+  {
+   "name": "needy pickle seed 0",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "carrot",
+   "wish": {
+    "kind": "clean",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 1",
+   "pet": {
+    "bornAt": 1799740801000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "strawberry",
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 2",
+   "pet": {
+    "bornAt": 1799740802000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "broccoli",
+   "wish": {
+    "kind": "play",
+    "target": "catch",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 3",
+   "pet": {
+    "bornAt": 1799740803000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "apple",
+   "wish": {
+    "kind": "nap",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 4",
+   "pet": {
+    "bornAt": 1799740804000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "cheese",
+   "wish": {
+    "kind": "feed",
+    "target": "cheese",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 5",
+   "pet": {
+    "bornAt": 1799740805000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "carrot",
+   "wish": {
+    "kind": "clean",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 6",
+   "pet": {
+    "bornAt": 1799740806000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "strawberry",
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 7",
+   "pet": {
+    "bornAt": 1799740807000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "broccoli",
+   "wish": {
+    "kind": "play",
+    "target": "hunt",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 8",
+   "pet": {
+    "bornAt": 1799740808000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "apple",
+   "wish": {
+    "kind": "nap",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 9",
+   "pet": {
+    "bornAt": 1799740809000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "cheese",
+   "wish": {
+    "kind": "feed",
+    "target": "cheese",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 10",
+   "pet": {
+    "bornAt": 1799740810000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "carrot",
+   "wish": {
+    "kind": "clean",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "needy pickle seed 11",
+   "pet": {
+    "bornAt": 1799740811000,
+    "hygiene": 50,
+    "energy": 30,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-01-15",
+   "hour": 11,
+   "food": "strawberry",
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-01-15",
+    "count": 1
+   }
+  },
+  {
+   "name": "healthy pickle seed 0",
+   "pet": {
+    "bornAt": 1799740800000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-02-01",
+   "hour": 12,
+   "food": "carrot",
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-02-01",
+    "count": 1
+   }
+  },
+  {
+   "name": "healthy pickle seed 1",
+   "pet": {
+    "bornAt": 1799740801000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-02-02",
+   "hour": 12,
+   "food": "carrot",
+   "wish": {
+    "kind": "feed",
+    "target": "carrot",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-02-02",
+    "count": 1
+   }
+  },
+  {
+   "name": "healthy pickle seed 2",
+   "pet": {
+    "bornAt": 1799740802000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-02-03",
+   "hour": 12,
+   "food": "carrot",
+   "wish": {
+    "kind": "play",
+    "target": "memory",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-02-03",
+    "count": 1
+   }
+  },
+  {
+   "name": "healthy pickle seed 3",
+   "pet": {
+    "bornAt": 1799740803000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-02-04",
+   "hour": 12,
+   "food": "carrot",
+   "wish": {
+    "kind": "pet",
+    "target": "",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-02-04",
+    "count": 1
+   }
+  },
+  {
+   "name": "healthy pickle seed 4",
+   "pet": {
+    "bornAt": 1799740804000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-02-05",
+   "hour": 12,
+   "food": "carrot",
+   "wish": {
+    "kind": "feed",
+    "target": "carrot",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-02-05",
+    "count": 1
+   }
+  },
+  {
+   "name": "healthy pickle seed 5",
+   "pet": {
+    "bornAt": 1799740805000,
+    "hygiene": 95,
+    "energy": 90,
+    "sleeping": false,
+    "dead": false
+   },
+   "now": 1800000000000,
+   "day": "2027-02-06",
+   "hour": 12,
+   "food": "carrot",
+   "wish": {
+    "kind": "play",
+    "target": "hunt",
+    "issuedAt": 1800000000000,
+    "expiresAt": 1800021600000
+   },
+   "wishes": {
+    "day": "2027-02-06",
+    "count": 1
+   }
+  }
+ ],
+ "scrapbook": [
+  {
+   "name": "half a day",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0
+   },
+   "now": 1800043200000,
+   "streak": 0,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    }
+   ],
+   "unlocked": 0,
+   "stickers": [],
+   "album": []
+  },
+  {
+   "name": "young at one day",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000030000,
+    "dead": false,
+    "diedAt": 0,
+    "events": {
+     "game": 1800003600000
+    }
+   },
+   "now": 1800086430000,
+   "streak": 3,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000030000
+    },
+    {
+     "id": "game",
+     "at": 1800003600000
+    },
+    {
+     "id": "young",
+     "at": 1800086430000
+    }
+   ],
+   "unlocked": 0,
+   "stickers": [
+    3
+   ],
+   "album": []
+  },
+  {
+   "name": "teen",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0,
+    "events": {
+     "wish": 1800172800000,
+     "game": 1800172800000
+    }
+   },
+   "now": 1800259200000,
+   "streak": 6,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "game",
+     "at": 1800172800000
+    },
+    {
+     "id": "wish",
+     "at": 1800172800000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    }
+   ],
+   "unlocked": 0,
+   "stickers": [
+    3
+   ],
+   "album": []
+  },
+  {
+   "name": "adult",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0
+   },
+   "now": 1800604800000,
+   "streak": 7,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    },
+    {
+     "id": "adult",
+     "at": 1800604800000
+    }
+   ],
+   "unlocked": 0,
+   "stickers": [
+    3,
+    7
+   ],
+   "album": []
+  },
+  {
+   "name": "first elder",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0,
+    "events": {
+     "arena": 1800691200000,
+     "game": 1800003600000,
+     "wish": 1800777600000
+    }
+   },
+   "now": 1801209600000,
+   "streak": 14,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "game",
+     "at": 1800003600000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    },
+    {
+     "id": "adult",
+     "at": 1800604800000
+    },
+    {
+     "id": "arena",
+     "at": 1800691200000
+    },
+    {
+     "id": "wish",
+     "at": 1800777600000
+    },
+    {
+     "id": "elder",
+     "at": 1801209600000
+    }
+   ],
+   "unlocked": 1,
+   "stickers": [
+    3,
+    7,
+    14
+   ],
+   "album": [
+    [
+     "grandill",
+     1801209600000
+    ]
+   ]
+  },
+  {
+   "name": "third elder",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0
+   },
+   "now": 1801728000000,
+   "streak": 29,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    },
+    {
+     "id": "adult",
+     "at": 1800604800000
+    },
+    {
+     "id": "elder",
+     "at": 1801209600000
+    }
+   ],
+   "unlocked": 3,
+   "stickers": [
+    3,
+    7,
+    14
+   ],
+   "album": [
+    [
+     "grandill",
+     1801209600000
+    ],
+    [
+     "retired-dj",
+     1801468800000
+    ],
+    [
+     "tax-wizard",
+     1801728000000
+    ]
+   ]
+  },
+  {
+   "name": "full album",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0
+   },
+   "now": 1809244800000,
+   "streak": 30,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    },
+    {
+     "id": "adult",
+     "at": 1800604800000
+    },
+    {
+     "id": "elder",
+     "at": 1801209600000
+    }
+   ],
+   "unlocked": 32,
+   "stickers": [
+    3,
+    7,
+    14,
+    30
+   ],
+   "album": [
+    [
+     "grandill",
+     1801209600000
+    ],
+    [
+     "retired-dj",
+     1801468800000
+    ],
+    [
+     "tax-wizard",
+     1801728000000
+    ],
+    [
+     "lawn-lord",
+     1801987200000
+    ],
+    [
+     "soup-oracle",
+     1802246400000
+    ],
+    [
+     "disco",
+     1802505600000
+    ],
+    [
+     "admiral",
+     1802764800000
+    ],
+    [
+     "professor",
+     1803024000000
+    ],
+    [
+     "couch-duke",
+     1803283200000
+    ],
+    [
+     "pickle-cowboy",
+     1803542400000
+    ],
+    [
+     "tea-gossip",
+     1803801600000
+    ],
+    [
+     "space-grandpa",
+     1804060800000
+    ],
+    [
+     "yoga",
+     1804320000000
+    ],
+    [
+     "pirate",
+     1804579200000
+    ],
+    [
+     "detective",
+     1804838400000
+    ],
+    [
+     "influencer",
+     1805097600000
+    ],
+    [
+     "goth",
+     1805356800000
+    ],
+    [
+     "billionaire",
+     1805616000000
+    ],
+    [
+     "mushroom",
+     1805875200000
+    ],
+    [
+     "chef",
+     1806134400000
+    ],
+    [
+     "knight",
+     1806393600000
+    ],
+    [
+     "weather",
+     1806652800000
+    ],
+    [
+     "punk",
+     1806912000000
+    ],
+    [
+     "gardener",
+     1807171200000
+    ],
+    [
+     "accountant",
+     1807430400000
+    ],
+    [
+     "zen",
+     1807689600000
+    ],
+    [
+     "magician",
+     1807948800000
+    ],
+    [
+     "artist",
+     1808208000000
+    ],
+    [
+     "royal",
+     1808467200000
+    ],
+    [
+     "timekeeper",
+     1808726400000
+    ],
+    [
+     "cosmic",
+     1808985600000
+    ],
+    [
+     "eternal",
+     1809244800000
+    ]
+   ]
+  },
+  {
+   "name": "second lap",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": false,
+    "diedAt": 0
+   },
+   "now": 1825920000000,
+   "streak": 100,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    },
+    {
+     "id": "adult",
+     "at": 1800604800000
+    },
+    {
+     "id": "elder",
+     "at": 1801209600000
+    }
+   ],
+   "unlocked": 32,
+   "stickers": [
+    3,
+    7,
+    14,
+    30
+   ],
+   "album": [
+    [
+     "grandill",
+     1801209600000
+    ],
+    [
+     "retired-dj",
+     1801468800000
+    ],
+    [
+     "tax-wizard",
+     1801728000000
+    ],
+    [
+     "lawn-lord",
+     1801987200000
+    ],
+    [
+     "soup-oracle",
+     1802246400000
+    ],
+    [
+     "disco",
+     1802505600000
+    ],
+    [
+     "admiral",
+     1802764800000
+    ],
+    [
+     "professor",
+     1803024000000
+    ],
+    [
+     "couch-duke",
+     1803283200000
+    ],
+    [
+     "pickle-cowboy",
+     1803542400000
+    ],
+    [
+     "tea-gossip",
+     1803801600000
+    ],
+    [
+     "space-grandpa",
+     1804060800000
+    ],
+    [
+     "yoga",
+     1804320000000
+    ],
+    [
+     "pirate",
+     1804579200000
+    ],
+    [
+     "detective",
+     1804838400000
+    ],
+    [
+     "influencer",
+     1805097600000
+    ],
+    [
+     "goth",
+     1805356800000
+    ],
+    [
+     "billionaire",
+     1805616000000
+    ],
+    [
+     "mushroom",
+     1805875200000
+    ],
+    [
+     "chef",
+     1806134400000
+    ],
+    [
+     "knight",
+     1806393600000
+    ],
+    [
+     "weather",
+     1806652800000
+    ],
+    [
+     "punk",
+     1806912000000
+    ],
+    [
+     "gardener",
+     1807171200000
+    ],
+    [
+     "accountant",
+     1807430400000
+    ],
+    [
+     "zen",
+     1807689600000
+    ],
+    [
+     "magician",
+     1807948800000
+    ],
+    [
+     "artist",
+     1808208000000
+    ],
+    [
+     "royal",
+     1808467200000
+    ],
+    [
+     "timekeeper",
+     1808726400000
+    ],
+    [
+     "cosmic",
+     1808985600000
+    ],
+    [
+     "eternal",
+     1809244800000
+    ]
+   ]
+  },
+  {
+   "name": "died an adult",
+   "pet": {
+    "hatchAt": 1800000000000,
+    "bornAt": 1800000000000,
+    "dead": true,
+    "diedAt": 1800864000000
+   },
+   "now": 1803456000000,
+   "streak": 2,
+   "moments": [
+    {
+     "id": "hatch",
+     "at": 1800000000000
+    },
+    {
+     "id": "name",
+     "at": 1800000000000
+    },
+    {
+     "id": "young",
+     "at": 1800086400000
+    },
+    {
+     "id": "teen",
+     "at": 1800259200000
+    },
+    {
+     "id": "adult",
+     "at": 1800604800000
+    }
+   ],
+   "unlocked": 0,
+   "stickers": [],
+   "album": []
+  }
+ ],
+ "visits": [
+  {
+   "name": "first visit",
+   "streak": 0,
+   "lastVisitDay": "",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": true,
+   "after": {
+    "streak": 1,
+    "lastVisitDay": "2027-01-15"
+   }
+  },
+  {
+   "name": "same day",
+   "streak": 4,
+   "lastVisitDay": "2027-01-15",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": false,
+   "after": {
+    "streak": 4,
+    "lastVisitDay": "2027-01-15"
+   }
+  },
+  {
+   "name": "next day",
+   "streak": 4,
+   "lastVisitDay": "2027-01-14",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": true,
+   "after": {
+    "streak": 5,
+    "lastVisitDay": "2027-01-15"
+   }
+  },
+  {
+   "name": "missed a day",
+   "streak": 9,
+   "lastVisitDay": "2027-01-13",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": true,
+   "after": {
+    "streak": 1,
+    "lastVisitDay": "2027-01-15"
+   }
+  },
+  {
+   "name": "clock rollback",
+   "streak": 4,
+   "lastVisitDay": "2027-01-16",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": false,
+   "after": {
+    "streak": 4,
+    "lastVisitDay": "2027-01-16"
+   }
+  },
+  {
+   "name": "month boundary",
+   "streak": 29,
+   "lastVisitDay": "2027-02-28",
+   "day": "2027-03-01",
+   "yesterday": "2027-02-28",
+   "changed": true,
+   "after": {
+    "streak": 30,
+    "lastVisitDay": "2027-03-01"
+   }
+  },
+  {
+   "name": "limit",
+   "streak": 100000,
+   "lastVisitDay": "2027-01-14",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": true,
+   "after": {
+    "streak": 100000,
+    "lastVisitDay": "2027-01-15"
+   }
+  },
+  {
+   "name": "malformed day",
+   "streak": 3,
+   "lastVisitDay": "yesterday",
+   "day": "2027-01-15",
+   "yesterday": "2027-01-14",
+   "changed": true,
+   "after": {
+    "streak": 1,
+    "lastVisitDay": "2027-01-15"
+   }
+  }
+ ]
+}

@@ -8,7 +8,8 @@ struct NestView: View {
     var revealCare: () -> Void = {}
     @StateObject private var stage = PetStage()
     @State private var performance: CarePerformance?
-    @AppStorage("little-dill.food-turn.v1",store:ArenaResume.defaults) private var successfulFeeds = 0
+    @AppStorage(FeedFood.turnKey,store:ArenaResume.defaults) private var successfulFeeds = 0
+    @State private var scrapbook = false
     @State private var reactionTask: Task<Void,Never>?
     @State private var arcade = false
     @State private var joyBeforeArcade = 0.0
@@ -23,6 +24,7 @@ struct NestView: View {
             header
             VStack(spacing:12) {
                 NestMeters(life:life)
+                if let wish = PetLife.activeWish(life,now:nowMs) { WishChip(wish:wish,now:nowMs) }
                 PetGarden(pet:store.pet,bites:store.snackBites,stage:stage,performance:performance,message:message,
                           hint:NestText.hint(life,bites:store.snackBites),onTap:tapPickle,onHold:startSnack,restart:restart)
                 careButtons
@@ -36,8 +38,10 @@ struct NestView: View {
             ElderClub(life:life)
             RoyaleCard(play:arena)
             dailyCard
+            HStack { Image(systemName:"book.closed"); Text("Every big day, kept.").font(.caption); Spacer(); Button("Scrapbook") { scrapbook = true }.font(.caption.bold()).accessibilityIdentifier("openScrapbook") }.foregroundStyle(DillTheme.muted)
             HStack { Image(systemName:"tshirt"); Text("A new look, a whole new dill.").font(.caption); Spacer(); Button("Dress up",action:closet).font(.caption.bold()) }.foregroundStyle(DillTheme.muted)
         }
+        .sheet(isPresented:$scrapbook) { ScrapbookView().environmentObject(store) }
         .fullScreenCover(isPresented:$arcade,onDismiss:arcadeClosed) { ArcadeSheet().environmentObject(store) }
         .onAppear {
             if let line = store.speech, PetLife.ms(Date()) - life.bornAt < 15_000 { stage.say(line,for:6) }
@@ -118,19 +122,27 @@ struct NestView: View {
 
     private func care(_ action: Care) {
         let before = life.fullness
-        let result = store.care(action)
+        let food = action == .feed ? FeedFood.at(successfulFeeds) : nil
+        let result = store.care(action, food: food)
         stage.say(line(result))
         guard result.applied else { stage.play(.wiggle); store.feedback(.rigid); return }
         store.feedback()
         stage.happyUntil = Date().addingTimeInterval(5)
         if action == .feed {
-            stage.pop("+\(Int((life.fullness - before).rounded())) food")
-            perform(action, food: FeedFood.at(successfulFeeds))
+            stage.pop(result.favorite ? "★ favorite snack ★" : "+\(Int((life.fullness - before).rounded())) food",hearts:result.favorite)
+            perform(action, food: food)
             successfulFeeds = (successfulFeeds + 1) % FeedFood.allCases.count
         } else {
             stage.pop("✧ squeaky clean ✧")
             perform(action)
         }
+        celebrate(result)
+    }
+
+    private func celebrate(_ result: CareResult) {
+        guard result.wish else { return }
+        stage.pop("★ wish granted ★",hearts:true)
+        store.feedback(.medium)
     }
 
     private func pet(performing: Bool) {
@@ -143,6 +155,7 @@ struct NestView: View {
         stage.pop(added > 0 ? "+\(added) happy ♥" : "♥ so loved ♥",hearts:true)
         store.feedback()
         if performing { perform(.pet) } else { stage.play(.hop); store.sound(.pet) }
+        celebrate(result)
     }
 
     private func tapPickle() {
@@ -160,6 +173,7 @@ struct NestView: View {
         store.feedback(.medium)
         if life.sleeping { stage.play(.yawn); perform(.nap) }
         else { stopPerformance(); stage.play(.wake); store.sound(.pop) }
+        celebrate(result)
     }
 
     private func openArcade() {
@@ -231,6 +245,22 @@ struct NestView: View {
             let mood = stage.mood(life,snacking:snacking,now:Date())
             stage.idleTick(mood:mood,busy:performance != nil,reduceMotion:reduceMotion)
         }
+    }
+}
+
+/// The active wish, like the web `.wish-chip` above the pickle.
+struct WishChip: View {
+    let wish: PetWish
+    let now: Int64
+    var body: some View {
+        let hours = max(1, Int((Double(wish.expiresAt - now) / Double(PetLife.HOUR)).rounded(.up)))
+        HStack(spacing:6) {
+            Image(systemName:"sparkles").font(.system(size:11,weight:.semibold))
+            Text("wish: " + PetLife.wishText(wish)).font(.system(size:12,weight:.semibold,design:.rounded))
+            Spacer(minLength:4)
+            Text("\(hours)h left").font(.system(size:10,weight:.semibold,design:.monospaced)).foregroundStyle(DillTheme.muted)
+        }.padding(.horizontal,14).frame(minHeight:36).background(DillTheme.peach.opacity(0.55),in:Capsule())
+            .accessibilityElement(children:.combine).accessibilityIdentifier("petWish")
     }
 }
 

@@ -1,3 +1,5 @@
+// Wishes roll by local hour; the fixed test clock (08:00 UTC) sits in quiet hours, so care rewards stay exact.
+process.env.TZ = 'UTC';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -392,4 +394,58 @@ test('photos stay hidden for a dead pickle or an unavailable photo module', () =
   assert.equal(app.get('take-photo').hidden, true);
   app.click('take-photo'); app.click('restart');
   assert.equal(app.get('take-photo').hidden, true);
+});
+
+test('a variety’s favorite game adds 4 happiness, says so, and starts the scrapbook', () => {
+  const app = client(); app.start('catch');
+  app.until(() => !app.get('game-again').hidden);
+  assert.match(app.get('message').textContent, /\+14 happy ♥ ★ my favorite game!$/);
+  assert.equal(app.saved().events.game > 0, true);
+  app.click('game-close');
+  assert.match(app.get('scrapbook-page').innerHTML, /First arcade game/);
+});
+
+test('a play wish is granted by finishing the named game', () => {
+  const now = 1800000000000, day = 86400000;
+  const pet = { version: 2, phase: 'living', name: 'Wishful', variety: 'garlic', brine: 'garlic', brinedAt: now - 3 * day - 60000, hatchAt: now - 3 * day,
+    bornAt: now - 3 * day, fullness: 80, happiness: 40, energy: 80, hygiene: 90, sleeping: false, sick: false, dead: false, neglectMs: 0, diedAt: 0,
+    lastCareAt: now, updatedAt: now, wish: { kind: 'play', target: 'catch', issuedAt: now, expiresAt: now + 6 * 3600000 }, wishes: { day: '2027-01-15', count: 2 } };
+  const app = client({}, { storage: { 'little-dill.v2': JSON.stringify(pet) } });
+  assert.equal(app.get('wish').textContent, '♡ wish: a round of Brine catch · 6h left');
+  app.start('catch');
+  assert.equal(app.get('wish').hidden, true, 'the chip hides during games');
+  app.until(() => !app.get('game-again').hidden);
+  assert.match(app.get('message').textContent, /\+10 happy ♥ wish granted! \+10 happy\.$/);
+  assert.equal(app.saved().wish, undefined);
+  assert.equal(app.saved().events.wish, app.saved().events.game);
+  app.click('game-close');
+  assert.equal(app.get('wish').hidden, true);
+});
+
+test('the browser visit streak matches iOS, travels in native extras, and fills scrapbook stickers', async () => {
+  let exported, restored;
+  const saves = { available: () => true, MAX_FILE_BYTES: 16384, decode: async () => restored,
+    encode: async (pet, native) => { exported = JSON.parse(JSON.stringify({ pet, native })); throw Error('Captured download'); } };
+  const web = client({}, { saves });
+  assert.deepEqual(JSON.parse(web.storage.get('little-dill.visits.v1')), { streak: 1, lastVisitDay: '2027-01-15' });
+  web.run(2 * 86400000);
+  assert.equal(JSON.parse(web.storage.get('little-dill.visits.v1')).streak, 3);
+  assert.match(web.get('scrapbook-summary').textContent, /3-day visit streak/);
+  assert.match(web.get('scrapbook-page').innerHTML, /class="sticker earned">★ 3 days/);
+  assert.match(web.get('scrapbook-page').innerHTML, /Elder album · 0\/32/);
+  web.visible(false); web.run(2 * 86400000); web.visible(true);
+  assert.equal(JSON.parse(web.storage.get('little-dill.visits.v1')).streak, 1, 'a missed day restarts the streak');
+  await web.get('download-save').dispatch('click');
+  assert.equal(exported.native, undefined, 'browser-only saves still export without native extras');
+
+  const app = client({}, { saves, storage: { 'little-dill.native-extras.v1': JSON.stringify({ coins: 15, streak: 9, lastVisitDay: '2027-01-14' }) } });
+  await app.get('download-save').dispatch('click');
+  assert.deepEqual([exported.native.coins, exported.native.streak, exported.native.lastVisitDay], [15, 10, '2027-01-15']);
+  restored = { savedAt: app.saved().updatedAt, pet: app.saved(), native: { coins: 3, streak: 4, lastVisitDay: '2027-01-15' } };
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change'); app.click('backup-restore');
+  assert.match(app.get('scrapbook-summary').textContent, /4-day visit streak/);
+  app.click('undo-import');
+  assert.match(app.get('scrapbook-summary').textContent, /10-day visit streak/);
 });

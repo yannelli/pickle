@@ -1,3 +1,5 @@
+// Wishes roll by local hour; the fixed test clock (08:00 UTC) sits in quiet hours.
+process.env.TZ = 'UTC';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -109,4 +111,39 @@ test('feeding resumes the saved assortment after a page reload', () => {
   assert.equal(app.get('feed-food').dataset.food, 'broccoli');
   app.click('feed');
   assert.equal(app.get('feed-food').dataset.food, 'apple');
+});
+
+test('a variety’s favorite food adds 4 happiness and its own reaction', () => {
+  const app = client({ fullness: 0 }, { storage: { 'little-dill.food-turn.v1': '1' } });
+  app.click('feed');
+  assert.equal(app.get('feed-food').dataset.food, 'strawberry');
+  assert.equal(app.get('message').textContent, 'strawberry! my favorite! +40 food, +7 happy.');
+  assert.equal(app.get('effect').textContent, '★ favorite snack ★');
+  assert.equal(app.saved().happiness, 27);
+  app.click('feed');
+  assert.equal(app.get('message').textContent, 'broccoli time! +40 food, +3 happy.');
+});
+
+test('a feed wish keeps the rotation on a refused feed and the next successful feed grants it', () => {
+  const now = 1800000000000, day = 86400000;
+  const pet = { version: 2, phase: 'living', name: 'Wishful', variety: 'garlic', brine: 'garlic', brinedAt: now - 3 * day - 60000, hatchAt: now - 3 * day,
+    bornAt: now - 3 * day, fullness: 99.5, happiness: 40, energy: 80, hygiene: 90, sleeping: false, sick: false, dead: false, neglectMs: 0, diedAt: 0,
+    lastCareAt: now, updatedAt: now, wish: { kind: 'feed', target: 'carrot', issuedAt: now, expiresAt: now + 6 * 3600000 }, wishes: { day: '2027-01-15', count: 2 } };
+  const app = client({}, { storage: { 'little-dill.v2': JSON.stringify(pet) } });
+  assert.equal(app.get('wish').hidden, false);
+  assert.equal(app.get('wish').textContent, '♡ wish: a carrot · 6h left');
+  app.click('feed');
+  assert.match(app.get('message').textContent, /full to the brim/);
+  assert.deepEqual(app.saved().wish, pet.wish);
+  assert.equal(app.storage.get('little-dill.food-turn.v1'), undefined, 'a refused feed leaves the rotation');
+  app.run(3600000);
+  app.click('feed');
+  assert.equal(app.get('feed-food').dataset.food, 'carrot');
+  assert.equal(app.get('message').textContent, 'carrot time! +2 food, +3 happy. wish granted! +10 happy.');
+  assert.equal(app.get('effect').textContent, '★ wish granted ★');
+  assert.equal(app.saved().wish, undefined);
+  assert.ok(Math.abs(app.saved().happiness - 52) < 1e-9);
+  assert.equal(app.saved().events.wish, now + 3600000);
+  assert.equal(app.get('wish').hidden, true);
+  assert.equal(app.foodAt(Number(app.storage.get('little-dill.food-turn.v1'))), 'strawberry');
 });

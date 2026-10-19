@@ -102,6 +102,22 @@ struct ElderLook: Equatable, Identifiable {
     ].enumerated().map { i, e in ElderLook(id: e.0, name: e.1, quip: e.2, hat: e.3, prop: e.4, accent: [0x718449, 0x8b754a, 0x65785f, 0x8e8460][i % 4]) }
 }
 
+struct PetWish: Codable, Equatable { var kind: String, target: String, issuedAt: Int64, expiresAt: Int64 }
+struct WishLog: Codable, Equatable { var day: String, count: Int }
+struct PetEvents: Codable, Equatable {
+    var game: Int64?, wish: Int64?, arena: Int64?
+    subscript(event: String) -> Int64? {
+        get { switch event { case "game": return game; case "wish": return wish; case "arena": return arena; default: return nil } }
+        set { switch event { case "game": game = newValue; case "wish": wish = newValue; case "arena": arena = newValue; default: break } }
+    }
+}
+struct ScrapbookMoment: Equatable { let id: String, at: Int64 }
+struct ScrapbookPage: Equatable {
+    struct Slot: Equatable { let id: String, day: Int, at: Int64, unlocked: Bool }
+    struct Sticker: Equatable { let days: Int, earned: Bool }
+    let moments: [ScrapbookMoment], album: [Slot], unlocked: Int, stickers: [Sticker]
+}
+
 enum LifeStage: String { case new, brining, naming, baby, young, teen, adult, elder }
 enum PetPhase: String, Codable { case new, brining, naming, living }
 enum PetStat: String, CaseIterable { case fullness, happiness, energy, hygiene }
@@ -127,6 +143,9 @@ struct WebPet: Codable, Equatable {
     var lastCareAt: Int64 = 0
     var updatedAt: Int64 = 0
     var eaten: Bool?
+    var wish: PetWish?
+    var wishes: WishLog?
+    var events: PetEvents?
 
     subscript(stat: PetStat) -> Double {
         get { switch stat { case .fullness: return fullness; case .happiness: return happiness; case .energy: return energy; case .hygiene: return hygiene } }
@@ -142,6 +161,27 @@ enum PetLife {
     static let RATES: [(stat: PetStat, rate: Double)] = [(.fullness, 1.5), (.happiness, 1), (.hygiene, 1.25)]
     static let BRINES = ["classic", "garlic", "spicy"]
     static let MAX_TIMESTAMP: Int64 = 8_640_000_000_000_000
+    static let FOODS = ["carrot", "strawberry", "broccoli", "apple", "cheese"]
+    static let FOOD_NAMES = ["carrot": "carrot", "strawberry": "strawberry", "broccoli": "broccoli", "apple": "apple slice", "cheese": "cheese wedge"]
+    static let GAMES = ["hunt", "memory", "catch"]
+    static let GAME_NAMES = ["hunt": "Heart hunt", "memory": "Dill says", "catch": "Brine catch"]
+    static let FAVORITES: [String: (food: String, game: String)] = [
+        "dill": ("strawberry", "catch"), "gherkin": ("carrot", "memory"), "garlic": ("broccoli", "hunt"),
+        "butter": ("cheese", "memory"), "chili": ("apple", "hunt"), "pepper": ("carrot", "catch")
+    ]
+    static let FAVORITE_BONUS = 4.0
+    static let WISH_KINDS = ["feed", "clean", "pet", "play", "nap"]
+    static let WISH_MS: Int64 = 6 * HOUR
+    static let WISHES_PER_DAY = 2, WISH_HAPPINESS = 10.0, WISH_COINS = 5
+    // Slot n opens at WISH_HOURS[n] local time; quiet hours run from QUIET_HOUR to WISH_HOURS[0].
+    static let WISH_HOURS = [9, 15], QUIET_HOUR = 22
+    static let STAGE_DAYS: [(id: String, days: Int64)] = [("young", 1), ("teen", 3), ("adult", 7), ("elder", 14)]
+    static let EVENTS = ["game", "wish", "arena"]
+    static let MOMENTS = ["hatch": "Hatched from the brine", "name": "Got a name", "young": "Grew up: young pickle", "teen": "Became a teen",
+                          "adult": "All grown up", "elder": "Joined the elder club", "game": "First arcade game", "wish": "First wish granted",
+                          "arena": "First arena run"]
+    static let STREAK_STICKERS = [3, 7, 14, 30]
+    static let MAX_STREAK = 100_000
     private static let hour = Double(HOUR), neglectLimit = 48 * Double(HOUR)
 
     static func ms(_ date: Date) -> Int64 { Int64((date.timeIntervalSince1970 * 1000).rounded(.down)) }
@@ -191,7 +231,50 @@ enum PetLife {
         else { throw PetLifeError.invalid }
         var result = pet
         result.eaten = pet.eaten == true ? true : nil
+        cleanOptionals(&result)
         return result
+    }
+
+    // Optional shared fields are dropped when malformed so one bad value cannot block a whole save.
+    static func cleanOptionals(_ pet: inout WebPet) {
+        pet.wish = pet.wish.flatMap(cleanWish)
+        pet.wishes = pet.wishes.flatMap { isDay($0.day) && (0...WISHES_PER_DAY).contains($0.count) ? $0 : nil }
+        if var events = pet.events {
+            for event in EVENTS where !(events[event].map(isTimestamp) ?? false) { events[event] = nil }
+            pet.events = EVENTS.contains { events[$0] != nil } ? events : nil
+        }
+    }
+
+    static func cleanWish(_ wish: PetWish) -> PetWish? {
+        let target: String? = wish.kind == "feed" ? (FOODS.contains(wish.target) ? wish.target : nil)
+            : wish.kind == "play" ? (GAMES.contains(wish.target) ? wish.target : nil) : ""
+        guard WISH_KINDS.contains(wish.kind), wish.target == target, isTimestamp(wish.issuedAt), isTimestamp(wish.expiresAt),
+              wish.expiresAt > wish.issuedAt, wish.expiresAt - wish.issuedAt <= WISH_MS else { return nil }
+        return wish
+    }
+
+    /// JS /^\d{4}-\d{2}-\d{2}$/.
+    static func isDay(_ day: String) -> Bool {
+        let bytes = Array(day.utf8)
+        return bytes.count == 10 && bytes.enumerated().allSatisfy { i, b in i == 4 || i == 7 ? b == 45 : (48...57).contains(b) }
+    }
+
+    private static func optionals(json value: JSONValue) -> (PetWish?, WishLog?, PetEvents?) {
+        var wish: PetWish?, wishes: WishLog?, events: PetEvents?
+        if let raw = value["wish"], raw.isObject, let kind = raw["kind"]?.string, let target = raw["target"]?.string,
+           let issuedAt = raw["issuedAt"]?.safeInteger, let expiresAt = raw["expiresAt"]?.safeInteger {
+            wish = PetWish(kind: kind, target: target, issuedAt: issuedAt, expiresAt: expiresAt)
+        }
+        if let raw = value["wishes"], raw.isObject, let day = raw["day"]?.string, let count = raw["count"]?.safeInteger,
+           (0...Int64(WISHES_PER_DAY)).contains(count) {
+            wishes = WishLog(day: day, count: Int(count))
+        }
+        if let raw = value["events"], raw.isObject {
+            var found = PetEvents()
+            for event in EVENTS { found[event] = raw[event]?.safeInteger }
+            events = found
+        }
+        return (wish, wishes, events)
     }
 
     static func validate(json value: JSONValue) throws -> WebPet {
@@ -208,10 +291,11 @@ enum PetLife {
         else { throw PetLifeError.invalid }
         var eaten: Bool?
         if let raw = value["eaten"] { guard let flag = raw.bool else { throw PetLifeError.invalid }; eaten = flag }
+        let (wish, wishes, events) = optionals(json: value)
         return try validate(WebPet(version: 2, phase: phase, name: name, variety: variety, brine: brine, brinedAt: brinedAt, hatchAt: hatchAt,
                                    bornAt: bornAt, fullness: fullness, happiness: happiness, energy: energy, hygiene: hygiene,
                                    sleeping: sleeping, sick: sick, dead: dead, neglectMs: neglectMs, diedAt: diedAt,
-                                   lastCareAt: lastCareAt, updatedAt: updatedAt, eaten: eaten))
+                                   lastCareAt: lastCareAt, updatedAt: updatedAt, eaten: eaten, wish: wish, wishes: wishes, events: events))
     }
 
     static func restore(json value: JSONValue, now: Int64) throws -> WebPet {
@@ -313,5 +397,89 @@ enum PetLife {
     static func nextCareAt(_ pet: WebPet, now: Int64) -> Double {
         let hours = RATES.map { max(0, pet[$0.stat] - 55) / $0.rate }.min()!
         return Double(now) + max(2, hours) * hour
+    }
+
+    static func dayNumber(_ day: String) -> Int64 {
+        let parts = day.split(separator: "-").compactMap { Int64($0) }
+        guard parts.count == 3 else { return 0 }
+        return parts[0] * 372 + (parts[1] - 1) * 31 + parts[2] - 1
+    }
+
+    static func favorite(_ variety: String) -> (food: String, game: String) { FAVORITES[variety] ?? FAVORITES["dill"]! }
+
+    static func activeWish(_ pet: WebPet, now: Int64) -> PetWish? {
+        guard pet.phase == .living, !pet.dead, let wish = pet.wish, now < wish.expiresAt else { return nil }
+        return wish
+    }
+
+    /// `day` and `hour` are the device's local calendar day and hour; `food` is the next food in the feeding rotation.
+    @discardableResult static func rollWish(_ pet: inout WebPet, now: Int64, day: String, hour: Int, food: String) -> PetWish? {
+        if pet.wish != nil && activeWish(pet, now: now) == nil { pet.wish = nil }
+        guard pet.phase == .living, !pet.dead, !pet.sleeping, pet.wish == nil, !trim(pet.name).isEmpty, isDay(day) else { return nil }
+        if let log = pet.wishes, log.day > day { return nil }
+        let count = pet.wishes?.day == day ? pet.wishes!.count : 0
+        guard count < WISHES_PER_DAY, hour >= WISH_HOURS[count], hour < QUIET_HOUR else { return nil }
+        let kinds = WISH_KINDS.filter { $0 == "clean" ? pet.hygiene < 80 : $0 == "nap" ? pet.energy < 50 : true }
+        let seed = pet.bornAt / 1000 + dayNumber(day) * 7 + Int64(count) * 3
+        let kind = kinds[Int(seed % Int64(kinds.count))]
+        let target = kind == "feed" ? (FOODS.contains(food) ? food : FOODS[0])
+            : kind == "play" ? GAMES[Int(seed / Int64(kinds.count) % Int64(GAMES.count))] : ""
+        let wish = PetWish(kind: kind, target: target, issuedAt: now, expiresAt: now + WISH_MS)
+        pet.wish = wish
+        pet.wishes = WishLog(day: day, count: count + 1)
+        return wish
+    }
+
+    @discardableResult static func recordEvent(_ pet: inout WebPet, _ event: String, now: Int64) -> Bool {
+        guard pet.phase == .living, EVENTS.contains(event), !(pet.events?[event].map(isTimestamp) ?? false) else { return false }
+        var events = pet.events ?? PetEvents()
+        events[event] = now
+        pet.events = events
+        return true
+    }
+
+    /// Feed wishes match by kind; play wishes need the named game. Returns the happiness added, or nil.
+    static func grantWish(_ pet: inout WebPet, kind: String, target: String = "", now: Int64) -> Int? {
+        guard let wish = activeWish(pet, now: now), wish.kind == kind, kind != "play" || wish.target == target else { return nil }
+        pet.wish = nil
+        let before = pet.happiness
+        pet.happiness = clamp(before + WISH_HAPPINESS)
+        recordEvent(&pet, "wish", now: now)
+        return Int((pet.happiness - before).rounded(.toNearestOrAwayFromZero))
+    }
+
+    static func wishText(_ wish: PetWish) -> String {
+        switch wish.kind {
+        case "feed": return "a " + (FOOD_NAMES[wish.target] ?? wish.target)
+        case "clean": return "a bubble bath"
+        case "pet": return "a little pet"
+        case "play": return "a round of " + (GAME_NAMES[wish.target] ?? wish.target)
+        default: return "a cozy nap"
+        }
+    }
+
+    static func scrapbook(_ pet: WebPet, now: Int64, streak: Int) -> ScrapbookPage {
+        let stickers = STREAK_STICKERS.map { ScrapbookPage.Sticker(days: $0, earned: streak >= $0) }
+        guard pet.phase == .living else { return ScrapbookPage(moments: [], album: [], unlocked: 0, stickers: stickers) }
+        let reached = age(pet, now: now)
+        var moments = [ScrapbookMoment(id: "hatch", at: pet.hatchAt), ScrapbookMoment(id: "name", at: pet.bornAt)]
+        for (id, days) in STAGE_DAYS where reached >= days * DAY { moments.append(ScrapbookMoment(id: id, at: pet.bornAt + days * DAY)) }
+        for id in EVENTS { if let at = pet.events?[id], isTimestamp(at) { moments.append(ScrapbookMoment(id: id, at: at)) } }
+        // Stable order for equal timestamps, like the JS sort.
+        moments = moments.enumerated().sorted { ($0.element.at, $0.offset) < ($1.element.at, $1.offset) }.map(\.element)
+        let unlocked = elder(pet, now: now)?.unlocked ?? 0
+        let album = ElderLook.all.enumerated().map { index, form in
+            ScrapbookPage.Slot(id: form.id, day: 14 + index * 3, at: pet.bornAt + Int64(14 + index * 3) * DAY, unlocked: index < unlocked)
+        }
+        return ScrapbookPage(moments: moments, album: album, unlocked: unlocked, stickers: stickers)
+    }
+
+    /// The visit streak: a new local day extends it when the last visit was yesterday, otherwise restarts at 1.
+    @discardableResult static func visit(streak: inout Int, lastVisitDay: inout String, day: String, yesterday: String) -> Bool {
+        let last = isDay(lastVisitDay) ? lastVisitDay : ""
+        guard isDay(day), day > last else { return false }
+        streak = last == yesterday ? min(max(0, streak), MAX_STREAK - 1) + 1 : 1
+        lastVisitDay = day
+        return true
     }
 }

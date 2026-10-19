@@ -271,6 +271,17 @@
     .elder-card { border: 1px solid var(--line); border-radius: 9px; padding: 11px; font-size: 11px; background: #eef0df; }
     .elder-card small { display: block; font-size: 10px; margin-top: 5px; color: #69765b; line-height: 1.5; }
     .elder-card.locked { background: transparent; color: #69765b; }
+    .wish-chip { position: absolute; z-index: 2; top: 24px; left: 50%; transform: translateX(-50%); max-width: 92%; padding: 2px 7px; border: 2px solid var(--pixel); border-radius: 8px; background: #dfe9b6; font-size: 9px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+    .scrapbook { max-width: 805px; margin: 14px auto; padding: 18px; border: 1px solid var(--line); border-radius: 16px; }
+    .scrapbook summary { font-size: 13px; font-weight: bold; }
+    .scrapbook h3 { margin: 16px 0 8px; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: #69765b; }
+    .scrapbook-note { font-size: 12px; color: #69765b; margin: 10px 0 0; }
+    .stickers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+    .sticker { border: 1px solid var(--line); border-radius: 9px; padding: 9px 4px; text-align: center; font-size: 11px; color: #69765b; }
+    .sticker.earned { background: #f3dcc4; color: var(--ink); font-weight: bold; }
+    .moments { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+    .moments li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+    .moments time { color: #69765b; white-space: nowrap; }
     .reminder-card { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
     .reminder-card > div { flex: 1 1 260px; }
     .reminder-actions { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -423,6 +434,7 @@
     .page.is-expanded .tombstone { margin: -19px 0 0; top: calc(16px * var(--pet-scale)); transform: scale(var(--pet-scale)); }
     .page.is-expanded .restart { top: auto; bottom: calc(50% + 45px * var(--pet-scale)); }
     .page.is-expanded .room.is-dead .effect { top: calc(50% - 44px * var(--pet-scale)); }
+    .page.is-expanded .wish-chip { top: 32px; font-size: 12px; }
     .page.is-expanded .crumbs { left: calc(50% + 42px * var(--pet-scale)); bottom: calc(50% - 50px * var(--pet-scale)); transform: scale(var(--pet-scale)); transform-origin: bottom left; }
     .page.is-expanded .room::after { --pet-scale: 1; bottom: calc(50% - 50px * var(--pet-scale)); }
     @container (min-height: 250px) { .page.is-expanded .room::after { --pet-scale: 1.25; } }
@@ -516,7 +528,7 @@
                 <div class="stat" data-stat="hygiene"><div class="stat-top"><span>CLEAN</span><span class="stat-value">95</span></div><div class="meter" role="meter" aria-label="Hygiene" aria-valuemin="0" aria-valuemax="100" aria-valuenow="95"><span class="meter-fill" style="width:95%"></span></div></div>
               </div>
               <div class="room" id="room" data-stage="seed" data-mood="idle">
-                <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span>
+                <span class="pet-caption" id="pet-caption"></span><span class="room-decoration spark-one" aria-hidden="true">+</span><span class="room-decoration spark-two" aria-hidden="true">✦</span><span class="room-decoration grass" aria-hidden="true">,,</span><span class="wish-chip" id="wish" role="status" hidden></span>
                 <button class="pet-button" id="pet" aria-label="Pet your pickle for happiness"><span class="pet-shadow" aria-hidden="true"></span><span class="pet-size" aria-hidden="true"><svg class="scene-art" id="scene-art" viewBox="-40 -40 150 160" hidden></svg><span class="pet-actor" id="actor"><span class="pet-body"><span class="pickle"><svg class="body-art" id="body-art" viewBox="-3 -3 62 92" aria-hidden="true"></svg><span class="face"><i class="eye left"></i><i class="eye right"></i><i class="cheek left"></i><i class="cheek right"></i><i class="mouth"></i><span class="feed-food" id="feed-food" aria-hidden="true" hidden><svg viewBox="0 -32 76 64"><g id="feed-morsel"></g></svg></span></span><i class="arm left"></i><i class="arm right"></i><i class="foot left"></i><i class="foot right"></i><i class="sweat"></i><svg class="elder-art" id="elder-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg></span><svg class="prop-art" id="prop-art" viewBox="-40 -40 150 160" aria-hidden="true" hidden></svg><span class="bath" aria-hidden="true"><svg viewBox="0 0 140 64" fill="none" stroke="var(--pixel)" stroke-width="3" stroke-linejoin="round"><path d="M27 51v8h9l4-8m60 0 4 8h9v-8" fill="#78954b"/><path d="M14 25h112l-8 20a14 14 0 0 1-13 9H35a14 14 0 0 1-13-9Z" fill="#dfe9b6"/><path d="M25 34h89" stroke="#a1b56b"/><g class="bath-suds" fill="#fffde9"><path d="M14 24a8 8 0 0 1 3-15 10 10 0 0 1 19-3 9 9 0 0 1 15 1 12 12 0 0 1 22-1 9 9 0 0 1 16 3 11 11 0 0 1 21 0 9 9 0 0 1 15 15Z"/><path d="M37 15h0m22 2h0m39-1h0" stroke="#a1b56b" stroke-width="4" stroke-linecap="round"/></g><rect x="9" y="23" width="122" height="7" rx="3.5" fill="#eaf0c9"/></svg><i class="bath-bubble"></i><i class="bath-bubble"></i><i class="bath-bubble"></i></span></span></span><span class="sleep-z z1" aria-hidden="true">z</span><span class="sleep-z z2" aria-hidden="true">Z</span><span class="sleep-z z3" aria-hidden="true">z</span></button>
                 <span class="poop" id="poop" role="img" aria-label="A mess. Time to clean!" hidden></span><span class="effect" id="effect" aria-hidden="true"></span>
                 <div class="tombstone" id="tombstone" role="img" aria-label="Your pickle has passed away" hidden>R.I.P.<br>little dill</div><span class="crumbs" aria-hidden="true"></span><button class="restart" id="restart" hidden>Plant a new pickle ↻</button>
@@ -559,6 +571,7 @@
       </section>
       <section class="pet-profile" id="pet-profile" aria-labelledby="profile-name" hidden><h2 id="profile-name"></h2><p id="profile-kind"></p><p class="pet-quip" id="profile-quip"></p><p id="care-outlook"></p><p id="growth-outlook"></p></section>
       <details class="elder-club" id="elder-club" hidden><summary id="elder-summary">The elder club · 32 excellent ways to get weird</summary><div class="elder-grid" id="elder-grid"></div></details>
+      <details class="scrapbook" id="scrapbook" hidden><summary id="scrapbook-summary">Scrapbook</summary><div id="scrapbook-page"></div></details>
       <details class="game-settings" id="game-settings"><summary>Settings &amp; saves</summary>
       <section class="reminder-card" aria-labelledby="reminder-title"><div><h2 id="reminder-title">Care reminders</h2><p>Optional care reminders. At most one a day, quiet from 10pm to 9am. No repeat nudges if you’re away.</p><p id="reminder-status" role="status">Your pickle is happy with a daily check-in.</p></div><div class="reminder-actions"><button class="save-button" id="reminder-toggle" type="button">Enable reminders</button><button class="save-button" id="reminder-test" type="button" hidden>Send a test</button></div></section>
       <section class="jukebox" aria-label="Sound controls"><p class="track-title">♫ PICKLE RADIO<span>Four original 8-bit tracks</span></p><div class="audio-controls"><select id="music-track" aria-label="Music track"><option value="0">Brine Time · 132 BPM</option><option value="1">Dill Disco · 120 BPM</option><option value="2">Moonlight Marinade · 88 BPM</option><option value="3">Spicy Sprint · 156 BPM</option></select><button id="music-toggle" type="button" aria-pressed="true">Music on</button><button id="sfx-toggle" type="button" aria-pressed="true">SFX on</button><label class="audio-volume">Volume<input id="volume" type="range" min="0" max="100" value="45" aria-label="Audio volume"></label></div></section>
@@ -689,6 +702,13 @@
         const stored = JSON.parse(localStorage.getItem('little-dill.native-extras.v1'));
         if (stored && typeof stored === 'object' && !Array.isArray(stored)) nativeProgress = stored;
       } catch { /* Native progress travels with imported saves. */ }
+      // The iOS visit streak, kept in this browser and exchanged through native extras like arcade bests.
+      const VISITS_KEY = 'little-dill.visits.v1';
+      const readVisits = value => value && typeof value === 'object' && !Array.isArray(value) ? { streak: value.streak, lastVisitDay: value.lastVisitDay } : { streak: 0, lastVisitDay: '' };
+      let visits = readVisits(nativeProgress);
+      try { visits = readVisits(JSON.parse(localStorage.getItem(VISITS_KEY)) ?? nativeProgress); } catch { /* Native extras or the next visit start the streak. */ }
+      const streak = () => Number.isSafeInteger(visits.streak) ? Math.max(0, Math.min(Life.MAX_STREAK, visits.streak)) : 0;
+      let scrapbookKey = '';
       let game = null;
       const gameTimers = new Set();
       let effectTimer;
@@ -719,6 +739,7 @@
         try {
           if (autosaveBlocked) throw new Error('Preserve the unreadable local save.');
           localStorage.setItem('little-dill.native-extras.v1', JSON.stringify(nativeProgress || null));
+          localStorage.setItem(VISITS_KEY, JSON.stringify(visits));
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveAvailable = true;
         }
         catch { saveAvailable = false; }
@@ -773,7 +794,7 @@
           for (const id of Object.keys(GAME_NAMES)) {
             if (Number.isSafeInteger(records[id]) && records[id] >= 0) arcade[id] = records[id];
           }
-          const raw = await window.LittleDillSaves.encode({ ...state }, nativeProgress ? { ...nativeProgress, arcade } : undefined);
+          const raw = await window.LittleDillSaves.encode({ ...state }, nativeProgress ? { ...nativeProgress, arcade, streak: streak(), lastVisitDay: visits.lastVisitDay || '' } : undefined);
           const url = URL.createObjectURL(new Blob([raw], { type: 'application/octet-stream' }));
           const link = document.createElement('a');
           link.href = url; link.download = 'little-dill-' + new Date().toISOString().replace(/[:.]/g, '-') + '.dill';
@@ -816,9 +837,10 @@
       }
       $('backup-restore').addEventListener('click', () => {
         if (!pendingRestore || backupBusy) return;
-        syncTime(); previousPet = { pet: { ...state }, native: nativeProgress, records: { ...records } };
+        syncTime(); previousPet = { pet: { ...state }, native: nativeProgress, records: { ...records }, visits: { ...visits } };
         if (pendingRestore.native) {
           nativeProgress = pendingRestore.native;
+          visits = readVisits(nativeProgress);
           for (const id of Object.keys(GAME_NAMES)) {
             const score = nativeProgress.arcade?.[id];
             if (Number.isSafeInteger(score) && score >= 0) records[id] = Math.max(Number(records[id]) || 0, score);
@@ -832,7 +854,7 @@
       });
       $('undo-import').addEventListener('click', () => {
         if (!previousPet) return;
-        nativeProgress = previousPet.native; records = previousPet.records;
+        nativeProgress = previousPet.native; records = previousPet.records; visits = previousPet.visits;
         try { localStorage.setItem('little-dill.arcade.v1', JSON.stringify(records)); } catch { /* Scores stay in memory. */ }
         replacePet(previousPet.pet); previousPet = null; $('undo-import').hidden = true;
         backupNotice(saveAvailable ? 'Import undone. Your previous pickle is saved here again.' : 'Import undone for this visit. Download a backup before leaving.');
@@ -842,7 +864,10 @@
       function assessHealth() { Life.assess(state); }
       function syncTime() {
         const previousStage = Life.stage(state, state.updatedAt);
-        Life.advance(state);
+        const now = Date.now(), local = Life.localTime(now);
+        Life.advance(state, now);
+        Life.rollWish(state, { now, day: local.day, hour: local.hour, food: foodAt(successfulFeeds).id });
+        if (state.phase === 'living') Life.visit(visits, local.day, local.yesterday);
         if (state.dead && game) endGame(false);
         if (state.dead && snack) cancelSnack(false);
         if (stage() !== previousStage && state.phase === 'living' && !state.dead) say('look at you grow. hello, ' + stage() + '!', 5000);
@@ -875,7 +900,7 @@
           } else if (state.phase === 'naming') $('nursery-message').textContent = 'Your baby pickle is here. Every great dill needs a name.';
           else $('nursery-message').textContent = 'Pick a brine. Pop in your cucumber. A tiny friend hatches in one minute.';
         }
-        $('pet-profile').hidden = !living; $('elder-club').hidden = !living;
+        $('pet-profile').hidden = !living; $('elder-club').hidden = !living; $('scrapbook').hidden = !living;
         $('pet-caption').textContent = state.name;
         if (!living) return;
         const currentVibe = vibe();
@@ -896,6 +921,36 @@
           collectionKey = key;
           $('elder-grid').innerHTML = Life.ELDERS.map((form, index) => '<div class="elder-card' + (index >= unlocked ? ' locked' : '') + '"><b>' + (index < unlocked ? '✦ ' : '') + form.name + '</b><small>' + (index < unlocked ? form.quip : 'Day ' + (14 + index * 3)) + '</small></div>').join('');
         }
+        renderScrapbook();
+      }
+      function renderScrapbook() {
+        const days = streak(), page = Life.scrapbook(state, Date.now(), days);
+        const key = JSON.stringify([days, page.unlocked, page.moments]);
+        if (scrapbookKey === key) return;
+        scrapbookKey = key;
+        const date = at => new Date(at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+        const favorite = Life.favorite(state.variety);
+        $('scrapbook-summary').textContent = 'Scrapbook · ' + days + '-day visit streak';
+        $('scrapbook-page').innerHTML = '<p class="scrapbook-note">Loves ' + Life.FOOD_NAMES[favorite.food] + ' and ' + Life.GAME_NAMES[favorite.game] + '.</p>' +
+          '<h3>Streak stickers</h3><div class="stickers">' + page.stickers.map(sticker => '<div class="sticker' + (sticker.earned ? ' earned' : '') + '">' + (sticker.earned ? '★ ' : '') + sticker.days + ' days</div>').join('') + '</div>' +
+          '<h3>Life so far</h3><ul class="moments">' + page.moments.map(moment => '<li><span>' + Life.MOMENTS[moment.id] + '</span><time>' + date(moment.at) + '</time></li>').join('') + '</ul>' +
+          '<h3>Elder album · ' + page.unlocked + '/32</h3><div class="elder-grid">' + page.album.map((slot, index) => '<div class="elder-card' + (slot.unlocked ? '' : ' locked') + '"><b>' + (slot.unlocked ? '✦ ' + Life.ELDERS[index].name : 'Locked') + '</b><small>' + (slot.unlocked ? date(slot.at) : 'Day ' + slot.day) + '</small></div>').join('') + '</div>';
+      }
+      function renderWish() {
+        const wish = Life.activeWish(state, Date.now());
+        $('wish').hidden = !wish || !!game;
+        if (!wish) return;
+        const text = '♡ wish: ' + Life.wishText(wish) + ' · ' + Math.max(1, Math.ceil((wish.expiresAt - Date.now()) / Life.HOUR)) + 'h left';
+        if ($('wish').textContent !== text) $('wish').textContent = text;
+      }
+      // Grants a matching wish with a sparkle and a fanfare. Returns the line to add to the pickle's reply.
+      function grantWish(kind, target = '') {
+        const added = Life.grantWish(state, kind, target, Date.now());
+        if (added === null) return '';
+        happyUntil = Date.now() + 5000;
+        if (!game) effect('★ wish granted ★');
+        sfx('win');
+        return ' wish granted! +' + added + ' happy.';
       }
       document.querySelectorAll('[data-brine]').forEach(button => button.addEventListener('click', () => {
         selectedBrine = button.dataset.brine;
@@ -958,6 +1013,7 @@
         room.dataset.mood = mood();
         room.classList.toggle('is-dead', state.dead);
         room.classList.toggle('is-eaten', !!state.eaten);
+        renderWish();
         room.dataset.bites = String(snack?.bites || 0);
         $('tombstone').innerHTML = state.eaten ? 'YUM.<br>little dill' : 'R.I.P.<br>little dill';
         $('tombstone').setAttribute('aria-label', state.eaten ? 'Your pickle has been eaten. Crumbs remain.' : 'Your pickle has passed away');
@@ -1088,8 +1144,8 @@
         if (Date.now() - lastPet < 2000) { say('so loved. another pet in a moment. ♥'); render(); return; }
         lastPet = Date.now(); lastAction = Date.now();
         const added = addHappy(8);
-        say(added ? '+' + added + ' happy. you’re my favorite human.' : '100% happy. maximum pickle joy!');
         effect(added ? '+' + added + ' happy ♥' : '♥ so loved ♥'); act('hop', 650); sfx('pet');
+        say((added ? '+' + added + ' happy. you’re my favorite human.' : '100% happy. maximum pickle joy!') + grantWish('pet'));
         assessHealth(); recordCare(); save(); render();
       }
       function toggleSleep() {
@@ -1097,9 +1153,10 @@
         syncTime();
         if (state.phase !== 'living' || state.dead || game || snack) return;
         state.sleeping = sleeping; happyUntil = 0;
-        say(state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.');
         act(state.sleeping ? 'yawn' : 'wake', state.sleeping ? 1200 : 900);
-        sfx(state.sleeping ? 'sleep' : 'wake'); recordCare(); save(); render();
+        sfx(state.sleeping ? 'sleep' : 'wake');
+        say((state.sleeping ? 'night night. don’t let the dill bugs bite.' : 'rise & brine, sleepyhead.') + (state.sleeping ? grantWish('nap') : ''));
+        recordCare(); save(); render();
       }
       function care(action) {
         syncTime();
@@ -1114,16 +1171,18 @@
           else {
             const added = Math.min(40, 100 - state.fullness);
             state.fullness = clamp(state.fullness + 40);
-            const happy = addHappy(3);
             const food = showFood();
-            say(food.name + ' time! +' + Math.round(added) + ' food, +' + happy + ' happy.');
-            effect('+' + Math.round(added) + ' food'); act('munch', 2900); sfx('feed');
+            const favorite = food.id === Life.favorite(state.variety).food;
+            const happy = addHappy(3 + (favorite ? Life.FAVORITE_BONUS : 0));
+            effect(favorite ? '★ favorite snack ★' : '+' + Math.round(added) + ' food'); act('munch', 2900); sfx('feed');
+            say((favorite ? food.name + '! my favorite! +' : food.name + ' time! +') + Math.round(added) + ' food, +' + happy + ' happy.' + grantWish('feed'));
           }
         } else if (state.hygiene >= 99) { say('already sparkling. how about a game?'); sfx('blocked'); }
         else {
           state.hygiene = 100;
           const happy = addHappy(4);
-          say('a sudsy little bath. +' + happy + ' happy, too.'); effect('✧ squeaky clean ✧'); act('bath', 2800); sfx('clean');
+          effect('✧ squeaky clean ✧'); act('bath', 2800); sfx('clean');
+          say('a sudsy little bath. +' + happy + ' happy, too.' + grantWish('clean'));
         }
         assessHealth(); recordCare(); save(); render();
       }
@@ -1196,8 +1255,10 @@
         syncTime();
         if (!game || state.dead || game.phase === 'result') return;
         clearGameTimers(); game.phase = 'result';
-        const added = addHappy(reward);
-        game.message = message + ' +' + added + ' happy ♥';
+        const favorite = game.type === Life.favorite(state.variety).game;
+        const added = addHappy(reward + (favorite ? Life.FAVORITE_BONUS : 0));
+        Life.recordEvent(state, 'game', Date.now());
+        game.message = message + ' +' + added + ' happy ♥' + (favorite ? ' ★ my favorite game!' : '') + grantWish('play', game.type);
         records[game.type] = Math.max(Number(records[game.type]) || 0, game.score);
         try { localStorage.setItem('little-dill.arcade.v1', JSON.stringify(records)); } catch { /* Scores are optional. */ }
         $('game-again').hidden = false; $('game-menu-button').hidden = false;
