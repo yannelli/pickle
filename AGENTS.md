@@ -25,7 +25,7 @@
 | `ios/project.yml` | XcodeGen project definition; commit the generated Xcode project too |
 | `tests/`, `ios/LittleDillTests/`, `ios/LittleDillUITests/` | Web/server, native unit, and native UI checks |
 | `tests/fixtures/arena-parity.json` | Shared values checked by JavaScript and Swift tests |
-| `website/`, `server/website-worker.mjs` | Official landing site, with a separate deployment |
+| `website/` | Official landing site (`pickle-website`), deployed by Cloudflare Git integration on pushes to `main` |
 
 Read [README.md](README.md) for player behavior and deployment targets, [ios/README.md](ios/README.md) for native workflows, and [docs/INDEX.md](docs/INDEX.md) for the Cloudflare rate-limit references.
 
@@ -108,6 +108,6 @@ UI tests and explicit WebSocket/restart checks are documented in [ios/README.md]
 - `wrangler.jsonc` deploys the browser pet and reminder Worker.
 - `wrangler.arena.jsonc` deploys the arena engine and `arena-web/` assets together.
 - `wrangler.arena-legacy.jsonc` updates the compatibility proxy for older clients.
-- The official landing site has a separate Worker. Follow the root README's content-replacement procedure to retain its assets and bindings.
+- The official landing site (`pickle-website`) deploys from `website/` on every push to `main`. Edit `website/public/`; manual uploads are replaced by the next push.
 - Bump `CACHE_VERSION` in `sw.js` for pet asset changes. Preserve Durable Object migrations, stored keys, and bindings.
 - Validate the intended target with `npx wrangler deploy --dry-run --config <config>`. After an authorized deployment, check served assets and `/health`; do not infer deployed behavior from local source.

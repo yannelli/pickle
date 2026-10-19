@@ -246,7 +246,26 @@
   @keyframes peek { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(-11deg) translateY(-6px); } }
   @keyframes hop { 0%, 100% { transform: translateY(0); } 35% { transform: translateY(-18px) rotate(-8deg); } 65% { transform: translateY(-8px) rotate(7deg); } }
   @keyframes love { 0% { opacity: 0; transform: translateY(10px) rotate(12deg); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-25px) rotate(12deg); } }
+  .hero-links { display: flex; flex-wrap: wrap; gap: 10px 24px; margin-top: 22px; font-size: 14px; }
+  .hero-links a { display: inline-flex; align-items: center; gap: 10px; text-decoration: underline; text-underline-offset: 5px; font-weight: 700; }
+  .hero-links svg { width: 19px; height: 19px; }
+  .arena-feature { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 40px; border: 1px solid var(--line); border-radius: 30px; background: #edf1e3; }
+  .arena-feature > div { min-width: 0; }
+  .arena-feature h2 { margin-bottom: 20px; }
+  .arena-feature p:not(.eyebrow) { color: var(--muted); margin-bottom: 24px; }
+  .arena-feature .arena-art { width: 100%; height: auto; border-radius: 24px; overflow: hidden; }
+  .arena-features { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 0 0 25px; font-size: 12px; font-weight: 700; }
+  .arena-features li { padding: 7px 11px; border: 1px solid var(--line); border-radius: 30px; background: var(--cream); }
+  .arena-feature .button { max-width: 100%; white-space: normal; text-align: center; }
+  .arena-feature .button svg { flex-shrink: 0; }
+  .arena-feature .hero-note { margin: 18px 0 0; }
+  .app-feature { background: var(--lime); }
+  .whats-new { padding: 30px; border-radius: 24px; background: var(--cream); }
+  .whats-new ul { display: grid; gap: 14px; margin: 14px 0 0; padding: 0; list-style: none; }
+  .whats-new li { color: var(--muted); }
+  .whats-new strong { color: var(--ink); }
 }
+
 
 @layer responsive {
   @media (min-width: 1500px) { .hero { min-height: 720px; } }
@@ -288,6 +307,7 @@
     .button-small { gap: 8px; min-height: 40px; padding: 8px 15px; font-size: 11px; }
     .hero { grid-template-columns: 1fr; padding-block: 48px 42px; gap: 20px; }
     .hero-copy { text-align: center; padding: 0; }
+    .hero-links { justify-content: center; }
     .hero .eyebrow { justify-content: center; font-size: 9px; }
     h1 { font-size: clamp(51px, 9vw, 72px); }
     .hero-description { max-width: 390px; margin: 26px auto 25px; }
@@ -391,5 +411,17 @@
     .device[data-action="love"] .pet-effect, .device[data-action="feed"] .pet-effect { opacity: 1; }
     .feeling svg path { stroke-dashoffset: 0; }
     [data-reveal] { opacity: 1; transform: none; }
+  }
+  @media (max-width: 760px) {
+    .arena-feature { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 26px; }
+    .arena-feature .arena-art { max-height: 260px; }
+    .arena-feature h2 { font-size: 38px; }
+    .whats-new { padding: 22px; }
+  }
+  @media (max-width: 420px) {
+    .arena-feature { padding: 20px; }
+    .arena-feature h2 { font-size: 32px; }
+    .arena-feature .button { padding: 12px 17px; font-size: 14px; gap: 12px; }
+    .arena-features { font-size: 11px; }
   }
 }
