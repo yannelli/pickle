@@ -555,3 +555,83 @@ test('piece loss suppresses routine pickup sounds even when nearby food offsets 
   app.read(`feedingSounds(${JSON.stringify(after)}, ${JSON.stringify(before)}, [])`);
   assert.equal(app.read('JSON.stringify(heard)'), '["crunch"]');
 });
+
+test('jar spill cues fire once on the warning-to-spill edge and recaps read the frozen run', async () => {
+  const { jarSpilled, recapStats, recapRows, goalProgress } = await import(modulePath);
+  assert.equal(jarSpilled({ x: 1, y: 1, warn: .1 }, { x: 1, y: 1, warn: 0 }), true);
+  assert.equal(jarSpilled({ x: 1, y: 1, warn: 0 }, { x: 1, y: 1, warn: 0 }), false, 'linger frames do not repeat the cue');
+  assert.equal(jarSpilled(null, { x: 1, y: 1, warn: 0 }), false, 'joining mid-spill stays quiet');
+  assert.equal(jarSpilled({ x: 1, y: 1, warn: 4 }, null), false);
+  assert.equal(jarSpilled({ x: 1, y: 1, warn: 4 }, { x: 1, y: 1, warn: 3 }), false);
+  const own = { id: 'you', alive: false, run: [1840, 2, 95, 3], goals: [['eat', 2, 2], ['mass', 2000, 1840], ['jar', 1, 1]] };
+  const stats = recapStats(own);
+  assert.deepEqual(stats, { peak: 1840, rank: 3, kills: 2, seconds: 95, goalsDone: 2, goalsTotal: 3 });
+  assert.deepEqual(recapRows(stats), [['PEAK MASS', '1840'], ['BEST RANK', '#3'], ['CRUNCHES', '2'], ['TIME ALIVE', '1:35'], ['GOALS', '2/3']]);
+  assert.equal(recapRows({ ...stats, rank: 0 })[1][1], '—', 'unknown rank');
+  assert.equal(recapStats({ id: 'you', alive: true, mass: 300 }), null, 'older servers send no run');
+  assert.equal(recapStats(null), null);
+  assert.equal(goalProgress(['food', 40, 55]), '40/40');
+});
+
+function eventPlayer(extra = {}) {
+  return { id: 'player', name: 'Dilly', alive: true, mass: 640, best: 640, kills: 1, x: 500, y: 500, shield: 0, dash: 0, cooldown: 0, splitCooldown: 0, cells: [{ id: 'a', x: 500, y: 500, mass: 640 }], goals: [['eat', 2, 1], ['mass', 1000, 640], ['jar', 1, 0]], goalsDone: 0, run: [640, 1, 95, 2], ...extra };
+}
+async function eventHarness() {
+  const app = await browserHarness(), created = [], make = app.document.createElement;
+  app.document.createElement = tag => { const element = make(tag); element.tag = tag; created.push(element); return element; };
+  app.read("globalThis.heard = []; sound = kind => heard.push(kind)");
+  app.node('join-form').fire('submit'); app.welcome(app.sockets[0]);
+  const send = (tick, fields = {}, player = {}) => app.sockets[0].message({ type: 'state', tick, width: 8400, height: 6300, food: [], players: [eventPlayer(player)], ...fields });
+  return { app, created, send };
+}
+
+test('web controller shows goals, highlights the bounty, and cues the jar spill once', async () => {
+  const { app, created, send } = await eventHarness();
+  send(1, { jar: { x: 900, y: 500, warn: 2 }, bounty: 'player' });
+  assert.equal(app.node('goals').hidden, false);
+  assert.ok(created.some(element => element.tag === 'span' && element.textContent === 'Crunch 2 pickles'));
+  assert.ok(created.some(element => element.tag === 'b' && element.textContent === '640/1000'));
+  assert.ok(created.some(element => element.tag === 'li' && element.className === 'you bounty'), 'bounty row class');
+  assert.ok(created.some(element => element.className === 'bounty-mark' && element.textContent === '♛'), 'bounty glyph');
+  send(2, { jar: { x: 900, y: 500, warn: 0 } }); send(3, { jar: { x: 900, y: 500, warn: 0 } }); send(4, {});
+  assert.deepEqual(JSON.parse(app.read('JSON.stringify(heard)')).filter(kind => kind === 'jar'), ['jar']);
+  assert.equal(app.read('events.jar'), null);
+  send(5, {}, { goals: undefined, run: undefined });
+  assert.equal(app.node('goals').hidden, true, 'older servers hide the goal list');
+});
+
+test('web render draws the jar warning ring, minimap jar and bounty crown', async () => {
+  const { app, send } = await eventHarness();
+  send(1, { jar: { x: 700, y: 500, warn: 4 }, bounty: 'player' });
+  app.read('globalThis.crowns = []; drawBountyCrown = (...args) => crowns.push(args.slice(1))');
+  app.read('render(performance.now() + 16)');
+  const arena = app.node('arena'), map = app.node('minimap'), zoom = app.read('zoom');
+  assert.ok(arena.calls.some(([key, style]) => key === 'stroke' && style === '#C8E06B99'), 'warning ring color');
+  assert.ok(arena.calls.some(([key, dash]) => key === 'setLineDash' && Math.abs(dash[0] - 18 / zoom) < 1e-9 && Math.abs(dash[1] - 12 / zoom) < 1e-9), 'screen-space dashes');
+  assert.ok(arena.calls.some(([key, x, y, r]) => key === 'arc' && x === 700 && y === 500 && r === 260), 'ring radius');
+  assert.ok(map.calls.some(([key, style]) => key === 'stroke' && style === '#C8E06B'), 'pulsing minimap ring');
+  const [[x, y, width]] = JSON.parse(app.read('JSON.stringify(crowns)'));
+  const r = app.read('radius(640)'), screen = JSON.parse(app.read('JSON.stringify({ camera, viewCenter })'));
+  assert.ok(Math.abs(y - ((500 - screen.camera.y - r * 1.25) * zoom + screen.viewCenter.y)) < 1e-6, 'crown sits 1.25 radii above the piece');
+  assert.ok(Math.abs(x - ((500 - screen.camera.x) * zoom + screen.viewCenter.x)) < 1e-6 && width >= 14 && width <= 30);
+});
+
+test('web death and explicit leave show the run recap; older servers leave without one', async () => {
+  const { app, created, send } = await eventHarness();
+  send(1); send(2, {}, { alive: false, respawn: 3, eatenBy: 'Big', run: [700, 1, 96, 2], goals: [['eat', 2, 2], ['mass', 1000, 700], ['jar', 1, 0]] });
+  assert.equal(app.read('overlayMode'), 'dead');
+  assert.equal(app.node('run-recap').hidden, false); assert.equal(app.node('run-result').hidden, true);
+  const values = () => created.filter(element => element.tag === 'dd').map(element => element.textContent);
+  assert.deepEqual(values().slice(-5), ['700', '#2', '1', '1:36', '1/3']);
+  app.node('overlay-back').fire('click');
+  assert.equal(app.read('phase'), 'lobby'); assert.equal(app.node('recap-card').hidden, false);
+  assert.equal(app.document.activeElement, app.node('recap-dismiss'));
+  assert.deepEqual(values().slice(-5), ['700', '#2', '1', '1:36', '1/3']);
+  app.node('recap-dismiss').fire('click');
+  assert.equal(app.node('recap-card').hidden, true); assert.equal(app.document.activeElement, app.node('play'));
+
+  const legacy = await browserHarness(); legacy.node('join-form').fire('submit'); legacy.welcome(legacy.sockets[0]); legacy.snapshot(legacy.sockets[0]);
+  legacy.node('leave').fire('click'); legacy.node('overlay-back').fire('click');
+  assert.equal(legacy.read('phase'), 'lobby'); assert.equal(legacy.node('recap-card').hidden, true);
+  assert.equal(legacy.document.activeElement, legacy.node('play'));
+});

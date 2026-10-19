@@ -1,4 +1,4 @@
-import { BRINES, OUTFITS, VARIETIES, varietyOf, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, cellKey, threatenedCellIDs, splitState, massLabel, roomCode, direction, stickInput, playerName, socketURL, applyFoodUpdate, readResumeRecord, refreshResumeRecord, resumeFromWelcome, resumeRetryDelay, shareURL, interpolate, drawPickle, easeZoom, killRings, bodyShape, membraneSize, resizeMembrane, stepMembrane, membraneOutline, hazardFor, drainDroplets, spitFlight, drawDroplet, drawHazard, hazardKind, scheduleStrokes, pickupCue } from './arena-core.mjs';
+import { BRINES, OUTFITS, VARIETIES, varietyOf, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, cellKey, threatenedCellIDs, splitState, massLabel, roomCode, direction, stickInput, playerName, socketURL, applyFoodUpdate, readResumeRecord, refreshResumeRecord, resumeFromWelcome, resumeRetryDelay, shareURL, interpolate, drawPickle, easeZoom, killRings, bodyShape, membraneSize, resizeMembrane, stepMembrane, membraneOutline, hazardFor, drainDroplets, spitFlight, drawDroplet, drawHazard, hazardKind, scheduleStrokes, pickupCue, JAR, goalLabel, goalDone, goalProgress, eventState, jarSpilled, recapStats, recapRows, drawJar, drawBountyCrown, bountyCrownWidth, drawMapJar } from './arena-core.mjs';
 
 const $ = id => document.getElementById(id);
 const canvas = $('arena'), ctx = canvas.getContext('2d'), map = $('minimap').getContext('2d');
@@ -25,6 +25,7 @@ let threatened = new Set(), membranes = new Map(), membraneClock = 0, spits = ne
 let width = innerWidth, height = innerHeight, camera = { x: 1200, y: 900 }, zoom = null, lastFrame = performance.now();
 let viewCenter = { x: width / 2, y: height / 2 }, cameraInsets = {};
 let audio = null, audioOut = null, noiseBuffer = null, drainLoop = null, pickupState = null, pickupBuffers = [], pickupLoading = null, leaderboardSignature = '', lastSavedBest = settings.best;
+let events = eventState(null, null), lastAliveOwn = null, deathRecap = null, jarSpillAt = null, goalsSignature = '';
 
 function notify(message) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3500); }
 function audioOutput() {
@@ -64,7 +65,11 @@ const sounds = {
   split(at) { for (const offset of [0, .035]) burst(at + offset, .015, .1, { type: 'highpass', frequency: 4000 }); tone('sine', 900, 500, at, .06, .08); },
   regroup(at) { tone('sine', 420, 620, at, .12, .07); },
   join(at) { tone('triangle', 523, 523, at, .14, .06); tone('triangle', 784, 784, at + .09, .18, .06); },
-  respawn(at) { tone('triangle', 587, 587, at, .14, .06); tone('triangle', 880, 880, at + .09, .18, .06); }
+  respawn(at) { tone('triangle', 587, 587, at, .14, .06); tone('triangle', 880, 880, at + .09, .18, .06); },
+  jar(at) {
+    burst(at, .32, .16, { type: 'lowpass', frequency: 1800, sweep: 380, q: .8, attack: .02 });
+    for (const [n, offset] of [0, .07, .15].entries()) tone('sine', 700 - n * 120, 340 - n * 60, at + offset, .1, .07);
+  }
 };
 function sound(kind) {
   if (!settings.sound || !audio || audio.state !== 'running') return;
@@ -165,7 +170,7 @@ function overlay(mode, title, message) {
   $('overlay-kicker').textContent = { joining: 'FRESH FROM THE JAR', reconnecting: 'HOLD THAT DILL', disconnected: 'A LITTLE BREATHER', dead: 'YOU WERE A PRETTY BIG DILL', leave: 'HEADING OUT?' }[mode] || '';
   $('overlay-action').hidden = mode === 'joining'; $('overlay-action').disabled = false;
   $('overlay-action').textContent = mode === 'leave' ? 'Keep playing' : mode === 'dead' ? 'One more crunch' : mode === 'reconnecting' ? 'Reconnect now' : 'Start a fresh run';
-  $('run-result').hidden = mode !== 'dead'; $('share-run').hidden = mode !== 'dead';
+  $('run-result').hidden = mode !== 'dead' || deathRecap !== null; $('run-recap').hidden = mode !== 'dead' || deathRecap === null; $('share-run').hidden = mode !== 'dead';
   $('overlay-back').textContent = mode === 'leave' ? 'Leave this garden' : 'Back to the garden gate';
   // One dialog remains focusable while the live controls are unavailable.
   for (const element of [$('arena'), ...document.querySelectorAll('.game-header button'), $('dash'), $('split')]) element.inert = true;
@@ -178,6 +183,7 @@ function join(room) {
   // keep following it while the keyboard and browser chrome finish animating.
   document.activeElement?.blur();
   releaseRun(); requestedRoom = roomCode(room); ownID = null; state = null; previous.clear(); threatened.clear(); membranes.clear(); spits.clear(); ownPrevious = null; sequence = 0; leaderboardSignature = ''; zoom = null;
+  events = eventState(null, null); lastAliveOwn = null; deathRecap = null; jarSpillAt = null; goalsSignature = ''; $('goals').hidden = true; $('recap-card').hidden = true;
   phase = 'joining'; $('lobby').hidden = true; $('game').hidden = false; document.body.style.overflow = 'hidden';
   $('room-badge').hidden = !requestedRoom; $('room-badge').textContent = requestedRoom ? `FRIEND ROOM · ${requestedRoom}` : '';
   $('population').textContent = 'Finding your garden…'; $('mass').textContent = '25'; $('rank').textContent = '—'; $('best').textContent = '25'; $('leaders').replaceChildren(); $('protection').hidden = true;
@@ -214,12 +220,15 @@ function connectSocket(resume = null) {
     packet.food = applyFoodUpdate(state?.food || [], packet);
     packet.hazards = Array.isArray(packet.hazards) ? packet.hazards : [];
     state = packet; arrived = performance.now();
+    const jarBefore = events.jar; events = eventState(packet, ownID);
+    if (!entering && jarSpilled(jarBefore, events.jar)) { jarSpillAt = arrived; sound('jar'); }
+    if (own.alive) lastAliveOwn = own;
     trackSpit(packet, entering); pruneMembranes(packet);
     threatened = threatenedCellIDs(packet.players);
     resumeSession = refreshResumeRecord(resumeSession); persistResume();
     if (entering) { clearTimeout(connectTimer); cancelRecovery(); phase = 'playing'; hideOverlay(); if (!resume) sound('join'); canvas.tabIndex = 0; canvas.focus({ preventScroll: true }); }
-    if (!own.alive && (ownPrevious?.alive || entering)) { clearMovement(); if (ownPrevious?.alive && !resume) sound('crunch'); overlay('dead', 'A delicious little disaster.', `${own.eatenBy || 'Another dill'} got the last crunch. Your next big moment starts small.`); }
-    if (ownPrevious && !ownPrevious.alive && own.alive) { hideOverlay(); sound('respawn'); zoom = null; }
+    if (!own.alive && (ownPrevious?.alive || entering)) { clearMovement(); if (ownPrevious?.alive && !resume) sound('crunch'); deathRecap = recapStats(own.run ? own : lastAliveOwn); fillRecap($('run-recap'), deathRecap); overlay('dead', 'A delicious little disaster.', `${own.eatenBy || 'Another dill'} got the last crunch. Your next big moment starts small.`); }
+    if (ownPrevious && !ownPrevious.alive && own.alive) { hideOverlay(); sound('respawn'); zoom = null; deathRecap = null; }
     if (ownPrevious?.alive && own.alive) feedingSounds(own, ownPrevious, packet.players);
     if (own.dash > 0 && !(ownPrevious?.dash > 0)) sound('dash');
     const drained = own.alive ? playerCells(own).find(cell => cell.drain > 0) : null, field = drained && hazardFor(drained, packet.hazards);
@@ -315,7 +324,20 @@ function restoreStoredRun() {
   history.replaceState(null, '', shareURL(location.origin, requestedRoom));
   phase = 'reconnecting'; disconnected('Restoring your saved run…'); resize(); scheduleResume(true);
 }
-function leave() { releaseRun(); phase = 'lobby'; save(); $('game').hidden = true; $('lobby').hidden = false; document.body.style.overflow = ''; hideOverlay(); state = null; ownPrevious = null; refreshLobby(); $('play').focus({ preventScroll: true }); }
+function fillRecap(list, stats) {
+  if (!stats) return;
+  list.replaceChildren(...recapRows(stats, massLabel).map(([label, value]) => {
+    const item = document.createElement('div'), term = document.createElement('dt'), detail = document.createElement('dd');
+    term.textContent = label; detail.textContent = value; item.append(term, detail); return item;
+  }));
+}
+function leave() {
+  const recap = recapStats(ownPrevious?.run ? ownPrevious : lastAliveOwn);
+  releaseRun(); phase = 'lobby'; save(); $('game').hidden = true; $('lobby').hidden = false; document.body.style.overflow = ''; hideOverlay(); state = null; ownPrevious = null; lastAliveOwn = null; deathRecap = null; refreshLobby();
+  fillRecap($('recap-stats'), recap); $('recap-card').hidden = !recap;
+  (recap ? $('recap-dismiss') : $('play')).focus({ preventScroll: true });
+}
+$('recap-dismiss').addEventListener('click', () => { $('recap-card').hidden = true; $('play').focus({ preventScroll: true }); });
 $('leave').addEventListener('click', () => { clearMovement(); overlay('leave', 'Still a little hungry?', 'Your dill stays in the garden while you decide. Leaving starts a fresh run next time.'); });
 $('overlay-back').addEventListener('click', leave);
 $('overlay-action').addEventListener('click', () => { unlockAudio(); if (overlayMode === 'dead') { send({ type: 'respawn' }); $('overlay-action').disabled = true; } else if (overlayMode === 'leave') { hideOverlay(); canvas.focus({ preventScroll: true }); } else if (overlayMode === 'reconnecting') scheduleResume(true); else join(requestedRoom); });
@@ -341,9 +363,22 @@ function updateHUD(own) {
   $('cell-count').textContent = `${splitting.count} / 8 slices`;
   $('merge-note').textContent = splitting.count > 1 ? splitting.merge > 0 ? `Regroup in ${Math.ceil(splitting.merge)}s` : 'Regrouping automatically…' : '60 mass per slice to split';
   if (!own.alive && overlayMode === 'dead') { $('run-best').textContent = massLabel(own.best); $('run-best').title = own.best.toLocaleString(); $('run-kills').textContent = massLabel(own.kills); $('overlay-action').disabled = own.respawn > 0; $('overlay-action').textContent = own.respawn > 0 ? `Fresh pickle in ${Math.ceil(own.respawn)}…` : 'One more crunch'; }
-  const leaders = ranked.slice(0, 5), signature = leaders.map(p => `${p.id}:${Math.floor(p.mass)}`).join('|');
+  const leaders = ranked.slice(0, 5), signature = `${events.bounty}|${leaders.map(p => `${p.id}:${Math.floor(p.mass)}`).join('|')}`;
   if (signature !== leaderboardSignature) {
-    leaderboardSignature = signature; $('leaders').replaceChildren(...leaders.map(p => { const row = document.createElement('li'), name = document.createElement('span'), score = document.createElement('b'); name.className = 'leader-name'; name.textContent = p.id === ownID ? 'you' : p.name; score.textContent = massLabel(p.mass); score.title = Math.floor(p.mass).toLocaleString(); if (p.id === ownID) row.className = 'you'; row.append(name, score); return row; }));
+    leaderboardSignature = signature; $('leaders').replaceChildren(...leaders.map(p => {
+      const row = document.createElement('li'), name = document.createElement('span'), score = document.createElement('b'); name.className = 'leader-name'; name.textContent = p.id === ownID ? 'you' : p.name; score.textContent = massLabel(p.mass); score.title = Math.floor(p.mass).toLocaleString();
+      row.className = [p.id === ownID && 'you', p.id === events.bounty && 'bounty'].filter(Boolean).join(' ');
+      if (p.id === events.bounty) { const mark = document.createElement('span'); mark.className = 'bounty-mark'; mark.textContent = '♛'; mark.title = 'Bounty: crunch for 10% extra'; mark.setAttribute('aria-label', 'bounty'); mark.setAttribute('role', 'img'); row.append(name, mark, score); } else row.append(name, score);
+      return row;
+    }));
+  }
+  const goalSignature = JSON.stringify(events.goals);
+  if (goalSignature !== goalsSignature) {
+    goalsSignature = goalSignature; $('goals').hidden = events.goals.length === 0;
+    $('goal-list').replaceChildren(...events.goals.map(goal => {
+      const item = document.createElement('li'), label = document.createElement('span'), progress = document.createElement('b'), done = goalDone(goal);
+      item.className = done ? 'done' : ''; label.textContent = `${done ? '✓ ' : ''}${goalLabel(goal)}`; progress.textContent = goalProgress(goal); item.append(label, progress); return item;
+    }));
   }
 }
 function steer() {
@@ -466,6 +501,8 @@ function render(now) {
         const look = nearest ? direction(nearest.cell.x - h.x, nearest.cell.y - h.y) : { x: 0, y: 0 };
         drawHazard(ctx, h, { kind: hazardKind(h, index), time, hungry: draining.length > 0, lookX: look.x, lookY: look.y, droplets: draining.flatMap(cell => drainDroplets(cell, h, time)) });
       }
+      const jar = events.jar;
+      if (jar && jar.x + JAR.radius > left && jar.x - JAR.radius < right && jar.y + JAR.radius > top && jar.y - JAR.radius < bottom) drawJar(ctx, jar, { zoom, time, spilledFor: jarSpillAt === null || reducedMotion.matches ? Infinity : (now - jarSpillAt) / 1000 });
       const visiblePlayers = [], latest = new Map(state.players.map(player => [player.id, player]));
       const danger = new Map(own?.alive ? killRings(alive, ownID).map(ring => [cellKey(ring.ownerID, ring.cellID), ring.alpha]) : []);
       const bodies = [];
@@ -490,7 +527,7 @@ function render(now) {
         drawPickle(ctx, p, p.x, p.y, r, time, p.ownerID === ownID, zoom, reducedMotion.matches);
         visiblePlayers.push(p);
       }
-      ctx.restore(); drawLabels(visiblePlayers); drawMap(cells, own); steer();
+      ctx.restore(); drawLabels(visiblePlayers); drawBounty(visiblePlayers); drawMap(cells, own, time); steer();
     }
   }
   requestAnimationFrame(render);
@@ -536,11 +573,18 @@ function drawLabels(players) {
     ctx.fillStyle = '#263E31'; ctx.fillText(label, x, y);
   }
 }
-function drawMap(players, own) {
+function drawBounty(players) {
+  const pieces = players.filter(cell => cell.ownerID === events.bounty);
+  if (!pieces.length) return;
+  const p = pieces.reduce((largest, cell) => cell.mass > largest.mass ? cell : largest), r = radius(p.mass);
+  drawBountyCrown(ctx, (p.x - camera.x) * zoom + viewCenter.x, (p.y - camera.y - r * 1.25) * zoom + viewCenter.y, bountyCrownWidth(r * zoom));
+}
+function drawMap(players, own, time = 0) {
   map.clearRect(0, 0, 160, 120); map.fillStyle = '#e9eed7'; roundedRect(map, 0, 0, 160, 120, 5); map.fill();
   map.strokeStyle = '#b2c090'; map.lineWidth = .8; map.strokeRect(1, 1, 158, 118);
   map.fillStyle = '#D5DEE1'; map.strokeStyle = '#263E3199'; map.lineWidth = .8;
   for (const h of state.hazards) { map.beginPath(); map.roundRect(h.x / state.width * 160 - 3, h.y / state.height * 120 - 3, 6, 6, 1.5); map.fill(); map.stroke(); }
+  if (events.jar) drawMapJar(map, events.jar, events.jar.x / state.width * 160, events.jar.y / state.height * 120, JAR.radius / state.width * 160, time);
   for (const p of players) { map.fillStyle = p.ownerID === ownID ? '#263E31' : '#F1C9B4'; map.beginPath(); map.arc(p.x / state.width * 160, p.y / state.height * 120, p.ownerID === ownID ? 3.5 : 2, 0, Math.PI * 2); map.fill(); }
   if (own?.alive) { map.strokeStyle = '#405c3480'; map.lineWidth = .6; map.strokeRect((camera.x - viewCenter.x / zoom) / state.width * 160, (camera.y - viewCenter.y / zoom) / state.height * 120, width / zoom / state.width * 160, height / zoom / state.height * 120); }
 }

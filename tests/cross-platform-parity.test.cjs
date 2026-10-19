@@ -32,3 +32,16 @@ test('web and server follow the shared arena gameplay fixtures', async () => {
     if (cue) { assert.ok(Math.abs(cue.volume - row.volume) < 1e-9); cadence = cue; }
   }
 });
+
+test('web and server follow the shared jar, bounty, goal and recap fixtures', async () => {
+  const web = await import('../arena-web/arena-core.mjs');
+  const { RULES, GOAL_POOL } = await import('../server/arena-engine.mjs');
+  assert.deepEqual(JSON.parse(JSON.stringify(GOAL_POOL)), fixture.goals.pool);
+  assert.equal(RULES.goalCount, fixture.rules.goalCount);
+  assert.deepEqual({ ...web.JAR }, { warnSeconds: fixture.rules.jarWarnSeconds, lingerSeconds: fixture.rules.jarLingerSeconds, radius: fixture.rules.jarRadius });
+  for (const row of fixture.goals.labels) assert.equal(web.goalLabel(row.goal), row.text, row.text);
+  for (const row of fixture.eventSnapshots) {
+    const { jar, bounty, goals, goalsDone, run } = row;
+    assert.deepEqual(web.eventState(row.snapshot, 'you'), { jar, bounty, goals, goalsDone, run }, row.name);
+  }
+});
