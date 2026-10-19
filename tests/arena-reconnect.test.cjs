@@ -258,3 +258,24 @@ test('public reconnect routing targets the original room and rejects incomplete 
   }
   assert.deepEqual(rooms,['public-12']);
 });
+test('a reconnect keeps run goals and pauses the survive clock',async t=>{
+  const f=await setup(t), owner=await connect(f.room);
+  await connect(f.room,{name:'Observer'},'192.0.2.2');
+  const p=f.room.engine.players.get(owner.welcome.id);
+  assert.equal(owner.state.players.find(x=>x.id===p.id).goals.length,3);
+  p.goals=[['survive',120,0],['food',40,3],['eat',1,0]];p.goalsDone=2;
+  f.room.engine.time=p.spawnedAt+30;f.room.engine.step(0);
+  assert.deepEqual(p.goals[0],['survive',120,30]);
+  owner.socket.close();await f.room.pendingCheckpoint;
+  f.room.engine.time+=20;f.advance(20000);
+  const resumed=await connect(f.room,credentials(owner.welcome));
+  assert.equal(resumed.welcome.resumed,true);
+  const back=f.room.engine.players.get(p.id);
+  assert.equal(Math.floor(f.room.engine.time-back.spawnedAt),30,'held time does not count as survival');
+  f.advance(1100);f.room.tick();await f.room.pendingCheckpoint;
+  const restarted=await f.restart(), again=await connect(restarted,credentials(owner.welcome));
+  assert.equal(again.welcome.resumed,true);
+  const entry=again.state.players.find(x=>x.id===p.id);
+  assert.deepEqual(entry.goals,[['survive',120,30],['food',40,3],['eat',1,0]],'a reconnect must not reroll');
+  assert.equal(entry.goalsDone,2);
+});

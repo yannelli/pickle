@@ -159,7 +159,7 @@ export class ArenaRoom {
       const old = record.socket; this.sessions.delete(old); old.close(4001, 'Resumed on another connection.');
     } else if (record?.player) {
       const p = record.player, paused = this.engine.time - record.pausedAt;
-      for (const field of ['lastMeal','shieldUntil','dashUntil','dashReady','splitReady','mergeUntil','diedAt']) p[field] += paused;
+      for (const field of ['lastMeal','shieldUntil','dashUntil','dashReady','splitReady','mergeUntil','diedAt','spawnedAt']) p[field] += paused;
       for (const field of ['hazardSplitReady','hurtUntil','botHazardReady']) if (p[field] > record.pausedAt) p[field] += paused;
       this.engine.players.set(id,p); this.engine.balanceBots();
     } else this.engine.addPlayer(id, { name, brine, outfit, variety });
