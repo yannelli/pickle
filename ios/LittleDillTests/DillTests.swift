@@ -650,10 +650,13 @@ final class PetModelTests: XCTestCase {
     }
     @MainActor func testBackupRoundTripCarriesNativeExtrasAndCanBeUndone() throws {
         let clockA = TestClock(t0), a = hatched(suite(), clockA, brine: .spicy, name: "Sir Crunch")
-        XCTAssertEqual(a.care(.feed).coins, 5)
+        // A wish rolls when t0 falls in a local wish slot, which depends on the runner's time zone.
+        let feedWish = PetLife.activeWish(a.pet.life, now: PetLife.ms(clockA.now))?.kind == "feed"
+        XCTAssertEqual(a.care(.feed).coins, feedWish ? 5 + PetLife.WISH_COINS : 5)
         XCTAssertEqual(a.record(score: 250, day: DailyChallenge.today(clockA.now)), 25)
         XCTAssertTrue(a.equip(.shades))
         XCTAssertTrue(a.startArcade()); a.finishArcade(game: "catch", score: 7, completed: true)
+        let wishCoins = a.pet.life.events?.wish != nil ? PetLife.WISH_COINS : 0
         let file = try a.exportBackup()
         XCTAssertLessThanOrEqual(file.count, DillBackup.MAX_FILE_BYTES)
         let clockB = TestClock(t0.addingTimeInterval(3600)), b = DillStore(defaults: suite(), clock: { clockB.now })
@@ -662,7 +665,7 @@ final class PetModelTests: XCTestCase {
         XCTAssertEqual(preview.savedAt, clockA.now); XCTAssertEqual(preview.rows.map(\.label), ["Name", "Age", "Food", "Happy", "Energy", "Clean", "Condition"])
         let exported = a.pet.life
         b.restoreBackup(preview)
-        XCTAssertEqual(b.pet.name, "Sir Crunch"); XCTAssertEqual(b.pet.coins, 0); XCTAssertEqual(b.pet.outfit, .shades)
+        XCTAssertEqual(b.pet.name, "Sir Crunch"); XCTAssertEqual(b.pet.coins, wishCoins); XCTAssertEqual(b.pet.outfit, .shades)
         XCTAssertEqual(b.pet.arcadeRecords["catch"], 7); XCTAssertEqual(b.pet.scores.first?.score, 250)
         XCTAssertEqual(b.pet.life.fullness, exported.fullness - 1.5 * 3540 / 3600, accuracy: 1e-9, "Elapsed time applies after restore")
         XCTAssertTrue(b.canUndoRestore); XCTAssertTrue(b.undoRestore())

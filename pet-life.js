@@ -57,8 +57,55 @@
     ['band', 'Band Kid', 'This one time, at brine camp...', 'shako', 'trumpet'],
     ['prep', 'Prep', 'Early decision. Extra brine.', 'mortarboard', 'phone']
   ].map(([id, name, quip, hat, prop], index) => ({ id, name, quip, hat, prop, accent: ['#5b6f8a', '#3d3d47', '#8a5b5b', '#6f7f4a'][index % 4] }));
+  const FOODS = ['carrot', 'strawberry', 'broccoli', 'apple', 'cheese'];
+  const FOOD_NAMES = { carrot: 'carrot', strawberry: 'strawberry', broccoli: 'broccoli', apple: 'apple slice', cheese: 'cheese wedge' };
+  const GAMES = ['hunt', 'memory', 'catch'];
+  const GAME_NAMES = { hunt: 'Heart hunt', memory: 'Dill says', catch: 'Brine catch' };
+  const FAVORITES = {
+    dill: { food: 'strawberry', game: 'catch' }, gherkin: { food: 'carrot', game: 'memory' },
+    garlic: { food: 'broccoli', game: 'hunt' }, butter: { food: 'cheese', game: 'memory' },
+    chili: { food: 'apple', game: 'hunt' }, pepper: { food: 'carrot', game: 'catch' }
+  };
+  const FAVORITE_BONUS = 4;
+  const WISH_KINDS = ['feed', 'clean', 'pet', 'play', 'nap'];
+  const WISH_MS = 6 * HOUR, WISHES_PER_DAY = 2, WISH_HAPPINESS = 10, WISH_COINS = 5;
+  // Slot n opens at WISH_HOURS[n] local time; quiet hours run from QUIET_HOUR to WISH_HOURS[0].
+  const WISH_HOURS = [9, 15], QUIET_HOUR = 22;
+  const STAGE_DAYS = [['young', 1], ['teen', 3], ['adult', 7], ['elder', 14]];
+  const EVENTS = ['game', 'wish', 'arena'];
+  const MOMENTS = { hatch: 'Hatched from the brine', name: 'Got a name', young: 'Grew up: young pickle', teen: 'Became a teen',
+    adult: 'All grown up', elder: 'Joined the elder club', game: 'First arcade game', wish: 'First wish granted', arena: 'First arena run' };
+  const STREAK_STICKERS = [3, 7, 14, 30];
+  const MAX_STREAK = 100000;
   const clamp = value => Math.max(0, Math.min(100, value));
   const timestamp = value => Number.isSafeInteger(value) && value >= 0 && value <= 8640000000000000;
+  const isDay = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const isObject = value => !!value && typeof value === 'object' && !Array.isArray(value);
+  function cleanWish(value) {
+    if (!isObject(value) || !WISH_KINDS.includes(value.kind) || typeof value.target !== 'string' ||
+      value.target !== (value.kind === 'feed' ? (FOODS.includes(value.target) ? value.target : null) :
+        value.kind === 'play' ? (GAMES.includes(value.target) ? value.target : null) : '') ||
+      !timestamp(value.issuedAt) || !timestamp(value.expiresAt) || value.expiresAt <= value.issuedAt ||
+      value.expiresAt - value.issuedAt > WISH_MS) return undefined;
+    return { kind: value.kind, target: value.target, issuedAt: value.issuedAt, expiresAt: value.expiresAt };
+  }
+  function cleanWishes(value) {
+    if (!isObject(value) || !isDay(value.day) || !Number.isSafeInteger(value.count) || value.count < 0 || value.count > WISHES_PER_DAY) return undefined;
+    return { day: value.day, count: value.count };
+  }
+  function cleanEvents(value) {
+    if (!isObject(value)) return undefined;
+    const events = Object.fromEntries(EVENTS.filter(key => timestamp(value[key])).map(key => [key, value[key]]));
+    return Object.keys(events).length ? events : undefined;
+  }
+  // Optional shared fields are dropped when malformed so one bad value cannot block a whole save.
+  function withOptionals(pet, value) {
+    for (const [key, clean] of [['wish', cleanWish], ['wishes', cleanWishes], ['events', cleanEvents]]) {
+      const cleaned = clean(value[key]);
+      if (cleaned) pet[key] = cleaned;
+    }
+    return pet;
+  }
   function fresh(now = Date.now()) {
     return { version: 2, phase: 'new', name: '', variety: 'dill', brine: 'classic', brinedAt: 0, hatchAt: 0, bornAt: 0,
       fullness: 90, happiness: 85, energy: 90, hygiene: 95, sleeping: false, sick: false, dead: false,
@@ -79,7 +126,7 @@
     }
     const pet = Object.fromEntries(Object.keys(fresh()).map(key => [key, value[key]]));
     if (value.eaten) pet.eaten = true;
-    return pet;
+    return withOptionals(pet, value);
   }
   function restore(value, now = Date.now()) {
     if (value?.version === 2) return validate(value);
@@ -154,7 +201,78 @@
     const hours = Math.min(...Object.entries(RATES).map(([key, rate]) => Math.max(0, pet[key] - 55) / rate));
     return now + Math.max(2, hours) * HOUR;
   }
-  const api = Object.freeze({ HOUR, DAY, HATCH_MS, STATS, RATES, VARIETIES, ELDERS, TEENS, fresh, validate, restore, brine, name, assess, advance, age, stage, teen, elder, nextCareAt });
+  const pad = (value, size = 2) => String(value).padStart(size, '0');
+  const dayKey = date => pad(date.getFullYear(), 4) + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+  function localTime(now = Date.now()) {
+    const date = new Date(now);
+    return { day: dayKey(date), yesterday: dayKey(new Date(date.getFullYear(), date.getMonth(), date.getDate() - 1)), hour: date.getHours() };
+  }
+  function dayNumber(day) {
+    const [year, month, date] = day.split('-').map(Number);
+    return year * 372 + (month - 1) * 31 + date - 1;
+  }
+  function favorite(variety) { return FAVORITES[variety] || FAVORITES.dill; }
+  function activeWish(pet, now = Date.now()) {
+    return pet.phase === 'living' && !pet.dead && pet.wish && now < pet.wish.expiresAt ? pet.wish : null;
+  }
+  // `day` and `hour` are the device's local calendar day and hour; `food` is the next food in the feeding rotation.
+  function rollWish(pet, { now = Date.now(), day, hour, food }) {
+    if (pet.wish && !activeWish(pet, now)) delete pet.wish;
+    if (pet.phase !== 'living' || pet.dead || pet.sleeping || pet.wish || !pet.name.trim() || !isDay(day)) return null;
+    if (pet.wishes && pet.wishes.day > day) return null;
+    const count = pet.wishes?.day === day ? pet.wishes.count : 0;
+    if (count >= WISHES_PER_DAY || hour < WISH_HOURS[count] || hour >= QUIET_HOUR) return null;
+    const kinds = WISH_KINDS.filter(kind => kind === 'clean' ? pet.hygiene < 80 : kind === 'nap' ? pet.energy < 50 : true);
+    const seed = Math.floor(pet.bornAt / 1000) + dayNumber(day) * 7 + count * 3;
+    const kind = kinds[seed % kinds.length];
+    const target = kind === 'feed' ? (FOODS.includes(food) ? food : FOODS[0]) : kind === 'play' ? GAMES[Math.floor(seed / kinds.length) % GAMES.length] : '';
+    pet.wish = { kind, target, issuedAt: now, expiresAt: now + WISH_MS };
+    pet.wishes = { day, count: count + 1 };
+    return pet.wish;
+  }
+  function recordEvent(pet, event, now = Date.now()) {
+    if (pet.phase !== 'living' || !EVENTS.includes(event) || timestamp(pet.events?.[event])) return false;
+    pet.events = { ...pet.events, [event]: now };
+    return true;
+  }
+  // Feed wishes match by kind; play wishes need the named game. Returns the happiness added, or null.
+  function grantWish(pet, kind, target = '', now = Date.now()) {
+    const wish = activeWish(pet, now);
+    if (!wish || wish.kind !== kind || (kind === 'play' && wish.target !== target)) return null;
+    delete pet.wish;
+    const before = pet.happiness;
+    pet.happiness = clamp(before + WISH_HAPPINESS);
+    recordEvent(pet, 'wish', now);
+    return Math.round(pet.happiness - before);
+  }
+  function wishText(wish) {
+    return { feed: 'a ' + FOOD_NAMES[wish.target], clean: 'a bubble bath', pet: 'a little pet', play: 'a round of ' + GAME_NAMES[wish.target], nap: 'a cozy nap' }[wish.kind];
+  }
+  function scrapbook(pet, now = Date.now(), streak = 0) {
+    const stickers = STREAK_STICKERS.map(days => ({ days, earned: streak >= days }));
+    if (pet.phase !== 'living') return { moments: [], album: [], unlocked: 0, stickers };
+    const reached = age(pet, now);
+    const moments = [{ id: 'hatch', at: pet.hatchAt }, { id: 'name', at: pet.bornAt }];
+    for (const [id, days] of STAGE_DAYS) if (reached >= days * DAY) moments.push({ id, at: pet.bornAt + days * DAY });
+    for (const id of EVENTS) if (timestamp(pet.events?.[id])) moments.push({ id, at: pet.events[id] });
+    moments.sort((a, b) => a.at - b.at);
+    const unlocked = elder(pet, now)?.unlocked || 0;
+    const album = ELDERS.map((form, index) => ({ id: form.id, day: 14 + index * 3, at: pet.bornAt + (14 + index * 3) * DAY, unlocked: index < unlocked }));
+    return { moments, album, unlocked, stickers };
+  }
+  // The iOS visit streak: a new local day extends it when the last visit was yesterday, otherwise restarts at 1.
+  function visit(record, day, yesterday) {
+    const last = isDay(record.lastVisitDay) ? record.lastVisitDay : '';
+    const streak = Number.isSafeInteger(record.streak) ? Math.max(0, Math.min(MAX_STREAK, record.streak)) : 0;
+    if (!isDay(day) || day <= last) return false;
+    record.streak = last === yesterday ? Math.min(streak, MAX_STREAK - 1) + 1 : 1;
+    record.lastVisitDay = day;
+    return true;
+  }
+  const api = Object.freeze({ HOUR, DAY, HATCH_MS, STATS, RATES, VARIETIES, ELDERS, TEENS, FOODS, FOOD_NAMES, GAMES, GAME_NAMES, FAVORITES, FAVORITE_BONUS,
+    WISH_KINDS, WISH_MS, WISHES_PER_DAY, WISH_HAPPINESS, WISH_COINS, WISH_HOURS, QUIET_HOUR, STAGE_DAYS, MOMENTS, STREAK_STICKERS, MAX_STREAK,
+    fresh, validate, restore, brine, name, assess, advance, age, stage, teen, elder, nextCareAt,
+    localTime, favorite, activeWish, rollWish, recordEvent, grantWish, wishText, scrapbook, visit });
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.LittleDillLife = api;
 })(globalThis);

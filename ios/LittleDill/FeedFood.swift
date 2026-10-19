@@ -2,6 +2,7 @@ import SwiftUI
 
 enum FeedFood: String, CaseIterable {
     case carrot, strawberry, broccoli, apple, cheese
+    static let turnKey = "little-dill.food-turn.v1"
 
     static func at(_ successfulFeeds: Int) -> FeedFood {
         allCases[successfulFeeds % allCases.count]

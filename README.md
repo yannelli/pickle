@@ -29,6 +29,10 @@ A daily feed, clean, game, and pet is enough even if the game goes badly. A heal
 
 Baby pickles have a round body and pacifier. Young pickles are taller with a leaf, teens cycle through 8 stereotypes (nerd, emo, jock, skater, gamer, theater kid, band kid, prep) with a new one each day, adults reach their full shape, and elders wear glasses and changing accessories. Pickles become young at 1 day, teens at 3 days, adults at 7 days, and elders at 14 days. A content pickle rotates every 30 to 60 seconds between hopping, chilling in sunglasses, lounging in the sun, reading, and sitting by a campfire; petting it always makes it hop. Every 3 days after that, your pickle takes another of 32 elder forms, each with its own hat and accessory pairing, name, and lines. After all 32 forms, the cycle repeats indefinitely. All 6 varieties keep their own colors and shapes throughout life.
 
+Wishes: an awake, named pickle makes up to 2 wishes per local day, one at a time, outside quiet hours (10pm to 9am device time). The first can appear from 9am and the second from 3pm. Each lasts 6 hours. A wish asks for the next food in the feeding rotation, a bath (hygiene under 80), a pet, a named round of Heart hunt, Dill says, or Brine catch, or a nap (energy under 50). Granting it adds 10 happiness, and 5 coins on iOS. Wishes stay on the device and in backups; reminder notifications do not include them.
+
+Scrapbook: the Scrapbook panel on web and the Scrapbook sheet on iOS list the hatch, naming, and stage dates, the first finished game, first granted wish, and first iOS arena run, plus a 32-slot elder album with locked future forms. Visit streak stickers unlock at 3, 7, 14, and 30 days. The browser keeps the same daily visit streak as iOS and exchanges it through `.dill` native extras.
+
 The app automatically migrates old local saves and encrypted v1 backups to a separate v2 local-save key. This prevents older open tabs from overwriting the new save. Migration preserves stats, life/death status, and the equivalent growth stage. Pickles receive a new grace period when upgrading from the old rapid-decay model. Existing pickles receive the name Little Dill.
 
 ## Play with your pickle
@@ -43,6 +47,17 @@ The app automatically migrates old local saves and encrypted v1 backups to a sep
 - Games pause while the page is hidden or a save preview is open. **Esc**, Games, or Back ends the current game without a completion reward.
 
 Feeding rotates through carrot, strawberry, broccoli, apple, and cheese on web and iOS. Successful feeds advance the sequence, which is remembered on that device; refused feeds leave it unchanged.
+
+Each variety has a favorite food and game. Feeding the favorite food or finishing the favorite game adds 4 happiness on top of the usual reward:
+
+| Variety | Favorite food | Favorite game |
+| --- | --- | --- |
+| Classic Dill | strawberry | Brine catch |
+| Tiny Gherkin | carrot | Dill says |
+| Garlic Goblin | broccoli | Heart hunt |
+| Butter Bean | cheese | Dill says |
+| Chili Dill | apple | Heart hunt |
+| Pepper Punk | carrot | Brine catch |
 
 Play wakes a sleeping pickle and opens the arcade without spending energy. Starting a game costs 6 energy.
 

@@ -349,6 +349,10 @@ struct ArcadeSheet: View {
             Text(text).font(DillTheme.display(26)).multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("arcade.result")
+            if gained != nil, PetLife.favorite(store.pet.life.variety).game == game.game.rawValue {
+                Text("★ favorite game · +\(Int(PetLife.FAVORITE_BONUS)) bonus happy").font(.system(size: 13, weight: .bold, design: .rounded))
+                    .accessibilityIdentifier("arcade.favorite")
+            }
             Text("Best \(best(game.game))").font(.system(size: 11, weight: .bold, design: .monospaced)).foregroundStyle(DillTheme.muted)
             circuitResult
             Button { start(game.game, circuit: circuitDay != nil) } label: { Label("Play again", systemImage: "arrow.clockwise") }
