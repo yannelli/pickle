@@ -1,4 +1,4 @@
-import { BRINES, OUTFITS, VARIETIES, varietyOf, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, cellKey, threatenedCellIDs, splitState, massLabel, roomCode, direction, stickInput, playerName, socketURL, applyFoodUpdate, readResumeRecord, refreshResumeRecord, resumeFromWelcome, resumeRetryDelay, shareURL, interpolate, drawPickle, easeZoom, killRings, bodyShape, membraneSize, resizeMembrane, stepMembrane, membraneOutline, hazardFor, drainDroplets, spitFlight, drawDroplet, drawHazard, hazardKind, scheduleStrokes, pickupCue, JAR, goalLabel, goalDone, goalProgress, eventState, jarSpilled, recapStats, recapRows, drawJar, drawBountyCrown, bountyCrownWidth, drawMapJar } from './arena-core.mjs';
+import { BRINES, OUTFITS, VARIETIES, varietyOf, clamp, radius, viewportBounds, cameraFrame, playerCells, flattenCells, cellKey, threatenedCellIDs, splitState, massLabel, roomCode, direction, stickInput, playerName, socketURL, applyFoodUpdate, readResumeRecord, refreshResumeRecord, resumeFromWelcome, resumeRetryDelay, shareURL, interpolate, drawPickle, easeZoom, killRings, bodyShape, membraneSize, resizeMembrane, stepMembrane, membraneOutline, hazardFor, drainDroplets, spitFlight, drawDroplet, drawHazard, hazardKind, scheduleStrokes, pickupCue, JAR, goalLabel, eventState, jarSpilled, goalsCompleted, recapStats, recapRows, drawJar, drawBountyCrown, bountyCrownWidth, drawMapJar } from './arena-core.mjs';
 
 const $ = id => document.getElementById(id);
 const canvas = $('arena'), ctx = canvas.getContext('2d'), map = $('minimap').getContext('2d');
@@ -25,8 +25,18 @@ let threatened = new Set(), membranes = new Map(), membraneClock = 0, spits = ne
 let width = innerWidth, height = innerHeight, camera = { x: 1200, y: 900 }, zoom = null, lastFrame = performance.now();
 let viewCenter = { x: width / 2, y: height / 2 }, cameraInsets = {};
 let audio = null, audioOut = null, noiseBuffer = null, drainLoop = null, pickupState = null, pickupBuffers = [], pickupLoading = null, leaderboardSignature = '', lastSavedBest = settings.best;
-let events = eventState(null, null), lastAliveOwn = null, deathRecap = null, jarSpillAt = null, goalsSignature = '';
+let events = eventState(null, null), lastAliveOwn = null, deathRecap = null, jarSpillAt = null, goalToasts = [], goalToastTimer = null;
 
+function showGoalToast() {
+  const toast = $('goal-toast');
+  if (goalToastTimer !== null || !goalToasts.length) return;
+  toast.textContent = `✓ ${goalLabel(goalToasts.shift())}`; toast.classList.toggle('shown', true);
+  goalToastTimer = setTimeout(() => {
+    toast.classList.toggle('shown', false);
+    goalToastTimer = setTimeout(() => { toast.textContent = ''; goalToastTimer = null; showGoalToast(); }, 450);
+  }, 2500);
+}
+function clearGoalToasts() { goalToasts = []; clearTimeout(goalToastTimer); goalToastTimer = null; $('goal-toast').classList.toggle('shown', false); $('goal-toast').textContent = ''; }
 function notify(message) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3500); }
 function audioOutput() {
   if (!audioOut) {
@@ -176,6 +186,13 @@ function overlay(mode, title, message) {
   for (const element of [$('arena'), ...document.querySelectorAll('.game-header button'), $('dash'), $('split')]) element.inert = true;
   (mode === 'joining' ? $('overlay-back') : $('overlay-action')).focus({ preventScroll: true });
 }
+// A disabled button loses focus, so Share holds it during the respawn countdown.
+function waitForRespawn(waiting) {
+  const action = $('overlay-action'), share = $('share-run');
+  if (waiting && document.activeElement === action) { share.focus({ preventScroll: true }); share.dataset.heldFocus = 'true'; }
+  action.disabled = waiting;
+  if (!waiting && share.dataset.heldFocus === 'true') { delete share.dataset.heldFocus; if (document.activeElement === share) action.focus({ preventScroll: true }); }
+}
 function hideOverlay() { $('overlay').hidden = true; overlayMode = ''; for (const element of [$('arena'), ...document.querySelectorAll('.game-header button'), $('dash'), $('split')]) element.inert = false; }
 function join(room) {
   settings.name = playerName($('name').value); settings.outfit = $('outfit').value; save(); unlockAudio();
@@ -183,7 +200,7 @@ function join(room) {
   // keep following it while the keyboard and browser chrome finish animating.
   document.activeElement?.blur();
   releaseRun(); requestedRoom = roomCode(room); ownID = null; state = null; previous.clear(); threatened.clear(); membranes.clear(); spits.clear(); ownPrevious = null; sequence = 0; leaderboardSignature = ''; zoom = null;
-  events = eventState(null, null); lastAliveOwn = null; deathRecap = null; jarSpillAt = null; goalsSignature = ''; $('goals').hidden = true; $('recap-card').hidden = true;
+  events = eventState(null, null); lastAliveOwn = null; deathRecap = null; jarSpillAt = null; clearGoalToasts(); $('recap-card').hidden = true;
   phase = 'joining'; $('lobby').hidden = true; $('game').hidden = false; document.body.style.overflow = 'hidden';
   $('room-badge').hidden = !requestedRoom; $('room-badge').textContent = requestedRoom ? `FRIEND ROOM · ${requestedRoom}` : '';
   $('population').textContent = 'Finding your garden…'; $('mass').textContent = '25'; $('rank').textContent = '—'; $('best').textContent = '25'; $('leaders').replaceChildren(); $('protection').hidden = true;
@@ -220,8 +237,9 @@ function connectSocket(resume = null) {
     packet.food = applyFoodUpdate(state?.food || [], packet);
     packet.hazards = Array.isArray(packet.hazards) ? packet.hazards : [];
     state = packet; arrived = performance.now();
-    const jarBefore = events.jar; events = eventState(packet, ownID);
+    const jarBefore = events.jar, goalsBefore = events.goals; events = eventState(packet, ownID);
     if (!entering && jarSpilled(jarBefore, events.jar)) { jarSpillAt = arrived; sound('jar'); }
+    if (!entering) { goalToasts.push(...goalsCompleted(goalsBefore, events.goals)); showGoalToast(); }
     if (own.alive) lastAliveOwn = own;
     trackSpit(packet, entering); pruneMembranes(packet);
     threatened = threatenedCellIDs(packet.players);
@@ -333,7 +351,7 @@ function fillRecap(list, stats) {
 }
 function leave() {
   const recap = recapStats(ownPrevious?.run ? ownPrevious : lastAliveOwn);
-  releaseRun(); phase = 'lobby'; save(); $('game').hidden = true; $('lobby').hidden = false; document.body.style.overflow = ''; hideOverlay(); state = null; ownPrevious = null; lastAliveOwn = null; deathRecap = null; refreshLobby();
+  releaseRun(); phase = 'lobby'; save(); $('game').hidden = true; $('lobby').hidden = false; document.body.style.overflow = ''; hideOverlay(); state = null; ownPrevious = null; lastAliveOwn = null; deathRecap = null; clearGoalToasts(); refreshLobby();
   fillRecap($('recap-stats'), recap); $('recap-card').hidden = !recap;
   (recap ? $('recap-dismiss') : $('play')).focus({ preventScroll: true });
 }
@@ -362,7 +380,7 @@ function updateHUD(own) {
   $('split').setAttribute('aria-label', splitting.enabled ? 'Split forward into pickle slices; regroup automatically after 12 seconds' : `Split unavailable: ${splitting.reason}`);
   $('cell-count').textContent = `${splitting.count} / 8 slices`;
   $('merge-note').textContent = splitting.count > 1 ? splitting.merge > 0 ? `Regroup in ${Math.ceil(splitting.merge)}s` : 'Regrouping automatically…' : '60 mass per slice to split';
-  if (!own.alive && overlayMode === 'dead') { $('run-best').textContent = massLabel(own.best); $('run-best').title = own.best.toLocaleString(); $('run-kills').textContent = massLabel(own.kills); $('overlay-action').disabled = own.respawn > 0; $('overlay-action').textContent = own.respawn > 0 ? `Fresh pickle in ${Math.ceil(own.respawn)}…` : 'One more crunch'; }
+  if (!own.alive && overlayMode === 'dead') { $('run-best').textContent = massLabel(own.best); $('run-best').title = own.best.toLocaleString(); $('run-kills').textContent = massLabel(own.kills); waitForRespawn(own.respawn > 0); $('overlay-action').textContent = own.respawn > 0 ? `Fresh pickle in ${Math.ceil(own.respawn)}…` : 'One more crunch'; }
   const leaders = ranked.slice(0, 5), signature = `${events.bounty}|${leaders.map(p => `${p.id}:${Math.floor(p.mass)}`).join('|')}`;
   if (signature !== leaderboardSignature) {
     leaderboardSignature = signature; $('leaders').replaceChildren(...leaders.map(p => {
@@ -370,14 +388,6 @@ function updateHUD(own) {
       row.className = [p.id === ownID && 'you', p.id === events.bounty && 'bounty'].filter(Boolean).join(' ');
       if (p.id === events.bounty) { const mark = document.createElement('span'); mark.className = 'bounty-mark'; mark.textContent = '♛'; mark.title = 'Bounty: crunch for 10% extra'; mark.setAttribute('aria-label', 'bounty'); mark.setAttribute('role', 'img'); row.append(name, mark, score); } else row.append(name, score);
       return row;
-    }));
-  }
-  const goalSignature = JSON.stringify(events.goals);
-  if (goalSignature !== goalsSignature) {
-    goalsSignature = goalSignature; $('goals').hidden = events.goals.length === 0;
-    $('goal-list').replaceChildren(...events.goals.map(goal => {
-      const item = document.createElement('li'), label = document.createElement('span'), progress = document.createElement('b'), done = goalDone(goal);
-      item.className = done ? 'done' : ''; label.textContent = `${done ? '✓ ' : ''}${goalLabel(goal)}`; progress.textContent = goalProgress(goal); item.append(label, progress); return item;
     }));
   }
 }
@@ -451,6 +461,7 @@ function measurePlayArea() {
   if (phase === 'lobby') return;
   const bounds = $('game').getBoundingClientRect(), top = document.querySelector('.game-top').getBoundingClientRect(), bottom = document.querySelector('.game-controls').getBoundingClientRect();
   cameraInsets = { top: top.bottom - bounds.top, bottom: bounds.bottom - bottom.top, left: 12, right: 12 };
+  $('game').style.setProperty('--hud-bottom', `${cameraInsets.top}px`);
 }
 new ResizeObserver(measurePlayArea).observe(document.querySelector('.game-controls'));
 new ResizeObserver(measurePlayArea).observe(document.querySelector('.game-top'));

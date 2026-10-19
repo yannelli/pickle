@@ -557,7 +557,7 @@ test('piece loss suppresses routine pickup sounds even when nearby food offsets 
 });
 
 test('jar spill cues fire once on the warning-to-spill edge and recaps read the frozen run', async () => {
-  const { jarSpilled, recapStats, recapRows, goalProgress } = await import(modulePath);
+  const { jarSpilled, goalsCompleted, recapStats, recapRows, goalProgress } = await import(modulePath);
   assert.equal(jarSpilled({ x: 1, y: 1, warn: .1 }, { x: 1, y: 1, warn: 0 }), true);
   assert.equal(jarSpilled({ x: 1, y: 1, warn: 0 }, { x: 1, y: 1, warn: 0 }), false, 'linger frames do not repeat the cue');
   assert.equal(jarSpilled(null, { x: 1, y: 1, warn: 0 }), false, 'joining mid-spill stays quiet');
@@ -571,6 +571,10 @@ test('jar spill cues fire once on the warning-to-spill edge and recaps read the 
   assert.equal(recapStats({ id: 'you', alive: true, mass: 300 }), null, 'older servers send no run');
   assert.equal(recapStats(null), null);
   assert.equal(goalProgress(['food', 40, 55]), '40/40');
+  assert.deepEqual(goalsCompleted([['eat', 2, 1], ['mass', 1000, 640]], [['eat', 2, 2], ['mass', 1000, 700]]), [['eat', 2, 2]]);
+  assert.deepEqual(goalsCompleted([['eat', 2, 2]], [['eat', 2, 2]]), [], 'finished goals do not repeat');
+  assert.deepEqual(goalsCompleted([['eat', 2, 1]], [['food', 40, 40]]), [], 'rerolled goals after respawn start fresh');
+  assert.deepEqual(goalsCompleted(undefined, [['eat', 2, 2]]), []);
 });
 
 function eventPlayer(extra = {}) {
@@ -585,19 +589,40 @@ async function eventHarness() {
   return { app, created, send };
 }
 
-test('web controller shows goals, highlights the bounty, and cues the jar spill once', async () => {
+test('web controller highlights the bounty and cues the jar spill once', async () => {
   const { app, created, send } = await eventHarness();
   send(1, { jar: { x: 900, y: 500, warn: 2 }, bounty: 'player' });
-  assert.equal(app.node('goals').hidden, false);
-  assert.ok(created.some(element => element.tag === 'span' && element.textContent === 'Crunch 2 pickles'));
-  assert.ok(created.some(element => element.tag === 'b' && element.textContent === '640/1000'));
   assert.ok(created.some(element => element.tag === 'li' && element.className === 'you bounty'), 'bounty row class');
   assert.ok(created.some(element => element.className === 'bounty-mark' && element.textContent === '♛'), 'bounty glyph');
   send(2, { jar: { x: 900, y: 500, warn: 0 } }); send(3, { jar: { x: 900, y: 500, warn: 0 } }); send(4, {});
   assert.deepEqual(JSON.parse(app.read('JSON.stringify(heard)')).filter(kind => kind === 'jar'), ['jar']);
   assert.equal(app.read('events.jar'), null);
-  send(5, {}, { goals: undefined, run: undefined });
-  assert.equal(app.node('goals').hidden, true, 'older servers hide the goal list');
+});
+
+test('web goal toasts announce completions one at a time after the first snapshot', async () => {
+  const { app, send } = await eventHarness();
+  const toast = app.node('goal-toast'), shown = [];
+  toast.classList.toggle = (name, on) => { if (name === 'shown') shown.push(on); };
+  send(1, {}, { goals: [['eat', 2, 2], ['mass', 1000, 640], ['jar', 1, 0]] });
+  assert.equal(toast.textContent, '', 'joining or resuming with a finished goal stays quiet');
+  send(2, {}, { goals: [['eat', 2, 2], ['mass', 1000, 1000], ['jar', 1, 1]] });
+  assert.equal(toast.textContent, '✓ Reach 1000 mass');
+  send(3, {}, { goals: [['eat', 2, 2], ['mass', 1000, 1000], ['jar', 1, 1]] });
+  app.advance(2500); assert.equal(toast.textContent, '✓ Reach 1000 mass', 'fades before swapping');
+  app.advance(450); assert.equal(toast.textContent, '✓ Touch a jar spill', 'queued completion follows');
+  app.advance(2950); assert.equal(toast.textContent, '');
+  assert.deepEqual(shown, [true, false, true, false]);
+  send(4, {}, { goals: undefined, run: undefined }); app.advance(3000);
+  assert.equal(toast.textContent, '', 'older servers send no goals');
+});
+
+test('web goal toasts clear when leaving', async () => {
+  const { app, send } = await eventHarness();
+  send(1); send(2, {}, { goals: [['eat', 2, 2], ['mass', 1000, 640], ['jar', 1, 0]] });
+  assert.equal(app.node('goal-toast').textContent, '✓ Crunch 2 pickles');
+  app.node('leave').fire('click'); app.node('overlay-back').fire('click');
+  assert.equal(app.node('goal-toast').textContent, '');
+  app.advance(5000); assert.equal(app.node('goal-toast').textContent, '');
 });
 
 test('web render draws the jar warning ring, minimap jar and bounty crown', async () => {
@@ -621,6 +646,9 @@ test('web death and explicit leave show the run recap; older servers leave witho
   send(1); send(2, {}, { alive: false, respawn: 3, eatenBy: 'Big', run: [700, 1, 96, 2], goals: [['eat', 2, 2], ['mass', 1000, 700], ['jar', 1, 0]] });
   assert.equal(app.read('overlayMode'), 'dead');
   assert.equal(app.node('run-recap').hidden, false); assert.equal(app.node('run-result').hidden, true);
+  assert.equal(app.document.activeElement, app.node('share-run'), 'focus stays in the dialog while the respawn button is disabled');
+  send(3, {}, { alive: false, respawn: 0, eatenBy: 'Big', run: [700, 1, 96, 2], goals: [['eat', 2, 2], ['mass', 1000, 700], ['jar', 1, 0]] });
+  assert.equal(app.node('overlay-action').disabled, false); assert.equal(app.document.activeElement, app.node('overlay-action'));
   const values = () => created.filter(element => element.tag === 'dd').map(element => element.textContent);
   assert.deepEqual(values().slice(-5), ['700', '#2', '1', '1:36', '1/3']);
   app.node('overlay-back').fire('click');

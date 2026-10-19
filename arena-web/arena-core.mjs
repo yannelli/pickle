@@ -2,7 +2,7 @@ import { bodyProfile, bodyRadius, bodyPoints } from './pickle-body.mjs';
 import { WARDROBE_IDS, drawWardrobe } from './arena-wardrobe.mjs';
 import { EAT_OVERLAP, drawSmile, tearPose } from './arena-expression.mjs';
 export { EAT_OVERLAP, SMILES, skinSmile, pickupCue } from './arena-expression.mjs';
-export { JAR, EVENT_COLORS, goalLabel, goalDone, goalProgress, eventState, jarSpilled, recapStats, recapRows, clockLabel, drawJar, drawBountyCrown, bountyCrownWidth, drawMapJar } from './arena-events.mjs';
+export { JAR, EVENT_COLORS, goalLabel, goalDone, goalProgress, eventState, jarSpilled, goalsCompleted, recapStats, recapRows, clockLabel, drawJar, drawBountyCrown, bountyCrownWidth, drawMapJar } from './arena-events.mjs';
 
 export const BRINES = ['classic', 'garlic', 'spicy'];
 export const OUTFITS = ['original', 'sprout', 'bow', 'shades', 'crown', 'party', ...WARDROBE_IDS];
