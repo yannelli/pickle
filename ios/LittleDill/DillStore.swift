@@ -228,9 +228,9 @@ import SwiftUI
         guard let progress = pet.arenaEarnings, progress.day == DailyChallenge.today(now) else { return 0 }
         return Int(progress.mass / Double(ArenaEarnings.massPerCoin))
     }
-    @discardableResult func recordArena(earnedMass: Double, session: String) -> Int {
+    @discardableResult func recordArena(earnedMass: Double, session: String, goalsDone: Int? = nil) -> Int {
         let previous = pet.arenaEarnings
-        let earned = pet.recordArena(earnedMass: earnedMass, session: session, at: now)
+        let earned = pet.recordArena(earnedMass: earnedMass, session: session, goalsDone: goalsDone, at: now)
         if pet.arenaEarnings != previous { save() }
         return earned
     }

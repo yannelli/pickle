@@ -381,9 +381,9 @@ struct PetState: Codable {
         return true
     }
 
-    @discardableResult mutating func recordArena(earnedMass: Double, session: String, at now: Date = Date()) -> Int {
+    @discardableResult mutating func recordArena(earnedMass: Double, session: String, goalsDone: Int? = nil, at now: Date = Date()) -> Int {
         var progress = arenaEarnings ?? ArenaEarnings()
-        let earned = progress.record(session: session, earnedMass: earnedMass, day: DailyChallenge.today(now))
+        let earned = progress.record(session: session, earnedMass: earnedMass, day: DailyChallenge.today(now), goalsDone: goalsDone)
         arenaEarnings = progress
         return addCoins(earned)
     }

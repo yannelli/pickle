@@ -118,16 +118,18 @@ struct Scorecard: View {
     let score: Int?
     let day: String
     var arenaScore = false
+    var recap: ArenaRunRecap? = nil
     var body: some View {
         VStack(spacing:20) {
             HStack { Text("little dill.").font(DillTheme.display(29)).tracking(-1); Spacer(); Image(systemName:"sparkle").font(.title2) }
             Rectangle().fill(DillTheme.ink.opacity(0.15)).frame(height:1)
-            Eyebrow(text:score == nil ? "Certified little legend" : arenaScore ? "Brine Royale · Personal best" : "The daily crunch · \(day)")
+            Eyebrow(text:score == nil ? "Certified little legend" : recap != nil ? "Brine Royale · Run recap" : arenaScore ? "Brine Royale · Personal best" : "The daily crunch · \(day)")
             Text(score == nil ? "Meet \(pet.name)." : "Kind of a big dill.").font(DillTheme.display(37)).tracking(-1).multilineTextAlignment(.center)
             PickleCharacter(pet:pet,happy:true).frame(width:210,height:210)
             if let score {
                 HStack(alignment:.firstTextBaseline,spacing:4) { Text("\(score)").font(.system(size:76,weight:.black,design:.rounded)).lineLimit(1).minimumScaleFactor(0.3); Text(arenaScore ? "mass" : "/ 300").font(.title3).foregroundStyle(DillTheme.muted).fixedSize() }
                 Text(arenaScore ? "\(pet.name) grew into a very big dill. Beat that." : "\(pet.name) brought the crunch. Your turn.").font(.system(size:14,weight:.medium,design:.rounded)).multilineTextAlignment(.center)
+                if let recap { Text(recap.summary).font(.system(size:12,weight:.semibold,design:.rounded)).multilineTextAlignment(.center) }
             } else { Text("Small pickle. Enormous personality.").font(.system(size:15,weight:.medium,design:.rounded)) }
             HStack(spacing:6) { ForEach(0..<7) { _ in Image(systemName:"sparkle").font(.system(size:9)) } }.foregroundStyle(DillTheme.muted)
             Text("LITTLEDILL.APP").font(.system(size:10,weight:.bold,design:.monospaced)).tracking(2)
@@ -148,12 +150,13 @@ struct ShareCardButton: View {
     var title = "Share your scorecard"
     var arenaScore = false
     var arenaRoom: String?
+    var recap: ArenaRunRecap? = nil
     private struct SharePayload: Identifiable { let id = UUID(); let image: UIImage }
     @State private var payload: SharePayload?
     @State private var failure = false
     var body: some View {
         Button {
-            let renderer = ImageRenderer(content:Scorecard(pet:pet,score:score,day:day,arenaScore:arenaScore))
+            let renderer = ImageRenderer(content:Scorecard(pet:pet,score:score,day:day,arenaScore:arenaScore,recap:recap))
             renderer.scale = 3
             if let image = renderer.uiImage { payload = SharePayload(image:image) } else { failure = true }
         } label: { Label(title,systemImage:"square.and.arrow.up").frame(maxWidth:.infinity) }

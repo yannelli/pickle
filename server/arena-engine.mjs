@@ -1,5 +1,8 @@
 // Dependency-free authoritative simulation. Clients send intent, never position or mass.
-export const RULES = Object.freeze({ width: 8400, height: 6300, tickRate: 20, maxHumans: 64, population: 32, foodCount: 6615, foodMass: 3, bonusFoodMass: 9, startMass: 25, shieldSeconds: 4, respawnSeconds: 2, decayFloor: 300, decayGraceSeconds: 8, decayPerSecond: 0.001, maxCells: 8, reconnectGraceSeconds: 30, splitMinMass: 60, splitCooldown: 1, mergeSeconds: 12, eatOverlap: 0.6, hazardRadius: 150, hazardSlow: 0.5, hazardSplitMass: 2500, hazardSplitCooldown: 2, leakRate: 0.05, leakMin: 4, leakMax: 60, leakFloor: 500, spitMass: 4, hurtSeconds: 15, tearSeconds: 1.4 });
+export const RULES = Object.freeze({ width: 8400, height: 6300, tickRate: 20, maxHumans: 64, population: 32, foodCount: 6615, foodMass: 3, bonusFoodMass: 9, startMass: 25, shieldSeconds: 4, respawnSeconds: 2, decayFloor: 300, decayGraceSeconds: 8, decayPerSecond: 0.001, maxCells: 8, reconnectGraceSeconds: 30, splitMinMass: 60, splitCooldown: 1, mergeSeconds: 12, eatOverlap: 0.6, hazardRadius: 150, hazardSlow: 0.5, hazardSplitMass: 2500, hazardSplitCooldown: 2, leakRate: 0.05, leakMin: 4, leakMax: 60, leakFloor: 500, spitMass: 4, hurtSeconds: 15, tearSeconds: 1.4,
+  jarFirstSeconds: 90, jarPeriodSeconds: 210, jarWarnSeconds: 10, jarLingerSeconds: 8, jarPellets: 40, jarRadius: 260, bountyMinMass: 500, bountyBonus: 0.1, goalCount: 3 });
+// Each run rolls goalCount distinct kinds; a goal's target comes from its list.
+export const GOAL_POOL = Object.freeze({ eat: Object.freeze([1, 2, 3]), mass: Object.freeze([500, 1000, 2000]), survive: Object.freeze([60, 120, 240]), food: Object.freeze([40, 80, 150]), jar: Object.freeze([1]) });
 // Kitchen gadgets sit at fixed garden positions, so checkpoints carry no hazard state.
 export const HAZARDS = Object.freeze([
   { id: 'slicer-1', kind: 'slicer', x: 2310, y: 1820 }, { id: 'shaker-1', kind: 'shaker', x: 6090, y: 1820 }, { id: 'grater-1', kind: 'grater', x: 4200, y: 4550 }
@@ -116,7 +119,7 @@ export function parseIntent(raw) {
 // Structured storage turns accessors into values; rebuild the live aggregates.
 export function restorePlayer(fields) {
   return {
-    hurtUntil: 0, tearRemaining: 0, earnedMass: 0, hazardSplitReady: 0, botHazard: null, botHazardReady: 0, botTarget: null, botRoute: null, ...(fields.bot ? { profile: botProfile(fields.id) } : {}), ...fields,
+    hurtUntil: 0, tearRemaining: 0, earnedMass: 0, spawnedAt: fields.joinedAt ?? 0, runPeak: 0, runKills: 0, runFood: 0, runJar: 0, runRank: 0, goals: [], goalsDone: 0, hazardSplitReady: 0, botHazard: null, botHazardReady: 0, botTarget: null, botRoute: null, ...(fields.bot ? { profile: botProfile(fields.id) } : {}), ...fields,
     get mass() { return this.cells.reduce((sum,c) => sum+c.mass,0); },
     set mass(value) { const total = this.mass; if (this.cells.length === 1) this.cells[0].mass = value; else if (total > 0) for (const c of this.cells) c.mass *= value/total; },
     get x() { const total = this.mass; return total > 0 ? this.cells.reduce((sum,c) => sum+c.x*c.mass,0)/total : this.lastX; },
@@ -129,8 +132,10 @@ export function restorePlayer(fields) {
 export class ArenaEngine {
   constructor({ random = Math.random, checkpoint, publicRoom = false } = {}) {
     this.random = random; this.time = 0; this.tick = 0; this.players = new Map(); this.food = []; this.events = []; this.nextFood = 1; this.nextBot = 1; this.nextCell = 1; this.hazardLeak = {}; this.publicRoom = publicRoom; this.hardBotId = null;
+    this.jar = null; this.nextJarAt = RULES.jarFirstSeconds; this.bountyId = null;
     if (checkpoint) {
       Object.assign(this,structuredClone(checkpoint));
+      if (checkpoint.nextJarAt === undefined) this.nextJarAt = this.time+RULES.jarFirstSeconds;
       this.publicRoom = checkpoint.publicRoom ?? publicRoom;
       this.players = new Map(this.players.map(p => [p.id,restorePlayer(p)]));
       // Checkpoints saved before a garden expansion carry fewer pellets.
@@ -141,7 +146,7 @@ export class ArenaEngine {
     for (let i = 0; i < RULES.foodCount; i++) this.food.push(this.makeFood());
   }
   checkpoint() {
-    return structuredClone({ time:this.time, tick:this.tick, players:[...this.players.values()], food:this.food, nextFood:this.nextFood, nextBot:this.nextBot, nextCell:this.nextCell, publicRoom:this.publicRoom, hardBotId:this.hardBotId });
+    return structuredClone({ time:this.time, tick:this.tick, players:[...this.players.values()], food:this.food, nextFood:this.nextFood, nextBot:this.nextBot, nextCell:this.nextCell, publicRoom:this.publicRoom, hardBotId:this.hardBotId, jar:this.jar, nextJarAt:this.nextJarAt, bountyId:this.bountyId });
   }
   makeCell(x, y, mass) { return { id: `cell-${this.nextCell++}`, x, y, mass, vx: 0, vy: 0 }; }
   liveCells() { return [...this.players.values()].filter(p => p.alive).flatMap(owner => owner.cells.map(cell => ({ owner, cell }))); }
@@ -180,11 +185,26 @@ export class ArenaEngine {
       id, name: this.uniqueName(bot ? cleanName(name) : humanName(name)), brine: BRINES.includes(brine) ? brine : 'classic', outfit: OUTFITS.includes(outfit) ? outfit : 'sprout', variety: pickVariety(variety, brine, id), bot,
       cells: [this.makeCell(spawn.x,spawn.y,mass)], lastX: spawn.x, lastY: spawn.y,
       best: mass, earnedMass: 0, kills: 0, alive: true, dx: 0, dy: 0, aimX: 0, aimY: -1, seq: -1, lastInput: this.time, lastMeal: this.time,
-      shieldUntil: this.time + RULES.shieldSeconds, dashUntil: 0, dashReady: 0, splitReady: 0, hazardSplitReady: 0, mergeUntil: 0, hurtUntil: 0, diedAt: 0, eatenBy: '', joinedAt: this.time
+      shieldUntil: this.time + RULES.shieldSeconds, dashUntil: 0, dashReady: 0, splitReady: 0, hazardSplitReady: 0, mergeUntil: 0, hurtUntil: 0, diedAt: 0, eatenBy: '', joinedAt: this.time,
+      spawnedAt: this.time, runPeak: mass, goalsDone: 0
     });
     this.players.set(id, p);
-    if (!bot) { this.balanceBots(); this.seedSpawnFood(p); }
+    // Goals roll after bot balancing so bot spawns keep their random sequence.
+    if (!bot) { this.balanceBots(); this.seedSpawnFood(p); p.goals = this.rollGoals(); }
     return p;
+  }
+  rollGoals() {
+    const kinds = Object.keys(GOAL_POOL);
+    for (let i = kinds.length-1; i > 0; i--) { const j = Math.floor(this.random()*(i+1)); [kinds[i],kinds[j]] = [kinds[j],kinds[i]]; }
+    return kinds.slice(0,RULES.goalCount).map(kind => [kind,GOAL_POOL[kind][Math.floor(this.random()*GOAL_POOL[kind].length)],0]);
+  }
+  updateGoals(p) {
+    const values = { eat:p.runKills, mass:Math.floor(p.runPeak), survive:Math.floor(this.time-p.spawnedAt), food:p.runFood, jar:p.runJar };
+    for (const goal of p.goals) {
+      const progress = Math.max(goal[2],Math.min(goal[1],values[goal[0]] ?? 0));
+      if (goal[2] < goal[1] && progress >= goal[1]) p.goalsDone++;
+      goal[2] = progress;
+    }
   }
   removePlayer(id) { this.players.delete(id); this.balanceBots(); }
   uniqueName(name) {
@@ -259,8 +279,9 @@ export class ArenaEngine {
     if (p.alive || this.time - p.diedAt < RULES.respawnSeconds) return false;
     const spawn = this.spawnPoint(RULES.startMass);
     p.cells = [this.makeCell(spawn.x,spawn.y,RULES.startMass)];
-    Object.assign(p, { alive: true, dx: 0, dy: 0, aimX: 0, aimY: -1, lastMeal: this.time, shieldUntil: this.time + RULES.shieldSeconds, dashUntil: 0, dashReady: 0, splitReady: 0, hazardSplitReady: 0, mergeUntil: 0, hurtUntil: 0, tearRemaining: 0, eatenBy: '', botHazard: null, botTarget: null, botRoute: null });
-    if (!p.bot) this.seedSpawnFood(p);
+    Object.assign(p, { alive: true, dx: 0, dy: 0, aimX: 0, aimY: -1, lastMeal: this.time, shieldUntil: this.time + RULES.shieldSeconds, dashUntil: 0, dashReady: 0, splitReady: 0, hazardSplitReady: 0, mergeUntil: 0, hurtUntil: 0, tearRemaining: 0, eatenBy: '', botHazard: null, botTarget: null, botRoute: null,
+      spawnedAt: this.time, runPeak: RULES.startMass, runKills: 0, runFood: 0, runJar: 0, runRank: 0 });
+    if (!p.bot) { this.seedSpawnFood(p); p.goals = this.rollGoals(); }
     return true;
   }
   think(bot) {
@@ -361,11 +382,57 @@ export class ArenaEngine {
       return;
     }
   }
+  jarSpot() {
+    const margin = RULES.jarRadius+400;
+    for (let tries = 0; tries < 40; tries++) {
+      const spot = { x: margin+this.random()*(RULES.width-2*margin), y: margin+this.random()*(RULES.height-2*margin) };
+      if (!HAZARDS.some(h => distance(spot,h) < h.r+RULES.jarRadius+250)) return spot;
+    }
+    return { x: RULES.width/2, y: RULES.height/2 };
+  }
+  // Moves distant pellets into the ring and keeps their ids, so the food count and delta protocol stay unchanged.
+  spillJar(jar) {
+    const ring = new Set();
+    for (let tries = 0; ring.size < RULES.jarPellets && tries < RULES.jarPellets*20 && this.food.length; tries++) {
+      const i = Math.floor(this.random()*this.food.length);
+      if (!ring.has(i) && distance(this.food[i],jar) > 1500) ring.add(i);
+    }
+    [...ring].forEach((i,n) => {
+      const angle = n/ring.size*Math.PI*2, pellet = this.food[i];
+      pellet.x = clamp(jar.x+Math.cos(angle)*RULES.jarRadius,30,RULES.width-30);
+      pellet.y = clamp(jar.y+Math.sin(angle)*RULES.jarRadius,30,RULES.height-30);
+      pellet.value = RULES.bonusFoodMass;
+    });
+    jar.spilled = true;
+  }
+  updateJar() {
+    if (!this.jar && this.time >= this.nextJarAt-RULES.jarWarnSeconds) this.jar = { ...this.jarSpot(), spillAt: this.nextJarAt, spilled: false };
+    const jar = this.jar; if (!jar) return;
+    if (!jar.spilled && this.time >= jar.spillAt) this.spillJar(jar);
+    if (jar.spilled && this.time >= jar.spillAt+RULES.jarLingerSeconds) {
+      this.jar = null;
+      while (this.nextJarAt <= this.time) this.nextJarAt += RULES.jarPeriodSeconds;
+    }
+  }
+  // Ranks alive players once per tick; the holder found here is the bounty for the next tick's eating.
+  updateStandings() {
+    const ranked = [...this.players.values()].filter(p => p.alive).sort((a,b) => b.mass-a.mass || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    this.bountyId = ranked[0]?.mass >= RULES.bountyMinMass ? ranked[0].id : null;
+    const jar = this.jar?.spilled ? this.jar : null;
+    ranked.forEach((p,i) => {
+      p.runPeak = Math.max(p.runPeak,p.mass);
+      if (p.bot) return;
+      p.runRank = p.runRank ? Math.min(p.runRank,i+1) : i+1;
+      if (jar && p.cells.some(c => distance(c,jar) < RULES.jarRadius+radius(c.mass))) p.runJar = 1;
+      this.updateGoals(p);
+    });
+  }
   step(dt = 1 / RULES.tickRate) {
     dt = clamp(Number.isFinite(dt) ? dt : 0,0,0.1);
     this.time += dt; this.tick++; this.events = [];
     // Spread decisions over six ticks instead of pausing every bot on the same frame.
     for (const p of this.players.values()) if (p.bot && Number(p.id.slice(4)) % 6 === this.tick % 6) this.think(p);
+    this.updateJar();
     const foodGrid = new FoodGrid(this.food);
     for (const p of this.players.values()) {
       if (!p.alive) continue;
@@ -387,7 +454,7 @@ export class ArenaEngine {
         const r = radius(cell.mass);
         for (const i of foodGrid.near(cell,r+4)) if (distance(cell,this.food[i]) < r+4) {
           const before = this.food[i], after = this.makeFood();
-          cell.mass += before.value; p.earnedMass += before.value; p.lastMeal = this.time; this.food[i] = after;
+          cell.mass += before.value; p.earnedMass += before.value; p.runFood++; p.lastMeal = this.time; this.food[i] = after;
           foodGrid.replace(i,before,after);
         }
         if (hazard && cell.mass > RULES.leakFloor) this.leak(hazard,cell,dt,foodGrid);
@@ -401,22 +468,26 @@ export class ArenaEngine {
         if (predator === prey || !prey.alive || !prey.cells.includes(snack) || prey.shieldUntil > this.time || hunter.mass < snack.mass*1.22) continue;
         if (distance(hunter,snack) >= radius(hunter.mass)-radius(snack.mass)*RULES.eatOverlap) continue;
         prey.lastX = snack.x; prey.lastY = snack.y; prey.cells.splice(prey.cells.indexOf(snack),1);
-        const absorbed = snack.mass*0.7;
+        const absorbed = snack.mass*0.7*(prey.id === this.bountyId ? 1+RULES.bountyBonus : 1);
         hunter.mass += absorbed; predator.earnedMass += absorbed; predator.lastMeal = this.time; predator.best = Math.max(predator.best,predator.mass);
         const eliminated = prey.cells.length === 0;
-        if (eliminated) { prey.alive = false; prey.diedAt = this.time; prey.eatenBy = predator.name; prey.dx = 0; prey.dy = 0; prey.mergeUntil = 0; prey.hurtUntil = 0; prey.tearRemaining = 0; predator.kills++; }
+        if (eliminated) { prey.alive = false; prey.diedAt = this.time; prey.eatenBy = predator.name; prey.dx = 0; prey.dy = 0; prey.mergeUntil = 0; prey.hurtUntil = 0; prey.tearRemaining = 0; predator.kills++; predator.runKills++; }
         else { prey.hurtUntil = this.time+RULES.hurtSeconds; prey.tearRemaining = this.random() < 0.25 ? RULES.tearSeconds : 0; if (prey.cells.length === 1) prey.mergeUntil = 0; }
         this.events.push({hunter:predator.id,prey:prey.id,cell:snack.id,eliminated});
       }
     }
     for (const {cell} of this.liveCells()) this.boundCell(cell);
+    this.updateStandings();
   }
   snapshot(includeFood = true) {
     const round = n => Math.round(n * 10) / 10;
     return {
       type: 'state', tick: this.tick, time: round(this.time), width: RULES.width, height: RULES.height,
       humans: this.humans, bots: [...this.players.values()].filter(p => p.bot).length, hazards: HAZARDS.map(h => ({ ...h })),
-      players: [...this.players.values()].map(p => ({ id: p.id, name: p.name, brine: p.brine, outfit: p.outfit, variety: p.variety, bot: p.bot, x: round(p.x), y: round(p.y), mass: round(p.mass), earnedMass: round(p.earnedMass), best: Math.floor(p.best), kills: p.kills, alive: p.alive, shield: round(Math.max(0, p.shieldUntil - this.time)), dash: round(Math.max(0, p.dashUntil - this.time)), cooldown: round(Math.max(0, p.dashReady - this.time)), splitCooldown: round(Math.max(0,p.splitReady-this.time)), merge: p.cells.length > 1 ? round(Math.max(0,p.mergeUntil-this.time)) : 0, hurt: round(Math.max(0,p.hurtUntil-this.time)), ...(p.tearRemaining > 0 ? {tear:round(p.tearRemaining)} : {}), cells: p.cells.map(c => ({id:c.id,x:round(c.x),y:round(c.y),mass:round(c.mass),...(c.mass > RULES.leakFloor && hazardFor(c) ? {drain:1} : {})})), respawn: p.alive ? 0 : round(Math.max(0, RULES.respawnSeconds - (this.time - p.diedAt))), eatenBy: p.eatenBy })),
+      players: [...this.players.values()].map(p => ({ id: p.id, name: p.name, brine: p.brine, outfit: p.outfit, variety: p.variety, bot: p.bot, x: round(p.x), y: round(p.y), mass: round(p.mass), earnedMass: round(p.earnedMass), best: Math.floor(p.best), kills: p.kills, alive: p.alive, shield: round(Math.max(0, p.shieldUntil - this.time)), dash: round(Math.max(0, p.dashUntil - this.time)), cooldown: round(Math.max(0, p.dashReady - this.time)), splitCooldown: round(Math.max(0,p.splitReady-this.time)), merge: p.cells.length > 1 ? round(Math.max(0,p.mergeUntil-this.time)) : 0, hurt: round(Math.max(0,p.hurtUntil-this.time)), ...(p.tearRemaining > 0 ? {tear:round(p.tearRemaining)} : {}), cells: p.cells.map(c => ({id:c.id,x:round(c.x),y:round(c.y),mass:round(c.mass),...(c.mass > RULES.leakFloor && hazardFor(c) ? {drain:1} : {})})), respawn: p.alive ? 0 : round(Math.max(0, RULES.respawnSeconds - (this.time - p.diedAt))), eatenBy: p.eatenBy,
+        ...(p.bot ? {} : { goals: p.goals.map(g => [g[0],g[1],Math.floor(g[2])]), goalsDone: p.goalsDone, run: [Math.floor(p.runPeak),p.runKills,Math.floor(Math.max(0,(p.alive ? this.time : p.diedAt)-p.spawnedAt)),p.runRank] }) })),
+      ...(this.players.get(this.bountyId)?.alive ? { bounty: this.bountyId } : {}),
+      ...(this.jar ? { jar: { x: Math.round(this.jar.x), y: Math.round(this.jar.y), warn: round(Math.max(0,this.jar.spillAt-this.time)) } } : {}),
       ...(includeFood ? { food: this.food.map(f => [f.id, Math.round(f.x), Math.round(f.y), f.value]) } : {})
     };
   }

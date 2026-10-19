@@ -13,6 +13,7 @@ struct ArenaView: View {
     @State private var pickups = ArenaPickupCadence()
     @State private var tactile = ArenaFeedback()
     @State private var feedbackEvents = ArenaFeedbackEvents()
+    @State private var recap: ArenaRunRecap?
     @AppStorage(ArenaControls.swappedKey,store:ArenaResume.defaults) private var controlsSwapped = false
     var body: some View {
         GeometryReader { geometry in
@@ -36,7 +37,8 @@ struct ArenaView: View {
                         }
                     } else {Spacer()}
                 }
-                if client.status == .connecting {connectionCard}
+                if let recap {ArenaRecapCard(recap:recap,pet:store.pet,room:launch.room) {dismiss()}}
+                else if client.status == .connecting {connectionCard}
                 else if client.status == .reconnecting {reconnectingCard}
                 else if client.status == .disconnected {disconnectedCard}
                 else if let me = client.me, !me.alive {respawnCard(me)}
@@ -71,7 +73,7 @@ struct ArenaView: View {
                 updateGadgetSound(); updateHaptics()
             }
             .confirmationDialog("Leave the garden?",isPresented:$leave,titleVisibility:.visible) {
-                Button("Leave arena",role:.destructive) {saveBest(); client.leave(); dismiss()}
+                Button("Leave arena",role:.destructive) {finishRun()}
                 Button("Keep growing",role:.cancel) {}
             } message: {Text("Leaving ends this run. Your personal best stays saved.")}
             .interactiveDismissDisabled()
@@ -80,6 +82,7 @@ struct ArenaView: View {
     private func listen() {
         updateGadgetSound(); updateHaptics(); saveBest()
         guard let snapshot = client.snapshot else {feedbackEvents.reset(); return}
+        if ArenaJar.spilled(from:client.previous?.jar,to:snapshot.jar) {store.sound(.splash); tactile.play(.spill)}
         let at = client.receivedAt.timeIntervalSinceReferenceDate
         let gadget = Self.drainingGadget(player:client.me,hazards:snapshot.hazards ?? [],enabled:tactile.enabled)
         let oldGadget = Self.drainingGadget(player:client.previous?.players.first(where:{$0.id == client.playerID}),
@@ -188,7 +191,7 @@ struct ArenaView: View {
             Text("Lost in the brine.").font(DillTheme.display(29)).multilineTextAlignment(.center)
             Text(client.errorMessage).font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
             Button {saveBest(); client.connect(pet:store.pet,room:launch.room,fresh:true)} label: {Text("Start a fresh run")}.buttonStyle(DillButton()).accessibilityIdentifier("arenaReconnect")
-            Button("Back to my pickle") {client.leave(); dismiss()}.font(.subheadline.bold())
+            Button("Back to my pickle") {finishRun()}.font(.subheadline.bold())
         }.padding(28).frame(maxWidth:350).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:30)).padding(24)
     }
     private var reconnectingCard: some View {
@@ -200,7 +203,7 @@ struct ArenaView: View {
                 Text("Reconnecting · \(seconds)s to return").font(.subheadline.bold()).accessibilityIdentifier("arenaReconnecting")
             }
             Text("Your size and slices are waiting right where you left them.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
-            Button("Leave this run") {saveBest(); client.leave(); dismiss()}.font(.subheadline.bold())
+            Button("Leave this run") {finishRun()}.font(.subheadline.bold())
         }.padding(24).frame(maxWidth:330).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:26)).padding(24)
     }
     private func respawnCard(_ me:ArenaPlayer) -> some View {
@@ -208,9 +211,10 @@ struct ArenaView: View {
             Eyebrow(text:"A little out-crunched")
             Text("You were\na big snack.").font(DillTheme.display(38)).tracking(-1).multilineTextAlignment(.center)
             Text("\(me.eatenBy) got the crunch this time.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
-            HStack(spacing:25) {VStack {Text("\(me.best)").font(.system(size:30,weight:.bold,design:.rounded)); Eyebrow(text:"Best mass")}; VStack {Text("\(me.kills)").font(.system(size:30,weight:.bold,design:.rounded)); Eyebrow(text:"Pickles eaten")}}
+            if let run = ArenaRunRecap(player:me) {ArenaRecapStats(recap:run)}
+            else {HStack(spacing:25) {VStack {Text("\(me.best)").font(.system(size:30,weight:.bold,design:.rounded)); Eyebrow(text:"Best mass")}; VStack {Text("\(me.kills)").font(.system(size:30,weight:.bold,design:.rounded)); Eyebrow(text:"Pickles eaten")}}}
             Button {client.respawn(); store.feedback(.medium)} label: {Text(me.respawn > 0 ? "Fresh brine in \(Int(ceil(me.respawn)))…" : "Grow again")}.buttonStyle(DillButton()).disabled(me.respawn > 0).accessibilityIdentifier("arenaRespawn")
-            ShareCardButton(pet:store.pet,score:me.best,title:"Share your run",arenaScore:true,arenaRoom:launch.room)
+            ShareCardButton(pet:store.pet,score:ArenaRunRecap(player:me)?.peakMass ?? me.best,title:"Share your run",arenaScore:true,arenaRoom:launch.room,recap:ArenaRunRecap(player:me))
             Text("Your pet is safe. This is just a little friendly chaos.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
         }.padding(26).frame(maxWidth:350).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:30)).padding(24)
     }
@@ -229,6 +233,7 @@ struct ArenaView: View {
                 Text("✦ \(store.arenaCoinsToday) / 1,000 coins today")
                     .font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.7)
                     .accessibilityIdentifier("arenaCoinsToday")
+                ArenaGoalsHUD(goals:me.goals,compact:compact)
                 if me.shield > 0 && me.alive && !compact {
                     Label("Protected \(Int(ceil(me.shield)))s",systemImage:"shield.fill").font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.8)
                 }
@@ -239,6 +244,7 @@ struct ArenaView: View {
                     Label("#\(client.rank)",systemImage:"crown.fill").font(.system(size:compact ? 17 : 20,weight:.bold,design:.rounded))
                     ForEach(client.leaders.prefix(compact ? 1 : showScores ? 5 : 3)) { leader in
                         HStack(spacing:4) {
+                            if leader.id == client.snapshot?.bounty {Image(systemName:"crown.fill").foregroundStyle(ArenaEventArt.gold).accessibilityLabel("Bounty")}
                             Text(leader.name).lineLimit(1)
                             Text("\(Int(leader.mass))").bold().lineLimit(1).minimumScaleFactor(0.6).layoutPriority(1)
                         }.font(.system(size:10)).frame(maxWidth:135,alignment:.trailing)
@@ -249,7 +255,13 @@ struct ArenaView: View {
     }
     private func saveEarnings() {
         guard let earnedMass = client.me?.earnedMass, !client.room.isEmpty, !client.playerID.isEmpty else { return }
-        store.recordArena(earnedMass:earnedMass,session:client.room + ":" + client.playerID)
+        store.recordArena(earnedMass:earnedMass,session:client.room + ":" + client.playerID,goalsDone:client.me?.goalsDone)
+    }
+    private func finishRun() {
+        saveBest()
+        let summary = ArenaRunRecap(player:client.me)
+        client.leave()
+        if let summary {recap = summary} else {dismiss()}
     }
     private func saveBest() {
         saveEarnings()
@@ -261,8 +273,10 @@ struct ArenaView: View {
 struct ArenaMinimap: View {
     let snapshot: ArenaSnapshot
     let playerID: String
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var body: some View {
         Canvas { context,size in
+            ArenaEventArt.drawMinimap(context,jar:snapshot.jar,world:CGSize(width:snapshot.width,height:snapshot.height),size:size,time:snapshot.time,still:reduceMotion)
             for hazard in snapshot.hazards ?? [] {
                 let point = CGPoint(x:hazard.x / snapshot.width * size.width,y:hazard.y / snapshot.height * size.height)
                 let marker = Path(roundedRect:CGRect(x:point.x-2,y:point.y-2,width:4,height:4),cornerRadius:1)
@@ -290,6 +304,7 @@ final class ArenaMotion {
     var membranes: [String:ArenaMembrane] = [:]
     var membraneClock = 0.0
     var playback = ArenaPlayback()
+    let jarClock = ArenaJarClock()
 }
 
 /// Name and sector labels drawn as Canvas symbols, so SwiftUI lays out each string once instead of every frame.
@@ -550,6 +565,8 @@ struct ArenaCanvas: View {
             context.stroke(rings,with:.color(DillTheme.peach.opacity(0.35)),lineWidth:2)
             context.fill(spits,with:.color(ArenaCanvas.brine))
             context.fill(shines,with:.color(ArenaCanvas.spitShine))
+            if let jar = snapshot.jar {ArenaEventArt.drawJar(context,jar:jar,center:screen(CGPoint(x:jar.x,y:jar.y)),zoom:zoom,time:time,still:still,spillAge:motion.jarClock.spillAge(jar,at:now))}
+            else {_ = motion.jarClock.spillAge(nil,at:now)}
             let pieces = players.filter(\.alive).flatMap {player in player.pieces.map {(player,$0)}}.sorted {$0.1.mass < $1.1.mass}
             let drains = pieces.compactMap { _,cell -> (cell:ArenaCell,hazard:ArenaHazard)? in
                 guard cell.draining, let field = hazards.min(by:{hypot($0.x-cell.x,$0.y-cell.y) - $0.r < hypot($1.x-cell.x,$1.y-cell.y) - $1.r}) else {return nil}
@@ -614,6 +631,7 @@ struct ArenaCanvas: View {
                                       danger:danger[body.key] ?? 0,outline:body.outline(scale:zoom),reduceMotion:still,showTear:p.pieces.first?.id == cell.id,hat:hats[p.outfit])
                 if let label = context.resolveSymbol(id:ArenaLabel.player(p,me:me.id)) {context.draw(label,at:CGPoint(x:position.x,y:position.y+r+14))}
             }
+            if let crown = ArenaEventArt.bountyPiece(players:players,bounty:snapshot.bounty) {ArenaEventArt.drawCrown(context,piece:screen(CGPoint(x:crown.x,y:crown.y)),r:crown.radius * zoom)}
             motion.tick = frame.to.tick
         } symbols: {
             ForEach(ArenaLabel.all(snapshot:snapshot,me:me.id),id:\.self) {$0.view.tag($0)}

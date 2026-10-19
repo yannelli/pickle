@@ -78,6 +78,32 @@ extension Outfit: ArenaLook { static var serverDefault: Outfit { .sprout } }
     let wrappedValue: Value
     init(from decoder: Decoder) throws { wrappedValue = Value(rawValue: try decoder.singleValueContainer().decode(String.self)) ?? .serverDefault }
 }
+/// Optional snapshot fields: a missing, null, or malformed value decodes as the fallback; arrays drop malformed entries.
+protocol ServerFallback: Decodable {
+    static var fallback: Self { get }
+    static func lenient(_ decoder:Decoder) -> Self
+}
+extension ServerFallback { static func lenient(_ decoder:Decoder) -> Self { (try? Self(from:decoder)) ?? fallback } }
+extension Optional: ServerFallback where Wrapped: Decodable { static var fallback: Self { nil } }
+extension Int: ServerFallback { static var fallback: Int { 0 } }
+extension Array: ServerFallback where Element: Decodable {
+    static var fallback: Self { [] }
+    static func lenient(_ decoder:Decoder) -> Self { ((try? [ServerEntry<Element>](from:decoder)) ?? []).compactMap(\.value) }
+}
+struct ServerEntry<Value: Decodable>: Decodable {
+    let value: Value?
+    init(from decoder: Decoder) { value = try? Value(from:decoder) }
+}
+@propertyWrapper struct ServerDefault<Value: ServerFallback>: Decodable {
+    var wrappedValue: Value
+    init(wrappedValue: Value) { self.wrappedValue = wrappedValue }
+    init(from decoder: Decoder) { wrappedValue = Value.lenient(decoder) }
+}
+extension KeyedDecodingContainer {
+    func decode<Value>(_ type: ServerDefault<Value>.Type, forKey key: Key) throws -> ServerDefault<Value> {
+        ((try? decodeIfPresent(type, forKey:key)) ?? nil) ?? ServerDefault(wrappedValue:Value.fallback)
+    }
+}
 struct ArenaPlayer: Decodable, Identifiable {
     let id: String
     let name: String
@@ -102,6 +128,9 @@ struct ArenaPlayer: Decodable, Identifiable {
     let merge: Double?
     let hurt: Double?
     let tear: Double?
+    @ServerDefault var goals: [ArenaGoal] = []
+    @ServerDefault var goalsDone: Int = 0
+    @ServerDefault var run: ArenaRun? = nil
     static let eatOverlap = 0.6
     var pieces: [ArenaCell] {
         guard alive else {return []}
@@ -159,6 +188,8 @@ struct ArenaSnapshot: Decodable {
     let foodAdded: [[Double]]?
     let foodRemoved: [Int]?
     var hazards: [ArenaHazard]? = nil
+    @ServerDefault var jar: ArenaJar? = nil
+    @ServerDefault var bounty: String? = nil
     var population: Int { humans + bots }
     func supports(playerID:String) -> Bool {
         players.count <= 64 && width > 0 && height > 0 && players.contains {$0.id == playerID}
