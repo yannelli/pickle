@@ -34,17 +34,21 @@ struct ArcadeSheet: View {
             GeometryReader { viewport in
                 ScrollView {
                     FillHeight(minHeight: viewport.size.height) {
-                        VStack(spacing: 22) {
-                            header
-                            content
-                        }
-                        .padding(24)
-                        .frame(maxWidth: 580)
-                        .frame(maxWidth: .infinity)
+                        content
+                            .padding(.horizontal, 24).padding(.top, 8).padding(.bottom, 24)
+                            .frame(maxWidth: 580)
+                            .frame(maxWidth: .infinity)
                     }
                 }
                 .scrollIndicators(.hidden)
                 .scrollBounceBehavior(.basedOnSize)
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                header
+                    .padding(.horizontal, 24).padding(.vertical, 8)
+                    .frame(maxWidth: 580)
+                    .frame(maxWidth: .infinity)
+                    .background(DillTheme.cream.ignoresSafeArea(edges: .top))
             }
         }
         .foregroundStyle(DillTheme.ink)
@@ -80,7 +84,7 @@ struct ArcadeSheet: View {
                 Color.clear.frame(width: 44, height: 44)
             }
             Spacer()
-            Eyebrow(text: engine == nil ? "The dill arcade" : "6 energy per game")
+            Eyebrow(text: engine == nil ? "Arcade" : "6 energy per game")
             Spacer()
             Label("\(Int(store.pet.energy.rounded()))", systemImage: "bolt.fill")
                 .font(.system(size: 12, weight: .bold, design: .rounded)).monospacedDigit()
@@ -101,7 +105,7 @@ struct ArcadeSheet: View {
 
     private var menu: some View {
         VStack(spacing: 20) {
-            PageHeading(eyebrow: "Pick your kind of pickle play", title: "The dill\narcade.", detail: "6 energy per game · 10–34 happy ♥ for every finished round.")
+            PageHeading(eyebrow: "Six games", title: "Arcade", detail: "Each game costs 6 energy. A finished round adds 10 to 34 happy.")
             ArcadeCircuitCard(circuit: store.circuitToday, canPlay: canPlay) {
                 start($0, circuit: true)
             }
@@ -350,7 +354,7 @@ struct ArcadeSheet: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .accessibilityIdentifier("arcade.result")
             if gained != nil, PetLife.favorite(store.pet.life.variety).game == game.game.rawValue {
-                Text("★ favorite game · +\(Int(PetLife.FAVORITE_BONUS)) bonus happy").font(.system(size: 13, weight: .bold, design: .rounded))
+                Text("Favorite game · +\(Int(PetLife.FAVORITE_BONUS)) bonus happy").font(.system(size: 13, weight: .bold, design: .rounded))
                     .accessibilityIdentifier("arcade.favorite")
             }
             Text("Best \(best(game.game))").font(.system(size: 11, weight: .bold, design: .monospaced)).foregroundStyle(DillTheme.muted)
@@ -390,7 +394,7 @@ struct ArcadeSheet: View {
                 .accessibilityIdentifier("arcade.circuit.next")
             } else {
                 if let medal = progress.medal { Text("\(medal) circuit") }
-                ShareLink(item: "My little dill daily circuit: \(progress.total)/300 on \(day)\(progress.medal.map { " · \($0)" } ?? "")") {
+                ShareLink(item: "My Little Dill Daily Circuit: \(progress.total)/300 on \(day)\(progress.medal.map { " · \($0)" } ?? "")") {
                     Label("Share circuit score", systemImage: "square.and.arrow.up")
                 }
                 .buttonStyle(DillButton(light: true))

@@ -21,7 +21,7 @@ enum NestText {
         if PetLife.teen(pet, now: now) != nil {
             return ["ugh. whatever. (still loves you.)", "it’s not a phase. okay, it’s a phase.", "do not talk to me before brine.", "can i get a bigger jar."][hour]
         }
-        return ["just a pickle. having a day.", "life is pretty dill-ightful.", "small, salty, and so loved.", "no thoughts. just brine."][hour]
+        return ["just a pickle. having a day.", "life is pretty good today.", "small, salty, and so loved.", "no thoughts. just brine."][hour]
     }
 
     static func hint(_ pet: WebPet, bites: Int?) -> String {
@@ -40,12 +40,12 @@ enum NestText {
     }
 
     static func quip(_ pet: WebPet, now: Int64) -> String {
-        if pet.dead { return pet.eaten == true ? "A good dill. A great snack. A questionable choice." : "A good dill. A very good friend." }
+        if pet.dead { return pet.eaten == true ? "You ate this pickle." : "A very good friend, missed." }
         if let elder = PetLife.elder(pet, now: now) { return elder.quip }
         if let teen = PetLife.teen(pet, now: now) { return teen.quip }
         switch PetLife.stage(pet, now: now) {
-        case .baby: return "Small pickle. Enormous feelings."
-        case .young: return "Growing into those big dill dreams."
+        case .baby: return "Brand new and curious about everything."
+        case .young: return "Growing a little every day."
         default: return "Thriving. Mostly thinking about snacks."
         }
     }
@@ -62,8 +62,6 @@ enum NestText {
         if PetLife.teen(pet, now: now) != nil { return "A new teen phase every day. Adult at 7 days, elder at 14." }
         return "Baby → young at 1 day → teen at 3 days → adult at 7 days → elder at 14 days."
     }
-
-    static func eldersUnlocked(_ pet: WebPet, now: Int64) -> Int { PetLife.elder(pet, now: now)?.unlocked ?? 0 }
 
     static func hatchRemaining(_ pet: WebPet) -> Int {
         max(0, Int((Double(pet.hatchAt - pet.updatedAt) / 1000).rounded(.up)))

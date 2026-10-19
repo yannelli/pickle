@@ -55,19 +55,19 @@ struct RootView: View {
                         Text("little dill.").font(DillTheme.display(27)).tracking(-1.5)
                         Spacer()
                         CoinPill(amount: store.pet.coins)
-                        Button { settings = true } label: { Image(systemName: "slider.horizontal.3").font(.system(size: 18)).frame(width:44,height:44) }.accessibilityLabel("Settings")
+                        Button { settings = true } label: { Image(systemName: "gearshape").font(.system(size: 18)).frame(width:44,height:44) }.accessibilityLabel("Settings")
                     }.padding(.horizontal,24).padding(.top,8).padding(.bottom,10)
                     ScrollViewReader { scroll in
                     ScrollView {
                         VStack(spacing: 24) {
                             switch tab {
-                            case .nest: NestView(play: { openDaily() }, closet: { tab = .closet }, arena:{arena = ArenaLaunch()}, revealCare:{withAnimation(.easeInOut(duration:0.3)) {scroll.scrollTo("careStage",anchor:.top)}})
+                            case .nest: NestView(closet: { tab = .closet }, revealCare:{withAnimation(.easeInOut(duration:0.3)) {scroll.scrollTo("careStage",anchor:.top)}})
                             case .play: PlayView(launch: { challenge = $0 }, arena:{arena = ArenaLaunch()})
                             case .friends: FriendsView(arena:{arena = $0})
                             case .closet: ClosetView()
                             }
                         }.padding(.horizontal,24).padding(.top,12).padding(.bottom,28).frame(maxWidth:640).frame(maxWidth:.infinity)
-                    }.scrollIndicators(.hidden).clipped()
+                    }.scrollIndicators(.hidden).clipped().id(tab)
                     }
                     HStack(spacing:4) {
                         ForEach(DillTab.allCases,id:\.self) { item in
@@ -105,11 +105,11 @@ struct RootView: View {
             if store.pet.adopted { challenge = .solo(daily) } else { pendingChallenge = daily }
         }
         .dillBackupOpening()
+        .task { GameCenter.shared.authenticate { store.gameCenterBests } }
         .onChange(of:store.pet.adopted) { _,adopted in
             if adopted, let launch = pendingArena {arena = launch; pendingArena = nil}
             if adopted, let daily = pendingChallenge { challenge = .solo(daily); pendingChallenge = nil }
         }
-        .alert("A little heads-up",isPresented:Binding(get:{store.notice != nil},set:{if !$0 {store.notice = nil}})) { Button("Got it") { store.notice = nil } } message: { Text(store.notice ?? "") }
+        .alert("Something went wrong",isPresented:Binding(get:{store.notice != nil},set:{if !$0 {store.notice = nil}})) { Button("OK") { store.notice = nil } } message: { Text(store.notice ?? "") }
     }
-    private func openDaily() { challenge = .solo(DailyChallenge(day:DailyChallenge.today())) }
 }

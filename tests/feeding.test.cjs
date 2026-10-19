@@ -118,7 +118,7 @@ test('a variety’s favorite food adds 4 happiness and its own reaction', () => 
   app.click('feed');
   assert.equal(app.get('feed-food').dataset.food, 'strawberry');
   assert.equal(app.get('message').textContent, 'strawberry! my favorite! +40 food, +7 happy.');
-  assert.equal(app.get('effect').textContent, '★ favorite snack ★');
+  assert.equal(app.get('effect').textContent, 'favorite snack!');
   assert.equal(app.saved().happiness, 27);
   app.click('feed');
   assert.equal(app.get('message').textContent, 'broccoli time! +40 food, +3 happy.');
@@ -140,7 +140,7 @@ test('a feed wish keeps the rotation on a refused feed and the next successful f
   app.click('feed');
   assert.equal(app.get('feed-food').dataset.food, 'carrot');
   assert.equal(app.get('message').textContent, 'carrot time! +2 food, +3 happy. wish granted! +10 happy.');
-  assert.equal(app.get('effect').textContent, '★ wish granted ★');
+  assert.equal(app.get('effect').textContent, 'wish granted!');
   assert.equal(app.saved().wish, undefined);
   assert.ok(Math.abs(app.saved().happiness - 52) < 1e-9);
   assert.equal(app.saved().events.wish, now + 3600000);

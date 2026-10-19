@@ -30,10 +30,10 @@ struct Eyebrow: View {
 struct CoinPill: View {
     let amount: Int
     var body: some View {
-        HStack(spacing: 5) { Image(systemName: "sparkle"); Text("\(amount)").monospacedDigit() }
+        HStack(spacing: 5) { Image(systemName: "circle.circle.fill"); Text("\(amount)").monospacedDigit() }
             .font(.system(size: 13, weight: .bold, design: .rounded)).padding(.horizontal, 12).padding(.vertical, 9)
             .background(.white.opacity(0.7), in: Capsule()).overlay(Capsule().stroke(DillTheme.line, lineWidth: 1))
-            .accessibilityLabel("\(amount) crunch coins")
+            .accessibilityElement(children: .ignore).accessibilityLabel("\(amount) coins")
     }
 }
 struct PageHeading: View {

@@ -15,19 +15,39 @@ struct PlayView: View {
     let launch: (GameLaunch) -> Void
     let arena: () -> Void
     @State private var party = false
+    @State private var arcade = false
+    @ObservedObject private var gameCenter = GameCenter.shared
+    private var canPlayArcade: Bool { store.pet.adopted && !store.pet.life.dead && store.snackBites == nil }
     var body: some View {
         let daily = DailyChallenge(day:DailyChallenge.today())
         VStack(spacing:24) {
-            PageHeading(eyebrow:"A little friendly competition",title:"Let’s make\na big dill of it.",detail:"Easy to learn. Almost impossible to tap just once.")
+            PageHeading(eyebrow:"Play",title:"Let’s make\na big dill of it.",detail:"The arcade, Brine Royale, the daily crunch, and pass & play.")
+            Button(action:openArcade) {
+                SoftCard(color:DillTheme.sage) {
+                    HStack(spacing:16) {
+                        Image(systemName:"gamecontroller.fill").font(.system(size:25)).frame(width:48,height:56).background(.white.opacity(0.7),in:RoundedRectangle(cornerRadius:16))
+                        VStack(alignment:.leading,spacing:6) {
+                            Text("Arcade").font(DillTheme.display(23))
+                            Text(store.pet.life.dead ? "Plant a new pickle in Nest to play." : "Six games and the Daily Circuit. 6 energy per game.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength:0); Image(systemName:"arrow.up.right")
+                    }
+                }
+            }.disabled(!canPlayArcade).accessibilityIdentifier("playArcade")
             RoyaleCard(play:arena)
             if let best = store.pet.arenaBest {
                 HStack {Label("Your biggest dill",systemImage:"trophy.fill").font(.subheadline); Spacer(); Text("\(best) mass").font(.system(.headline,design:.rounded))}.padding(18).background(DillTheme.sage,in:RoundedRectangle(cornerRadius:20))
+            }
+            if gameCenter.signedIn {
+                Button { gameCenter.showLeaderboards() } label: {
+                    HStack {Label("Game Center leaderboards",systemImage:"list.number").font(.subheadline); Spacer(); Image(systemName:"arrow.up.right")}.padding(18).background(DillTheme.sage,in:RoundedRectangle(cornerRadius:20))
+                }.accessibilityIdentifier("leaderboards")
             }
             VStack(alignment:.leading,spacing:20) {
                 HStack { Eyebrow(text:"Daily crunch / \(daily.number)"); Spacer(); Image(systemName:"sun.max.fill") }
                 HStack(alignment:.center) {
                     VStack(alignment:.leading,spacing:10) {
-                        Text("Three taps.\nAll the glory.").font(DillTheme.display(32)).tracking(-1)
+                        Text("Three taps.\nOne score.").font(DillTheme.display(32)).tracking(-1)
                         Text("Stop the seed in the sweet spot.\nGet as close as you can, three times.").font(.system(size:13)).foregroundStyle(DillTheme.muted)
                     }
                     Spacer(minLength:0)
@@ -44,13 +64,13 @@ struct PlayView: View {
                 SoftCard {
                     HStack(spacing:16) {
                         Image(systemName:"iphone.gen3.radiowaves.left.and.right").font(.system(size:27)).frame(width:48,height:56).background(DillTheme.peach.opacity(0.6),in:RoundedRectangle(cornerRadius:16))
-                        VStack(alignment:.leading,spacing:6) { Text("Pass the pickle.").font(DillTheme.display(23)); Text("2–4 friends. One phone. Zero chill.").font(.caption).foregroundStyle(DillTheme.muted) }
+                        VStack(alignment:.leading,spacing:6) { Text("Pass & play").font(DillTheme.display(23)); Text("2 to 4 players on one phone.").font(.caption).foregroundStyle(DillTheme.muted) }
                         Spacer(minLength:0); Image(systemName:"arrow.up.right")
                     }
                 }
             }.accessibilityIdentifier("passAndPlay")
             VStack(alignment:.leading,spacing:14) {
-                HStack { Text("Your little victories").font(DillTheme.display(23)); Spacer(); Image(systemName:"sparkles") }
+                HStack { Text("Your best scores").font(DillTheme.display(23)); Spacer(); Image(systemName:"trophy") }
                 if store.pet.scores.isEmpty {
                     Text("Your first score is the start of something crunchy.").font(.subheadline).foregroundStyle(DillTheme.muted).padding(.vertical,14)
                 } else {
@@ -61,6 +81,11 @@ struct PlayView: View {
             }
             Text("Same course for everyone. A fresh challenge at midnight UTC.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
         }.sheet(isPresented:$party) { PartySetup { names in party = false; launch(GameLaunch(challenge:daily,mode:.party,players:names)) } }
+            .fullScreenCover(isPresented:$arcade) { ArcadeSheet().environmentObject(store) }
+    }
+    private func openArcade() {
+        guard canPlayArcade, store.prepareArcade() else { return }
+        store.feedback(); store.sound(.pop); arcade = true
     }
 }
 
@@ -73,14 +98,14 @@ struct PartySetup: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing:25) {
-                    PageHeading(eyebrow:"Gather your favorite humans",title:"Pass the pickle.",detail:"Everyone gets the same three-round course. Take turns, then crown the crunch champion.")
+                    PageHeading(eyebrow:"2 to 4 players",title:"Take turns on\none phone.",detail:"Everyone plays the same three-round course. The highest total wins.")
                     Picker("Players",selection:$count) { ForEach(2...4,id:\.self) { Text("\($0) players").tag($0) } }.pickerStyle(.segmented)
                     ForEach(0..<count,id:\.self) { index in
                         HStack { Text("0\(index + 1)").font(.system(.headline,design:.monospaced)).foregroundStyle(DillTheme.muted); TextField("Player \(index + 1)",text:$names[index]).textInputAutocapitalization(.words).onChange(of:names[index]) { _,v in names[index] = String(v.prefix(18)) }.accessibilityIdentifier("playerName.\(index)") }.padding(18).background(.white,in:RoundedRectangle(cornerRadius:18))
                     }
-                    Button { start((0..<count).map { names[$0].trimmingCharacters(in:.whitespacesAndNewlines).isEmpty ? "Player \($0+1)" : names[$0].trimmingCharacters(in:.whitespacesAndNewlines) }) } label: { Text("Let the crunch begin") }.buttonStyle(DillButton()).accessibilityIdentifier("startParty")
+                    Button { start((0..<count).map { names[$0].trimmingCharacters(in:.whitespacesAndNewlines).isEmpty ? "Player \($0+1)" : names[$0].trimmingCharacters(in:.whitespacesAndNewlines) }) } label: { Text("Start game") }.buttonStyle(DillButton()).accessibilityIdentifier("startParty")
                 }.padding(24).frame(maxWidth:580).frame(maxWidth:.infinity)
-            }.background(DillTheme.cream).navigationTitle("Game night").navigationBarTitleDisplayMode(.inline)
+            }.background(DillTheme.cream).navigationTitle("Pass & play").navigationBarTitleDisplayMode(.inline)
                 .toolbar { ToolbarItem(placement:.topBarTrailing) { Button("Cancel") { dismiss() } } }
         }.tint(DillTheme.ink)
     }
@@ -120,7 +145,7 @@ struct GameView: View {
                         VStack(spacing:compact ? 16 : 26) {
                             HStack {
                                 Button { if stage == .finished { dismiss() } else { pause(); quit = true } } label: { Image(systemName:"xmark").font(.system(size:15,weight:.semibold)).frame(width:44,height:44).background(DillTheme.sage,in:Circle()) }.accessibilityLabel("Leave game")
-                                Spacer(); Eyebrow(text:launch.mode == .party ? "Pass the pickle" : "Daily crunch / \(launch.challenge.number)"); Spacer(); Image(systemName:"sparkle").frame(width:44)
+                                Spacer(); Eyebrow(text:launch.mode == .party ? "Pass & play" : "Daily crunch / \(launch.challenge.number)"); Spacer(); Color.clear.frame(width:44,height:44)
                             }
                             if stage == .finished { results }
                             else if stage == .handoff { handoff }
@@ -200,24 +225,24 @@ struct GameView: View {
     }
     private var results: some View {
         VStack(spacing:24) {
-            Eyebrow(text:launch.mode == .party ? "The crunch council has spoken" : "One tiny victory, secured")
+            Eyebrow(text:launch.mode == .party ? "Final scores" : "Daily crunch complete")
             Text(launch.mode == .party ? "A round of\napplause, please." : "Kind of\na big dill.").font(DillTheme.display(46)).tracking(-1.5).multilineTextAlignment(.center)
             PickleCharacter(pet:store.pet,outfit:.crown,happy:true,wearLook:false).frame(width:210,height:210)
             if launch.mode == .party {
                 ForEach(Array(totals.indices.sorted { totals[$0] == totals[$1] ? $0 < $1 : totals[$0] > totals[$1] }),id:\.self) { index in
                     HStack {
-                        Image(systemName:totals[index] == totals.max() ? "crown.fill" : "sparkle")
+                        Image(systemName:totals[index] == totals.max() ? "crown.fill" : "person.fill")
                         Text(launch.players[index]).font(.headline)
                         Spacer(); Text("\(totals[index])").font(.system(size:25,weight:.bold,design:.rounded))
                     }.padding(18).background(totals[index] == totals.max() ? DillTheme.lime : DillTheme.sage,in:RoundedRectangle(cornerRadius:18))
                 }
-                Text(totals.filter { $0 == totals.max() }.count > 1 ? "A tie! There’s room for more than one big dill." : "Winner gets the glory. Everyone gets the good vibes.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
+                Text(totals.filter { $0 == totals.max() }.count > 1 ? "A tie! There’s room for more than one big dill." : "Highest total wins.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
             } else {
                 HStack(alignment:.firstTextBaseline) { Text("\(totals.first ?? 0)").font(.system(size:76,weight:.black,design:.rounded)); Text("/ 300").font(.title3).foregroundStyle(DillTheme.muted) }.accessibilityIdentifier("finalScore")
                 Text(reward > 0 ? "+\(reward) coins · Your pickle is proud of you." : "Saved to your daily best. Your pickle is proud of you.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
                 ShareCardButton(pet:store.pet,score:totals.first ?? 0,day:launch.challenge.day)
             }
-            Button { dismiss() } label: { Text("Back to my little dill") }.buttonStyle(DillButton()).accessibilityIdentifier("gameDone")
+            Button { dismiss() } label: { Text("Done") }.buttonStyle(DillButton()).accessibilityIdentifier("gameDone")
         }
     }
     private func begin() { elapsed = 0; carried = 0; started = ProcessInfo.processInfo.systemUptime; cursor = 0; paused = false; enteredTarget = false; stage = .playing; store.feedback() }

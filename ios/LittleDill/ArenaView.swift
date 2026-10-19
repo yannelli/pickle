@@ -82,9 +82,9 @@ struct ArenaView: View {
                 if phase != .active {stick = .zero; client.steer(.zero)}
                 updateGadgetSound(); updateHaptics()
             }
-            .confirmationDialog("Leave the garden?",isPresented:$leave,titleVisibility:.visible) {
-                Button("Leave arena",role:.destructive) {finishRun()}
-                Button("Keep growing",role:.cancel) {}
+            .confirmationDialog("Leave Brine Royale?",isPresented:$leave,titleVisibility:.visible) {
+                Button("Leave",role:.destructive) {finishRun()}
+                Button("Keep playing",role:.cancel) {}
             } message: {Text("Leaving ends this run. Your personal best stays saved.")}
             .interactiveDismissDisabled()
     }
@@ -183,9 +183,9 @@ struct ArenaView: View {
     }
     private var topBar: some View {
         HStack(spacing:12) {
-            Button {leave = true} label: {Image(systemName:"xmark").font(.system(size:15,weight:.semibold)).frame(width:44,height:44).background(DillTheme.cream.opacity(0.95),in:Circle())}.accessibilityLabel("Exit online game").accessibilityIdentifier("arenaLeave")
+            Button {leave = true} label: {Image(systemName:"xmark").font(.system(size:15,weight:.semibold)).frame(width:44,height:44).background(DillTheme.cream.opacity(0.95),in:Circle())}.accessibilityLabel("Leave Brine Royale").accessibilityIdentifier("arenaLeave")
             VStack(alignment:.leading,spacing:4) {
-                Text("brine royale.").font(DillTheme.display(24)).tracking(-1)
+                Text("Brine Royale").font(DillTheme.display(24)).tracking(-1)
                 HStack(spacing:5) {
                     Circle().fill(client.status == .playing ? Color(hex:0x5C873E) : DillTheme.muted).frame(width:5,height:5)
                     Text(populationStatus).font(.system(size:10,weight:.medium,design:.rounded)).accessibilityIdentifier("arenaPopulation")
@@ -193,8 +193,10 @@ struct ArenaView: View {
             }
             Spacer(minLength:0)
             if let code = launch.room {
+                Text(code).font(.system(size:14,weight:.bold,design:.monospaced)).tracking(1.5).padding(.horizontal,12).frame(minHeight:44)
+                    .background(DillTheme.cream.opacity(0.95),in:Capsule()).accessibilityLabel("Room code \(code)").accessibilityIdentifier("arenaRoomCodeLabel")
                 ShareLink(item:"Come find me in Brine Royale! Room \(code) · \(ArenaLaunch.shareURL(room:code).absoluteString)") {Image(systemName:"person.badge.plus").font(.system(size:18)).frame(width:44,height:44).background(DillTheme.cream.opacity(0.95),in:Circle())}.accessibilityLabel("Invite a friend to room \(code)")
-            } else {Image(systemName:"globe").font(.system(size:20)).frame(width:44,height:44).background(DillTheme.cream.opacity(0.95),in:Circle())}
+            }
         }.padding(.horizontal,18).padding(.top,8)
     }
     private var populationStatus: String {
@@ -236,14 +238,14 @@ struct ArenaView: View {
     }
     private func respawnCard(_ me:ArenaPlayer) -> some View {
         VStack(spacing:18) {
-            Eyebrow(text:"A little out-crunched")
+            Eyebrow(text:"You got crunched")
             Text("You were\na big snack.").font(DillTheme.display(38)).tracking(-1).multilineTextAlignment(.center)
             Text("\(me.eatenBy) got the crunch this time.").font(.subheadline).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
             if let run = ArenaRunRecap(player:me) {ArenaRecapStats(recap:run)}
             else {HStack(spacing:25) {VStack {Text("\(me.best)").font(.system(size:30,weight:.bold,design:.rounded)); Eyebrow(text:"Best mass")}; VStack {Text("\(me.kills)").font(.system(size:30,weight:.bold,design:.rounded)); Eyebrow(text:"Pickles eaten")}}}
             Button {client.respawn(); store.feedback(.medium)} label: {Text(me.respawn > 0 ? "Fresh brine in \(Int(ceil(me.respawn)))…" : "Grow again")}.buttonStyle(DillButton()).disabled(me.respawn > 0).accessibilityIdentifier("arenaRespawn")
             ShareCardButton(pet:store.pet,score:ArenaRunRecap(player:me)?.peakMass ?? me.best,title:"Share your run",arenaScore:true,arenaRoom:launch.room,recap:ArenaRunRecap(player:me))
-            Text("Your pet is safe. This is just a little friendly chaos.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
+            Text("Your pet is safe. Losing a run does not affect its meters.").font(.caption).foregroundStyle(DillTheme.muted).multilineTextAlignment(.center)
         }.padding(26).frame(maxWidth:350).background(DillTheme.cream,in:RoundedRectangle(cornerRadius:30)).padding(24)
     }
     private func scoreBar(_ me:ArenaPlayer,compact:Bool) -> some View {
@@ -258,7 +260,7 @@ struct ArenaView: View {
                         ArenaMinimap(snapshot:state,playerID:client.playerID).frame(width:38,height:38).accessibilityLabel("Garden minimap")
                     }
                 }
-                Text("✦ \(store.arenaCoinsToday) / 1,000 coins today")
+                Text("\(store.arenaCoinsToday) / 1,000 coins today")
                     .font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.7)
                     .accessibilityIdentifier("arenaCoinsToday")
                 if me.shield > 0 && me.alive && !compact {

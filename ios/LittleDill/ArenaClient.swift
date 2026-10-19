@@ -360,7 +360,7 @@ struct ArenaHeader: Decodable {
         savedResume.save(to:defaults); savedAt = Date()
     }
     private func clearResume() {savedResume = nil; reconnectDeadline = nil; defaults.removeObject(forKey:ArenaResume.key)}
-    private func expireResume() {fail("Your 30-second return window has ended. Your best is saved—ready for a fresh pickle?")}
+    private func expireResume() {fail("Your 30-second return window has ended. Your best is saved. Start a fresh run?")}
     @discardableResult func handleTerminalClose(_ code:Int) -> Bool {
         if code == 4001 {fail("This run was reopened on another connection. You can start a fresh run here."); return true}
         if code == 1008 {fail("The garden ended this connection. Start a fresh run when you’re ready."); return true}
