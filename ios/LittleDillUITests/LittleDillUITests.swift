@@ -68,7 +68,12 @@ final class LittleDillUITests: XCTestCase {
         let destination = joystick.coordinate(withNormalizedOffset:CGVector(dx:0.8,dy:0.3))
         origin.press(forDuration:0.1,thenDragTo:destination,withVelocity:.slow,thenHoldForDuration:2)
         screenshot("11-live-arena-movement")
+        XCTAssertFalse(app.descendants(matching:.any)["arenaGoals"].exists)
         tap("arenaLeave"); app.buttons["Leave arena"].tap()
+        XCTAssertTrue(app.buttons["arenaRecapDone"].waitForExistence(timeout:5),"No run recap after leaving")
+        XCTAssertTrue(app.staticTexts["RUN RECAP"].exists)
+        screenshot("12-arena-recap")
+        tap("arenaRecapDone")
         XCTAssertTrue(app.buttons["tab.Nest"].waitForExistence(timeout:5))
     }
     func testArenaSplitControlsStayVisibleOnCompactScreen() {
@@ -86,7 +91,7 @@ final class LittleDillUITests: XCTestCase {
         XCTAssertFalse(joystick.frame.intersects(split.frame))
         XCTAssertEqual(split.label,"Split your pickle")
         screenshot("split-controls-compact")
-        tap("arenaLeave"); app.buttons["Leave arena"].tap()
+        tap("arenaLeave"); app.buttons["Leave arena"].tap(); tap("arenaRecapDone")
         XCTAssertTrue(app.buttons["tab.Friends"].waitForExistence(timeout:5))
     }
     func testDistinctCareScenesAndSoundSetting() {
