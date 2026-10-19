@@ -30,6 +30,7 @@ export function eventState(snapshot, ownID) {
   };
 }
 export const jarSpilled = (previous, next) => Boolean(previous && next && previous.warn > 0 && next.warn === 0);
+export const goalsCompleted = (previous = [], next = []) => next.filter(goal => goalDone(goal) && previous.some(([kind, target, progress]) => kind === goal[0] && target === goal[1] && progress < target));
 
 export function recapStats(own) {
   const { run, goals } = eventState({ players: own ? [own] : [] }, own?.id);

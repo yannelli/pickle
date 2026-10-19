@@ -81,14 +81,9 @@ kbd { font-family: inherit; font-size: 9px; border: 1px solid #cdd5bd; border-ra
 /* Container queries follow the visible game width, even while Safari is zoomed. */
 .leaderboard .bounty { background: #f2c14e2e; border-radius: 6px; margin: -2px -4px; padding: 2px 4px; }
 .leaderboard .bounty-mark { color: #c9971f; font-size: 11px; flex-shrink: 0; }
-.goals { justify-self: start; width: min(100%, 260px); padding: 9px 12px; border: 1px solid #d8dfc9; border-radius: 14px; background: #fffdf4dc; }
-.goals h2 { font-size: 8px; letter-spacing: 1.3px; margin: 0 0 6px; color: var(--muted); }
-.goals ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
-.goals li { display: flex; gap: 8px; font-size: 10px; white-space: nowrap; min-width: 0; }
-.goals li span { overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.goals li b { margin-left: auto; font-variant-numeric: tabular-nums; flex-shrink: 0; }
-.goals li.done { color: #5c7d2d; font-weight: 750; }
-.run-recap { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 10px; margin: 0; padding: 5px 0 18px; }
+.goal-toast { position: absolute; top: calc(var(--hud-bottom, 140px) - 6px); left: 0; right: 0; margin: 0 auto; width: max-content; max-width: min(320px, calc(100% - 32px)); padding: 7px 13px; border: 1px solid #d8dfc9; border-radius: 20px; background: #fffdf4f0; color: #4f6d27; font-size: 11px; font-weight: 750; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 5px 18px #263e310d; pointer-events: none; opacity: 0; transform: translateY(-6px); transition: opacity .35s, transform .35s; }
+.goal-toast.shown { opacity: 1; transform: none; }
+.run-recap { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 5px 0 18px; }
 .run-recap div { min-width: 0; }
 .run-recap dt { font-size: 8px; letter-spacing: 1px; color: var(--muted); }
 .run-recap dd { margin: 4px 0 0; font: 24px var(--serif); color: var(--ink); overflow-wrap: anywhere; }
@@ -171,8 +166,7 @@ kbd { font-family: inherit; font-size: 9px; border: 1px solid #cdd5bd; border-ra
 .game[data-short=true] .overlay-card p { margin-bottom: 8px; }
 .game[data-short=true] .run-result { padding-bottom: 5px; }
 .game[data-short=true] .run-result strong { font-size: 25px; }
-.game[data-short=true] .goals li { font-size: 9px; } .game[data-short=true] .run-recap dd { font-size: 18px; }
-.game[data-short=true] .goals { padding: 6px 9px; } .game[data-short=true] .goals h2 { display: none; }
+.game[data-short=true] .run-recap dd { font-size: 18px; }
 .game[data-short=true] .run-recap { padding-bottom: 5px; }
 .game[data-short=true] .overlay-card .button { min-height: 40px; margin-top: 6px; }
 @media (pointer: coarse) { .joystick { display: block; } .desktop-hint { display: none; } .game > canvas { cursor: default; } }
@@ -194,4 +188,4 @@ kbd { font-family: inherit; font-size: 9px; border: 1px solid #cdd5bd; border-ra
   .intro h1 { font-size: 48px; } .hero-art { width: 245px; } .join-card { padding: 21px; } .join-card h2 { font-size: 26px; }
   .brine { font-size: 10px; gap: 5px; padding: 5px; }
 }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none!important; animation: none!important; scroll-behavior: auto!important; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none!important; animation: none!important; scroll-behavior: auto!important; } .goal-toast { transform: none; transition: opacity .35s!important; } }
