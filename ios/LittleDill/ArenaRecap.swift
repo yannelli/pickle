@@ -67,39 +67,14 @@ struct ArenaRecapCard: View {
     }
 }
 
-/// The life's goals with progress; compact phones get one summary row.
-struct ArenaGoalsHUD: View {
-    let goals: [ArenaGoal]
-    let compact: Bool
-    static let doneColor = Color(hex:0x5C873E)
+/// A completed-goal pill shown under the score bar.
+struct ArenaGoalToast: View {
+    let text: String
     var body: some View {
-        if !goals.isEmpty {
-            Group {
-                if compact {
-                    HStack(spacing:3) {
-                        ForEach(Array(goals.enumerated()),id:\.offset) {_,goal in mark(goal)}
-                        Text("\(goals.filter(\.done).count)/\(goals.count) goals")
-                    }
-                } else {
-                    VStack(alignment:.leading,spacing:3) {
-                        ForEach(Array(goals.enumerated()),id:\.offset) {_,goal in
-                            HStack(spacing:4) {
-                                mark(goal)
-                                Text(goal.label).lineLimit(1).minimumScaleFactor(0.7).strikethrough(goal.done)
-                                Spacer(minLength:4)
-                                Text(goal.progressText).monospacedDigit().foregroundStyle(DillTheme.muted)
-                            }
-                        }
-                    }.frame(maxWidth:180,alignment:.leading)
-                }
-            }.font(.system(size:10,weight:.semibold))
-                .accessibilityElement(children:.ignore)
-                .accessibilityLabel("Goals: " + goals.map {"\($0.label), \($0.done ? "done" : $0.progressText)"}.joined(separator:"; "))
-                .accessibilityIdentifier("arenaGoals")
-        }
-    }
-    private func mark(_ goal:ArenaGoal) -> some View {
-        Image(systemName:goal.done ? "checkmark.circle.fill" : "circle")
-            .foregroundStyle(goal.done ? Self.doneColor : DillTheme.muted)
+        Text(text).font(.system(size:12,weight:.bold,design:.rounded)).lineLimit(1).minimumScaleFactor(0.7)
+            .padding(.horizontal,14).padding(.vertical,7)
+            .background(DillTheme.cream.opacity(0.95),in:Capsule())
+            .overlay(Capsule().stroke(Color(hex:0x5C873E).opacity(0.5),lineWidth:1))
+            .accessibilityIdentifier("arenaGoalToast")
     }
 }
