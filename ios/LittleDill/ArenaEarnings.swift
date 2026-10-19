@@ -4,21 +4,26 @@ struct ArenaEarnings: Codable, Equatable {
     static let massPerCoin = 1_000.0
     static let dailyMassLimit = 1_000_000.0
     static let dailyCoinLimit = 1_000
+    static let coinsPerGoal = 5
 
     private(set) var day: String
     private(set) var mass: Double
     private(set) var session: String
     private(set) var total: Double
+    /// Cumulative goals already paid in `session`.
+    private(set) var goals: Int
 
-    init(day: String = "", mass: Double = 0, session: String = "", total: Double = 0) {
+    init(day: String = "", mass: Double = 0, session: String = "", total: Double = 0, goals: Int = 0) {
         self.day = day
         self.mass = mass
         self.session = session
         self.total = total
+        self.goals = goals
         self = normalized()
     }
 
-    mutating func record(session incomingSession: String, earnedMass: Double, day incomingDay: String) -> Int {
+    /// Goal coins share the daily mass allowance: each goal counts as `coinsPerGoal * massPerCoin` mass.
+    mutating func record(session incomingSession: String, earnedMass: Double, day incomingDay: String, goalsDone: Int? = nil) -> Int {
         guard Self.validSession(incomingSession), Self.validDay(incomingDay),
               earnedMass.isFinite, earnedMass >= 0 else { return 0 }
         self = normalized()
@@ -30,10 +35,14 @@ struct ArenaEarnings: Codable, Equatable {
         if session != incomingSession {
             session = incomingSession
             total = 0
+            goals = 0
         }
-        guard earnedMass > total else { return 0 }
-        let delta = earnedMass - total
-        total = earnedMass
+        let massDelta = max(0, earnedMass - total)
+        total = max(total, earnedMass)
+        let newGoals = max(0, (goalsDone ?? 0) - goals)
+        goals += newGoals
+        let delta = massDelta + Double(newGoals) * Double(Self.coinsPerGoal) * Self.massPerCoin
+        guard delta > 0 else { return 0 }
         let before = Int(mass / Self.massPerCoin)
         mass = min(Self.dailyMassLimit, mass + min(delta, Self.dailyMassLimit - mass))
         let after = Int(mass / Self.massPerCoin)
@@ -45,8 +54,9 @@ struct ArenaEarnings: Codable, Equatable {
         if !Self.validDay(result.day) { result.day = ""; result.mass = 0 }
         if !result.mass.isFinite { result.mass = 0 }
         result.mass = min(Self.dailyMassLimit, max(0, result.mass))
-        if !Self.validSession(result.session) { result.session = ""; result.total = 0 }
+        if !Self.validSession(result.session) { result.session = ""; result.total = 0; result.goals = 0 }
         if !result.total.isFinite || result.total < 0 { result.total = 0 }
+        result.goals = max(0, result.goals)
         return result
     }
 
@@ -71,14 +81,15 @@ struct ArenaEarnings: Codable, Equatable {
         return (1...days[month - 1]).contains(day)
     }
 
-    private enum CodingKeys: String, CodingKey { case day, mass, session, total }
+    private enum CodingKeys: String, CodingKey { case day, mass, session, total, goals }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         self.init(day: (try? values.decode(String.self, forKey: .day)) ?? "",
                   mass: (try? values.decode(Double.self, forKey: .mass)) ?? 0,
                   session: (try? values.decode(String.self, forKey: .session)) ?? "",
-                  total: (try? values.decode(Double.self, forKey: .total)) ?? 0)
+                  total: (try? values.decode(Double.self, forKey: .total)) ?? 0,
+                  goals: (try? values.decode(Int.self, forKey: .goals)) ?? 0)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -88,5 +99,6 @@ struct ArenaEarnings: Codable, Equatable {
         try values.encode(clean.mass, forKey: .mass)
         try values.encode(clean.session, forKey: .session)
         try values.encode(clean.total, forKey: .total)
+        try values.encode(clean.goals, forKey: .goals)
     }
 }

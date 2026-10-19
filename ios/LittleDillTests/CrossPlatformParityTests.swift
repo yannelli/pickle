@@ -34,6 +34,28 @@ final class CrossPlatformParityTests: XCTestCase {
             XCTAssertEqual(gadget.drainSound.duration,period * 8,accuracy:1e-9)
         }
     }
+    func testNativeMatchesSharedJarBountyAndGoalFixtures() throws {
+        let url = try XCTUnwrap(Bundle(for:Self.self).url(forResource:"arena-parity",withExtension:"json"))
+        let fixture = try JSONDecoder().decode(Fixture.self,from:Data(contentsOf:url))
+        XCTAssertEqual(ArenaJar.warnSeconds,fixture.rules["jarWarnSeconds"])
+        XCTAssertEqual(ArenaJar.lingerSeconds,fixture.rules["jarLingerSeconds"])
+        XCTAssertEqual(ArenaJar.radius,fixture.rules["jarRadius"])
+        XCTAssertEqual(ArenaEarnings.coinsPerGoal,fixture.goals.coins)
+        XCTAssertFalse(fixture.goals.labels.isEmpty)
+        for row in fixture.goals.labels {XCTAssertEqual(row.goal.label,row.text)}
+        for (kind,targets) in fixture.goals.pool {
+            for target in targets {XCTAssertNotEqual(ArenaGoal(kind:kind,target:target,progress:0).label,"Complete a goal",kind)}
+        }
+        XCTAssertEqual(fixture.eventSnapshots.count,3)
+        for row in fixture.eventSnapshots {
+            let me = try XCTUnwrap(row.snapshot.players.first {$0.id == "you"},row.name)
+            XCTAssertEqual(row.snapshot.jar,row.jar,row.name)
+            XCTAssertEqual(row.snapshot.bounty,row.bounty,row.name)
+            XCTAssertEqual(me.goals,row.goals,row.name)
+            XCTAssertEqual(me.goalsDone,row.goalsDone,row.name)
+            XCTAssertEqual(me.run?.values,row.run,row.name)
+        }
+    }
     private struct Fixture: Decodable {
         let rules:[String:Double]
         let smiles:[String:String]
@@ -44,6 +66,14 @@ final class CrossPlatformParityTests: XCTestCase {
         let food: [Food]
         let varieties: [String:Look]
         let gadgetPeriods: [String:Double]
+        let goals: Goals
+        let eventSnapshots: [EventRow]
+    }
+    private struct Goals: Decodable { let coins:Int; let pool:[String:[Double]]; let labels:[Label] }
+    private struct Label: Decodable { let goal:ArenaGoal; let text:String }
+    private struct EventRow: Decodable {
+        let name:String; let snapshot:ArenaSnapshot; let jar:ArenaJar?; let bounty:String?
+        let goals:[ArenaGoal]; let goalsDone:Int; let run:[Double]?
     }
     private struct Pickup:Decodable {let time:Double; let index:Int?; let volume:Double?}
     private struct Split: Decodable { let name:String; let player:ArenaPlayer; let enabled:Bool }

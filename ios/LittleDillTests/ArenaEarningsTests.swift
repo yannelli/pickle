@@ -89,4 +89,53 @@ final class ArenaEarningsTests: XCTestCase {
         XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 2_000, day: "2026-13-01"), 0)
         XCTAssertEqual(earnings, ArenaEarnings())
     }
+    func testCompletedGoalsPayFiveCoinsOncePerSession() {
+        var earnings = ArenaEarnings()
+        XCTAssertEqual(ArenaEarnings.coinsPerGoal, 5)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 0, day: firstDay, goalsDone: 0), 0)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 0, day: firstDay, goalsDone: 1), 5)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 0, day: firstDay, goalsDone: 1), 0)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 500, day: firstDay, goalsDone: 3), 10)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 1_000, day: firstDay, goalsDone: 3), 1)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 1_000, day: firstDay, goalsDone: 2), 0)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 1_000, day: firstDay), 0)
+        XCTAssertEqual(earnings.goals, 3)
+        XCTAssertEqual(earnings.mass, 16_000)
+    }
+
+    func testNewSessionResetsTheGoalCursor() {
+        var earnings = ArenaEarnings()
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 0, day: firstDay, goalsDone: 4), 20)
+        XCTAssertEqual(earnings.record(session: "ROOM42:player-2", earnedMass: 0, day: firstDay, goalsDone: 1), 5)
+        XCTAssertEqual(earnings.goals, 1)
+        XCTAssertEqual(earnings.record(session: "ROOM42:player-2", earnedMass: 0, day: firstDay, goalsDone: 1), 0)
+    }
+
+    func testGoalCoinsShareTheDailyCapAndRollover() {
+        var earnings = ArenaEarnings()
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 998_000, day: firstDay), 998)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 998_000, day: firstDay, goalsDone: 1), 2)
+        XCTAssertEqual(earnings.mass, ArenaEarnings.dailyMassLimit)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 999_000, day: firstDay, goalsDone: 2), 0)
+        XCTAssertEqual(earnings.goals, 2)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 999_000, day: nextDay, goalsDone: 2), 0)
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 999_500, day: nextDay, goalsDone: 3), 5)
+        XCTAssertEqual(earnings.mass, 5_500)
+    }
+
+    func testGoalCursorSavesAndOlderSavesDefaultToZero() throws {
+        var earnings = ArenaEarnings()
+        XCTAssertEqual(earnings.record(session: firstSession, earnedMass: 1_000, day: firstDay, goalsDone: 2), 11)
+        let restored = try JSONDecoder().decode(ArenaEarnings.self, from: JSONEncoder().encode(earnings))
+        XCTAssertEqual(restored, earnings)
+        XCTAssertEqual(restored.goals, 2)
+        let older = try JSONDecoder().decode(ArenaEarnings.self, from: Data(
+            #"{"day":"2026-09-25","mass":1000,"session":"PUBLIC:player-1","total":1000}"#.utf8))
+        XCTAssertEqual(older.goals, 0)
+        XCTAssertEqual(ArenaEarnings(day: firstDay, session: firstSession, goals: -3).goals, 0)
+        XCTAssertEqual(ArenaEarnings(session: "bad", goals: 4).goals, 0)
+        var negative = ArenaEarnings()
+        XCTAssertEqual(negative.record(session: firstSession, earnedMass: 0, day: firstDay, goalsDone: -2), 0)
+        XCTAssertEqual(negative.goals, 0)
+    }
 }
