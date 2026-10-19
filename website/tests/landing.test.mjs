@@ -16,3 +16,13 @@ test('landing page features Brine Royale and its events', () => {
   for (const text of ['Jar drops', 'Leader bounty', 'Can I play with friends?', 'Is there an iPhone app?']) assert.ok(html.includes(text), text);
   assert.ok(html.includes('<a href="#brine-royale">Arena</a>') && html.includes('<a href="#iphone">iPhone</a>'));
 });
+
+test('legal pages exist and the landing page links them', async () => {
+  for (const slug of ['privacy', 'privacy-choices', 'terms']) {
+    const page = await readFile(new URL(`../public/${slug}.html`, import.meta.url), 'utf8');
+    assert.ok(page.includes(`<link rel="canonical" href="https://littledill.app/${slug}">`), slug);
+    assert.ok(page.includes('href="/privacy"') && page.includes('href="/privacy-choices"') && page.includes('href="/terms"'), slug);
+    assert.ok(!page.includes('data-canonical'), `${slug} keeps its own canonical URL`);
+    assert.ok(html.includes(`<a href="/${slug}">`), `landing footer links ${slug}`);
+  }
+});
