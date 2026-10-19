@@ -262,7 +262,9 @@ struct ArenaHeader: Decodable {
     var me: ArenaPlayer? { snapshot?.players.first {$0.id == playerID} }
     var leaders: [ArenaPlayer] { Array((snapshot?.players.filter(\.alive) ?? []).sorted {$0.mass > $1.mass}.prefix(5)) }
     var best: Int { me?.best ?? 0 }
-    var rank: Int { ((snapshot?.players.filter(\.alive).sorted {$0.mass > $1.mass}.firstIndex {$0.id == playerID}) ?? 0) + 1 }
+    /// 0 while this player is dead or missing from the snapshot.
+    var rank: Int { (snapshot?.players.filter(\.alive).sorted {$0.mass > $1.mass}.firstIndex {$0.id == playerID}).map {$0 + 1} ?? 0 }
+    var rankText: String { rank > 0 ? "#\(rank)" : "–" }
 
     func connect(pet:PetState,room requestedRoom:String?,fresh:Bool = false) {
         guard requestedRoom.map(ArenaLaunch.validRoom) ?? true else {fail("That room code isn’t valid."); return}

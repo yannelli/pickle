@@ -10,6 +10,7 @@ struct ArenaJar: Decodable, Equatable {
     let y: Double
     let warn: Double
     var spilled: Bool { warn <= 0 }
+    var spoken: String { spilled ? "A brine jar spilled." : "A brine jar spills in \(Int(ceil(warn))) seconds." }
     static func spilled(from old:ArenaJar?,to new:ArenaJar?) -> Bool {
         guard let old, let new else {return false}
         return old.warn > 0 && new.warn <= 0
@@ -66,6 +67,25 @@ struct ArenaRun: Decodable, Equatable {
         self.init(peakMass:max(0,values[0]),kills:max(0,Int(values[1])),secondsAlive:max(0,values[2]),bestRank:max(0,Int(values[3])))
     }
     var values: [Double] { [peakMass,Double(kills),secondsAlive,Double(bestRank)] }
+}
+
+/// Goals that turn done between consecutive observed snapshots of one life.
+/// The first snapshot after `reset()` only primes, so joins and resumed sessions do not replay completions.
+struct ArenaGoalWatch {
+    private var last: [ArenaGoal]?
+    mutating func reset() {last = nil}
+    mutating func completed(_ goals:[ArenaGoal]) -> [ArenaGoal] {
+        defer {last = goals}
+        guard let last else {return []}
+        return goals.enumerated().compactMap {index,goal in
+            guard goal.done, index < last.count else {return nil}
+            let before = last[index]
+            return before.kind == goal.kind && before.target == goal.target && !before.done ? goal : nil
+        }
+    }
+    static func toast(_ goal:ArenaGoal,coins:Bool) -> String {
+        "✓ \(goal.label)" + (coins ? " · +\(ArenaEarnings.coinsPerGoal) coins" : "")
+    }
 }
 
 /// Wall-clock start of the current jar's spill, for the tip animation and linger fade.

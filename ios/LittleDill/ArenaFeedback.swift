@@ -2,7 +2,7 @@ import UIKit
 
 enum ArenaFeedbackCue: CaseIterable, Equatable {
     case stick, edge, dash, split, bite, eaten, regroup, ready
-    case slicer, shaker, grater, pickup, feast, threat, spill
+    case slicer, shaker, grater, pickup, feast, threat, spill, goal
 
     fileprivate var cooldown: TimeInterval {
         switch self {
@@ -21,6 +21,7 @@ enum ArenaFeedbackCue: CaseIterable, Equatable {
         case .feast: 0.9
         case .threat: 3
         case .spill: 2
+        case .goal: 1
         }
     }
 
@@ -41,6 +42,7 @@ enum ArenaFeedbackCue: CaseIterable, Equatable {
         case .feast: [(.light, 0.5, 0), (.soft, 0.25, 65)]
         case .threat: [(.rigid, 0.42, 0)]
         case .spill: [(.soft, 0.6, 0), (.light, 0.3, 60)]
+        case .goal: [(.light, 0.45, 0), (.light, 0.3, 90)]
         }
     }
 

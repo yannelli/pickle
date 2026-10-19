@@ -78,6 +78,23 @@ final class ArenaEventsTests: XCTestCase {
         XCTAssertNil(ArenaRunRecap(player:try snapshot().players.first))
     }
 
+    func testGoalToastsFireOnceWhenAGoalCompletesAfterThePrimingSnapshot() {
+        var watch = ArenaGoalWatch()
+        let open = [ArenaGoal(kind:"eat",target:2,progress:1),ArenaGoal(kind:"food",target:40,progress:39)]
+        let done = [ArenaGoal(kind:"eat",target:2,progress:2),ArenaGoal(kind:"food",target:40,progress:40)]
+        XCTAssertEqual(watch.completed(done),[])
+        XCTAssertEqual(watch.completed(done),[])
+        watch.reset()
+        XCTAssertEqual(watch.completed(open),[])
+        XCTAssertEqual(watch.completed(done),done)
+        XCTAssertEqual(watch.completed(done),[])
+        let respawned = [ArenaGoal(kind:"mass",target:2,progress:2),ArenaGoal(kind:"food",target:40,progress:0)]
+        XCTAssertEqual(watch.completed(open),[])
+        XCTAssertEqual(watch.completed(respawned),[])
+        XCTAssertEqual(ArenaGoalWatch.toast(done[0],coins:true),"✓ Crunch 2 pickles · +5 coins")
+        XCTAssertEqual(ArenaGoalWatch.toast(done[1],coins:false),"✓ Eat 40 pellets")
+    }
+
     func testGoalLabelsFallBackAndClampProgress() {
         XCTAssertEqual(ArenaGoal(kind:"juggle",target:3,progress:0).label,"Complete a goal")
         XCTAssertEqual(ArenaGoal(kind:"mass",target:12000,progress:0).label,"Reach 12000 mass")

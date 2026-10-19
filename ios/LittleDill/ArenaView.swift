@@ -14,6 +14,11 @@ struct ArenaView: View {
     @State private var tactile = ArenaFeedback()
     @State private var feedbackEvents = ArenaFeedbackEvents()
     @State private var recap: ArenaRunRecap?
+    @State private var goalWatch = ArenaGoalWatch()
+    @State private var goalToasts: [GoalToast] = []
+    @State private var toastTask: Task<Void,Never>?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    private struct GoalToast: Identifiable { let id = UUID(); let text: String }
     @AppStorage(ArenaControls.swappedKey,store:ArenaResume.defaults) private var controlsSwapped = false
     var body: some View {
         GeometryReader { geometry in
@@ -23,12 +28,16 @@ struct ArenaView: View {
                 if let snapshot = client.snapshot, let me = client.me {
                     TimelineView(.animation(minimumInterval:nil,paused:client.status != .playing)) { timeline in
                         ArenaCanvas(snapshot:snapshot,previous:client.previous,food:client.food,me:me,spitAt:client.spitAt,received:client.receivedAt,now:timeline.date,motion:motion)
-                    }.ignoresSafeArea().accessibilityLabel("Live Brine Royale arena. You are \(me.name), mass \(Int(me.mass)), rank \(client.rank), \(me.pieces.count) \(me.isCucumber ? "cucumbers" : "pickle").")
+                    }.ignoresSafeArea().accessibilityLabel("Live Brine Royale arena. You are \(me.name), mass \(Int(me.mass)), rank \(client.rankText), \(me.pieces.count) \(me.isCucumber ? "cucumbers" : "pickle").\(snapshot.jar.map {" " + $0.spoken} ?? "")")
                 }
                 VStack(spacing:0) {
                     topBar
                     if let me = client.me {
                         scoreBar(me,compact:compact)
+                        if let toast = goalToasts.first {
+                            ArenaGoalToast(text:toast.text).padding(.top,8).id(toast.id)
+                                .transition(reduceMotion ? .opacity : .opacity.combined(with:.move(edge:.top)))
+                        }
                         Spacer(minLength:0)
                         if me.alive {
                             ArenaControls(me:me,compact:compact,swapped:controlsSwapped,stick:$stick,
@@ -47,9 +56,10 @@ struct ArenaView: View {
             .statusBarHidden()
             .persistentSystemOverlays(.hidden)
             .onAppear {client.connect(pet:store.pet,room:launch.room)}
-            .onDisappear {saveBest(); client.suspend(); DillAudio.shared.stop(); tactile.enabled = false; feedbackEvents.reset()}
+            .onDisappear {saveBest(); client.suspend(); DillAudio.shared.stop(); tactile.enabled = false; feedbackEvents.reset(); toastTask?.cancel()}
             .onChange(of:client.status) {_,status in
                 if status == .reconnecting || status == .disconnected {saveBest(); stick = .zero}
+                if status != .playing {goalWatch.reset()}
                 updateGadgetSound(); updateHaptics()
                 if status == .playing {tactile.prepare()}
             }
@@ -80,6 +90,10 @@ struct ArenaView: View {
     }
     /// Sounds from one snapshot to the next while alive; death and respawn are handled by the `alive` change.
     private func listen() {
+        if let me = client.me, client.status == .playing {
+            let coins = store.arenaCoinsToday < ArenaEarnings.dailyCoinLimit
+            for goal in goalWatch.completed(me.goals) {queueToast(ArenaGoalWatch.toast(goal,coins:coins))}
+        } else {goalWatch.reset()}
         updateGadgetSound(); updateHaptics(); saveBest()
         guard let snapshot = client.snapshot else {feedbackEvents.reset(); return}
         if ArenaJar.spilled(from:client.previous?.jar,to:snapshot.jar) {store.sound(.splash); tactile.play(.spill)}
@@ -113,6 +127,20 @@ struct ArenaView: View {
                                           at:at,active:tactile.enabled,combat:hurt || bite) {tactile.play(cue)}
         if before.cooldown > 0 && after.cooldown <= 0 && after.mass >= 35 ||
             (before.splitCooldown ?? 0) > 0 && after.canSplit {tactile.play(.ready)}
+    }
+    private func queueToast(_ text:String) {
+        tactile.play(.goal)
+        AccessibilityNotification.Announcement(text).post()
+        withAnimation(.easeOut(duration:0.25)) {goalToasts.append(GoalToast(text:text))}
+        if goalToasts.count == 1 {expireToast()}
+    }
+    private func expireToast() {
+        toastTask = Task { @MainActor in
+            try? await Task.sleep(for:.seconds(2.5))
+            guard !Task.isCancelled, !goalToasts.isEmpty else {return}
+            withAnimation(.easeOut(duration:0.3)) {_ = goalToasts.removeFirst()}
+            if !goalToasts.isEmpty {expireToast()}
+        }
     }
     private func updateHaptics() {
         tactile.enabled = store.pet.haptics && scenePhase == .active && client.status == .playing
@@ -233,7 +261,6 @@ struct ArenaView: View {
                 Text("✦ \(store.arenaCoinsToday) / 1,000 coins today")
                     .font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.7)
                     .accessibilityIdentifier("arenaCoinsToday")
-                ArenaGoalsHUD(goals:me.goals,compact:compact)
                 if me.shield > 0 && me.alive && !compact {
                     Label("Protected \(Int(ceil(me.shield)))s",systemImage:"shield.fill").font(.system(size:10,weight:.semibold)).lineLimit(1).minimumScaleFactor(0.8)
                 }
@@ -241,7 +268,7 @@ struct ArenaView: View {
             Spacer(minLength:0)
             Button {showScores.toggle()} label: {
                 VStack(alignment:.trailing,spacing:compact ? 4 : 8) {
-                    Label("#\(client.rank)",systemImage:"crown.fill").font(.system(size:compact ? 17 : 20,weight:.bold,design:.rounded))
+                    Label(client.rankText,systemImage:"crown.fill").font(.system(size:compact ? 17 : 20,weight:.bold,design:.rounded))
                     ForEach(client.leaders.prefix(compact ? 1 : showScores ? 5 : 3)) { leader in
                         HStack(spacing:4) {
                             if leader.id == client.snapshot?.bounty {Image(systemName:"crown.fill").foregroundStyle(ArenaEventArt.gold).accessibilityLabel("Bounty")}
@@ -250,8 +277,12 @@ struct ArenaView: View {
                         }.font(.system(size:10)).frame(maxWidth:135,alignment:.trailing)
                     }
                 }.padding(compact ? 10 : 14).background(DillTheme.cream.opacity(0.9),in:RoundedRectangle(cornerRadius:20))
-            }.accessibilityLabel("Leaderboard. Rank \(client.rank). Tap to show more.")
+            }.accessibilityLabel("Leaderboard. Rank \(client.rankText).\(bountyName.map {" Bounty on \($0)."} ?? "") Tap to show more.")
         }.padding(.horizontal,18).padding(.top,compact ? 6 : 12)
+    }
+    private var bountyName: String? {
+        guard let snapshot = client.snapshot, let bounty = snapshot.bounty else {return nil}
+        return snapshot.players.first {$0.id == bounty}?.name
     }
     private func saveEarnings() {
         guard let earnedMass = client.me?.earnedMass, !client.room.isEmpty, !client.playerID.isEmpty else { return }
