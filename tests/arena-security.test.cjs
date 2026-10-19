@@ -74,5 +74,6 @@ test('human names cannot impersonate the client label or bot handles', async () 
     assert.equal(humanName(name), 'Dilly', name);
   }
   assert.equal(engine.addPlayer('human', { name: 'Harper' }).name, 'Dilly');
-  assert.equal(engine.addPlayer('bot', { bot: true, name: 'Harper' }).name, 'Harper');
+  // A random starting bot can already hold the name, so the engine adds its uniqueness suffix.
+  assert.match(engine.addPlayer('bot', { bot: true, name: 'Harper' }).name, /^Harper(_\d+)?$/);
 });
