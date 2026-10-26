@@ -1,6 +1,6 @@
 # Test saves
 
-Generated: 2026-09-16T22:46:29.545Z
+Generated: 2026-10-25T17:09:07.490Z
 
 1. Open the app over HTTPS or localhost.
 2. Choose Import save and select a `.dill` file from this folder.
@@ -8,7 +8,7 @@ Generated: 2026-09-16T22:46:29.545Z
 
 Imports replace the current pickle. Undo import restores it during the same page visit.
 
-Saves use real elapsed time. Regenerate before testing to reset ages, care conditions, and countdowns:
+Imports keep the saved care condition and countdowns. Ages count real time since generation; regenerate to reset them:
 
 ```sh
 node tests/generate-saves.cjs
@@ -36,7 +36,7 @@ Run the command from the repository root with Node 24. It overwrites the generat
 | [sleeping.dill](sleeping.dill) | Adult asleep with 10 energy. |
 | [low-energy.dill](low-energy.dill) | Adult awake with 0 energy; arcade entry is unavailable. |
 | [sick.dill](sick.dill) | Adult with 5 food; feed to recover. |
-| [near-death.dill](near-death.dill) | Empty food; 1 hour remains before death at generation. |
+| [near-death.dill](near-death.dill) | Empty food; 1 hour remains before death after import. |
 | [dead.dill](dead.dill) | Adult dead from neglect. |
 | [eaten.dill](eaten.dill) | Adult after eating confirmation. |
 | [legacy-v1.dill](legacy-v1.dill) | Encrypted v1 save; imports as a living elder named Little Dill. |

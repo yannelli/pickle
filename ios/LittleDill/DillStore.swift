@@ -204,13 +204,14 @@ import SwiftUI
         guard data.count <= DillBackup.MAX_FILE_BYTES else { throw DillBackupError.fileTooLarge }
         return DillBackup.preview(try DillBackup.decode(data), now: PetLife.ms(now))
     }
-    /// Replaces the pickle, and the native extras when the file has them, then applies elapsed time like the web import.
+    /// Replaces the pickle, and the native extras when the file has them. Like the web import, needs change from the moment of import.
     func restoreBackup(_ preview: BackupPreview) {
         let time = now
         sync(at: time)
         let previous = pet
         var next = pet
         next.life = preview.backup.restored(now: PetLife.ms(time))
+        if next.life.phase == .living { next.life.updatedAt = max(next.life.updatedAt, PetLife.ms(time)) }
         if let native = preview.backup.native { next.apply(native) }
         replace(with: next, at: time)
         previousPet = previous

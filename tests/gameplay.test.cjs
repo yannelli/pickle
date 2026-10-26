@@ -295,6 +295,20 @@ test('a wrong memory note stops glowing when the result is shown', () => {
   assert.ok(app.pads.every(pad => !pad.classList.contains('lit')));
 });
 
+test('restoring an old backup keeps the saved condition instead of replaying the time since export', async () => {
+  let restored;
+  const app = client({}, { saves: { MAX_FILE_BYTES: 16384, decode: async () => restored } });
+  const savedAt = app.saved().updatedAt - 30 * 86400000;
+  restored = { savedAt, pet: { ...app.saved(), name: 'Old Dill', fullness: 64, sick: true, neglectMs: 3600000, bornAt: savedAt - 7 * 86400000, updatedAt: savedAt } };
+  const input = app.get('backup-file');
+  input.files = [{ size: 1, text: async () => 'backup' }];
+  await input.dispatch('change'); app.click('backup-restore');
+  const pet = app.saved();
+  assert.equal(pet.name, 'Old Dill'); assert.equal(pet.dead, false); assert.equal(pet.sick, true);
+  assert.equal(pet.fullness, 64); assert.equal(pet.neglectMs, 3600000);
+  assert.equal(Math.floor((pet.updatedAt - pet.bornAt) / 86400000), 37, 'age still counts from the hatch time');
+});
+
 test('browser import keeps native progress and undo restores both progress and scores', async () => {
   let restored, exported;
   const original = { coins: 15, arcade: { hop: 2 }, arcadeCircuit: { day: '2026-09-24', scores: { hop: 2 } } };

@@ -584,7 +584,7 @@
     <p id="backup-description">Your save stays on this device. Check your pickle before restoring it.</p>
     <section class="save-preview" id="backup-preview" aria-labelledby="backup-preview-title" tabindex="-1" hidden>
       <h3 id="backup-preview-title">Your pickle, as saved.</h3><p id="backup-saved-at"></p><dl id="backup-stats"></dl>
-      <p>Restoring replaces your current pickle. Real elapsed time will apply at the daily care pace. You can undo the import until you leave this page.</p>
+      <p>Restoring replaces your current pickle. It returns in the condition shown, and its needs change from now on. You can undo the import until you leave this page.</p>
     </section>
     <p class="save-error" id="backup-error" role="alert"></p><p id="backup-progress" role="status"></p>
     <div class="dialog-actions"><button class="save-button" type="button" id="backup-cancel">Cancel</button><label class="save-button save-file-control">Choose another file<input id="backup-file-other" type="file" aria-label="Choose another save file"></label><button class="save-button save-primary" type="button" id="backup-restore" hidden>Restore this pickle</button></div>
@@ -847,7 +847,9 @@
           }
           try { localStorage.setItem('little-dill.arcade.v1', JSON.stringify(records)); } catch { /* Scores stay in memory. */ }
         }
-        replacePet(pendingRestore.pet);
+        // Living imports keep the saved condition; needs change from the moment of import.
+        const pet = pendingRestore.pet;
+        replacePet(pet.phase === 'living' ? { ...pet, updatedAt: Math.max(pet.updatedAt, Date.now()) } : pet);
         $('undo-import').hidden = false;
         backupNotice(saveAvailable ? 'Your pickle is restored and saved here. You can undo this import until you leave the page.' : 'Your pickle is restored for this visit, but browser storage is unavailable. Keep your backup file safe.');
         backupDialog.close(); $('undo-import').focus();

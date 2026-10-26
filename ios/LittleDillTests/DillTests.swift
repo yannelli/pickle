@@ -667,7 +667,8 @@ final class PetModelTests: XCTestCase {
         b.restoreBackup(preview)
         XCTAssertEqual(b.pet.name, "Sir Crunch"); XCTAssertEqual(b.pet.coins, wishCoins); XCTAssertEqual(b.pet.outfit, .shades)
         XCTAssertEqual(b.pet.arcadeRecords["catch"], 7); XCTAssertEqual(b.pet.scores.first?.score, 250)
-        XCTAssertEqual(b.pet.life.fullness, exported.fullness - 1.5 * 3540 / 3600, accuracy: 1e-9, "Elapsed time applies after restore")
+        XCTAssertEqual(b.pet.life.fullness, exported.fullness, "Needs change from the moment of import")
+        XCTAssertEqual(b.pet.life.updatedAt, PetLife.ms(clockB.now))
         XCTAssertTrue(b.canUndoRestore); XCTAssertTrue(b.undoRestore())
         XCTAssertEqual(b.pet.life.phase, .new); XCTAssertEqual(b.pet.coins, 20); XCTAssertFalse(b.canUndoRestore); XCTAssertFalse(b.undoRestore())
     }
@@ -679,6 +680,17 @@ final class PetModelTests: XCTestCase {
         _ = store.care(.wash)
         store.restoreBackup(try store.previewBackup(file))
         XCTAssertEqual(store.pet.name, "Web Dill"); XCTAssertEqual(store.pet.variety.name, "Tiny Gherkin"); XCTAssertEqual(store.pet.coins, 25)
+    }
+    @MainActor func testOldBackupRestoresInItsSavedCondition() throws {
+        let saved = ms(t0) - 30 * PetLife.DAY
+        var pet = PetLife.fresh(now: saved)
+        pet.phase = .living; pet.name = "Old Dill"; pet.brinedAt = saved - 7 * PetLife.DAY - 60_000; pet.hatchAt = saved - 7 * PetLife.DAY
+        pet.bornAt = pet.hatchAt; pet.fullness = 64; pet.sick = true; pet.neglectMs = 3_600_000
+        let clock = TestClock(t0), store = DillStore(defaults: suite(), clock: { clock.now })
+        store.restoreBackup(try store.previewBackup(try DillBackup.encode(pet: pet, native: nil, savedAt: saved)))
+        XCTAssertFalse(store.pet.life.dead); XCTAssertTrue(store.pet.life.sick)
+        XCTAssertEqual(store.pet.life.fullness, 64); XCTAssertEqual(store.pet.life.neglectMs, 3_600_000)
+        XCTAssertEqual(store.pet.ageDays(at: t0), 37, "Age still counts from the hatch time")
     }
     @MainActor func testLegacyWebBackupRestoresThroughMigration() throws {
         let v1 = "{\"version\":1,\"savedAt\":\(ms(t0)),\"pet\":{\"version\":1,\"fullness\":83.25,\"happiness\":71.75,\"energy\":44.5,\"hygiene\":90,\"ageTicks\":1200,\"neglect\":0,\"sleeping\":true,\"sick\":false,\"dead\":false,\"updatedAt\":\(ms(t0))}}"
