@@ -46,7 +46,7 @@ async function main() {
     { energy: 0, dead: false });
   add('sick', 'Adult with 5 food; feed to recover.', living(7, { fullness: 5, sick: true }),
     { sick: true, dead: false });
-  add('near-death', 'Empty food; 1 hour remains before death at generation.',
+  add('near-death', 'Empty food; 1 hour remains before death after import.',
     living(7, { fullness: 0, sick: true, neglectMs: 47 * life.HOUR }),
     { sick: true, dead: false, neglectMs: 47 * life.HOUR });
   const dead = living(7, { fullness: 0, sick: true, neglectMs: 48 * life.HOUR, dead: true, diedAt: now });
@@ -85,7 +85,7 @@ async function main() {
     '',
     'Imports replace the current pickle. Undo import restores it during the same page visit.',
     '',
-    'Saves use real elapsed time. Regenerate before testing to reset ages, care conditions, and countdowns:',
+    'Imports keep the saved care condition and countdowns. Ages count real time since generation; regenerate to reset them:',
     '',
     '```sh',
     'node tests/generate-saves.cjs',

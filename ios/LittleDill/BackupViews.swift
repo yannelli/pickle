@@ -149,7 +149,7 @@ struct BackupShare: Identifiable {
         } header: {
             Text("Your pickle, as saved.")
         } footer: {
-            Text("Restoring replaces your current pickle. Real elapsed time will apply at the daily care pace. You can undo the import until you close the app.")
+            Text("Restoring replaces your current pickle. It returns in the condition shown, and its needs change from now on. You can undo the import until you close the app.")
         }
     }
 

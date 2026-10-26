@@ -53,6 +53,7 @@ For GitHub TestFlight automation, follow the release setup and Apple/GitHub refe
 - Arena `earnedMass` counts collected food and absorbed opponent mass across respawns and recovery. Native rewards use one coin per 1,000 earned mass, capped at 1,000 per UTC day; persist the daily total and credited cursor together with coins. Exclude starting mass, splits, and regrouping.
 - Play wakes living pets without care coins or energy cost; the six-energy charge applies when a game starts.
 - Native save additions need optional fields or decoding defaults. Preserve the `hop` score key used by Countertop escape.
+- Imports of living pickles keep the saved needs, sleep, sickness, and neglect, and restart the care clock at import on both clients; age still counts from `bornAt`.
 - Browser `.dill` imports retain the `native` extras through reload and export, including iOS circuit progress. Shared arcade bests merge without discarding native-only fields.
 - Reset removes the native recovery copy as well as active progress. Resume credentials stay out of pet backups.
 - Successful feeds rotate carrot, strawberry, broccoli, apple, and cheese. Refused feeds do not advance the local sequence; keep web and iOS ordering aligned.
